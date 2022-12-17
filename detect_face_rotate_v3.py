@@ -1,0 +1,241 @@
+import argparse
+import cv2
+import glob
+import os
+from anime_face_detector import create_detector
+from tqdm import tqdm
+import numpy as np
+
+
+def detect_faces(detector, image, debug=False):
+    preds = detector(image)  # bgr
+    h, w = image.shape[:2]
+    images = [image]
+    faces_data_main = {
+        'n_faces': 0,
+        'faces_rel_pos': [],
+        'max_face_height_ratio': 0,
+    }
+    faces_data_list = [faces_data_main]
+    # only keep faces with ratio <= 1.5
+    score_thres = 0.8
+    ratio_thres = 1.5
+    faces_bbox = []
+    faces_bbox_to_crop = []
+
+    for pred in preds:
+        bb = pred['bbox']
+        score = bb[-1]
+        left, top, right, bottom = bb[:4]
+        fw, fh = right - left, bottom - top
+        # ignore the face if too far from square or too low score
+        if fw / fh > ratio_thres or fh / fw > ratio_thres or score < score_thres:
+            continue
+        faces_bbox.append(bb[:4])
+        faces_data_main['n_faces'] = faces_data_main['n_faces'] + 1
+        left_rel = left / w
+        top_rel = top / h
+        right_rel = right / w
+        bottom_rel = bottom / h
+        faces_data_main['faces_rel_pos'].append(
+            [left_rel, top_rel, right_rel, bottom_rel])
+        if fh / h > faces_data_main['max_face_height_ratio']:
+            faces_data_main['max_face_height_ratio'] = fh / h
+        if debug:
+            cv2.rectangle(image, (int(left), int(top)),
+                          (int(right), int(bottom)), (255, 0, 255),  4)
+        # Crop only if the face is not too big
+        if max(fw, fh) < min(w, h):
+            faces_bbox_to_crop.append(bb[:4])
+
+    # Crop some sqaures in case where the image is not square
+    # Potential improvement: we can crop the character with some
+    # script that can deteect the character position
+    if h != w:
+        for face_bbox in faces_bbox_to_crop:
+            image_cropped, faces_data = crop_sqaure(image, face_bbox,
+                                                    faces_bbox)
+            images.append(image_cropped)
+            faces_data_list.append(faces_data)
+
+    return images, faces_data_list
+
+
+# Crop images to contain a certain face
+def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
+    h, w = image.shape[:2]
+    left, top, right, bottom = face_bbox
+    # crop to the largest sqaure
+    crop_size = min(h, w)
+    n_faces = 0
+    faces_rel_pos = []
+    max_face_height_ratio = 0
+    # paysage
+    if h < w:
+        # Put face in the middle, horizontally
+        cx = int((left + right) / 2)
+        left_crop = max(cx - crop_size // 2, 0)
+        right_crop = left_crop + crop_size
+        if right_crop > w:
+            right_crop = w
+            left_crop = right_crop - crop_size
+        image = image[:, left_crop:right_crop]
+        # Find faces mostly (more than 60%) contained in the cropped image
+        for bb in faces_bbox:
+            left, top, right, bottom = bb[:4]
+            cx = (left + right)/2
+            fw = right - left
+            left_tight = cx - fw*0.1
+            right_tight = cx + fw*0.1
+            if left_tight >= left_crop and right_tight <= right_crop:
+                n_faces += 1
+                left = left - left_crop
+                right = right - left_crop
+                left_rel = left / crop_size
+                top_rel = top / crop_size
+                right_rel = right / crop_size
+                bottom_rel = bottom / crop_size
+                faces_rel_pos.append(
+                    [left_rel, top_rel, right_rel, bottom_rel])
+                fh = bottom - top
+                if fh / crop_size > max_face_height_ratio:
+                    max_face_height_ratio = fh / h
+                if debug:
+                    cv2.rectangle(image, (int(left), int(top)),
+                                  (int(right), int(bottom)), (255, 0, 255),
+                                   4)
+    # portrait
+    if h > w:
+        # Try to put the head including hair at the top
+        fh = bottom - top
+        top_crop = max(int(top) - int(fh // 2), 0)
+        print(top_crop)
+        bottom_crop = top_crop + crop_size
+        if bottom_crop > h:
+            bottom_crop = h
+            top_crop = bottom_crop - crop_size
+        image = image[top_crop:bottom_crop]
+        # Find faces mostly (more than 60%) contained in the cropped image
+        for bb in faces_bbox:
+            left, top, right, bottom = bb[:4]
+            cy = (top + bottom)/2
+            fh = bottom - top
+            top_tight = cy - fh*0.1
+            bottom_tight = cy + fh*0.1
+            if top_tight >= top_crop and bottom_tight <= bottom_crop:
+                n_faces += 1
+                top = top - top_crop
+                bottom = bottom - top_crop
+                left_rel = left / crop_size
+                top_rel = top / crop_size
+                right_rel = right / crop_size
+                bottom_rel = bottom / crop_size
+                faces_rel_pos.append(
+                    [left_rel, top_rel, right_rel, bottom_rel])
+                fh = bottom - top
+                if fh / crop_size > max_face_height_ratio:
+                    max_face_height_ratio = fh / h
+                if debug:
+                    cv2.rectangle(image, (int(left), int(top)),
+                                  (int(right), int(bottom)), (255, 0, 255),
+                                   4)
+    if h == w:
+        raise Exception(
+            'This function should only be called for non-square images')
+    faces_data = {
+        'n_faces': n_faces,
+        'faces_rel_pos': faces_rel_pos,
+        'max_face_height_ratio': max_face_height_ratio,
+    }
+    return image, faces_data
+
+
+def faces_data_to_text(faces_data):
+    face_caption = f"{faces_data['n_faces']} faces"
+    for rel_pos in faces_data['faces_rel_pos']:
+        left, top, right, bottom = rel_pos
+        left = int(left * 100)
+        right = int(right * 100)
+        top = int(top * 100)
+        bottom = int(bottom * 100)
+        face_v_position_info = f', fvp {top} {bottom}'
+        face_h_position_info = f' fhp {left} {right}'
+        face_caption += face_v_position_info + face_h_position_info
+    return face_caption
+
+
+def process(args):
+
+    print("loading face detector.")
+    detector = create_detector('yolov3')
+
+    print("processing.")
+    output_extension = ".png"
+
+    paths = glob.glob(os.path.join(args.src_dir, "*.png"))
+    paths = paths + glob.glob(os.path.join(args.src_dir, "*.jpg"))
+    paths = paths + glob.glob(os.path.join(args.src_dir, "*.webp"))
+
+    for path in tqdm(paths):
+        print(path)
+        basename = os.path.splitext(os.path.basename(path))[0]
+
+        image = cv2.imdecode(np.fromfile(path, np.uint8), cv2.IMREAD_UNCHANGED)
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        if image.shape[2] == 4:
+            print(f"image has alpha. ignore: {path}")
+            image = image[:, :, :3].copy()
+
+        h, w = image.shape[:2]
+
+        images, faces_data_list = detect_faces(detector, image, args.debug)
+
+        idx = 0
+        for image, faces_data in zip(images, faces_data_list):
+            if (args.min_face_number <= faces_data['n_faces']
+                    and faces_data['n_faces'] <= args.max_face_number):
+                _, buf = cv2.imencode(output_extension, image)
+                fh_ratio = min(int(faces_data['max_face_height_ratio'] * 100),
+                               99)
+                lb = fh_ratio // args.folder_range * args.folder_range
+                ub = lb + args.folder_range
+                dst_dir = os.path.join(args.dst_dir,
+                                       f'face_height_ratio_{lb}-{ub}')
+                os.makedirs(dst_dir, exist_ok=True)
+                with open(
+                        os.path.join(dst_dir,
+                                     f"{basename}_{idx}{output_extension}"),
+                        "wb") as f:
+                    buf.tofile(f)
+                with open(os.path.join(dst_dir, f"{basename}_{idx}.facedata"),
+                          "w") as f:
+                    f.write(faces_data_to_text(faces_data))
+                idx += 1
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--src_dir", type=str, help="directory to load images")
+    parser.add_argument("--dst_dir", type=str, help="directory to save images")
+    parser.add_argument(
+        "--min_face_number",
+        type=int,
+        default=1,
+        help="the minimum number of faces an image should contain")
+    parser.add_argument(
+        "--max_face_number",
+        type=int,
+        default=10,
+        help="the maximum number of faces an image can contain")
+    parser.add_argument("--folder_range",
+                        type=int,
+                        default=25,
+                        help="the height ratio range of each separate folder")
+    parser.add_argument("--debug",
+                        action="store_true",
+                        help="render rect for face")
+    args = parser.parse_args()
+
+    process(args)
