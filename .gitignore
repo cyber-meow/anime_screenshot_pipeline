@@ -128,5 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .*.swp
+
 data/
+models/
 *.egg-info
+*/*.ckpt
