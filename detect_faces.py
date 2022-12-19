@@ -34,7 +34,8 @@ def detect_faces(detector,
         left, top, right, bottom = [int(pos) for pos in bb[:4]]
         fw, fh = right - left, bottom - top
         # ignore the face if too far from square or too low score
-        if fw / fh > ratio_thres or fh / fw > ratio_thres or score < score_thres:
+        if (fw / fh > ratio_thres or 
+                fh / fw > ratio_thres or score < score_thres):
             continue
         faces_bbox.append(bb[:4])
         faces_data_main['n_faces'] = faces_data_main['n_faces'] + 1
@@ -153,20 +154,6 @@ def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
         'max_height_ratio': max_height_ratio,
     }
     return image, faces_data
-
-
-def faces_data_to_text(faces_data):
-    face_caption = f"{faces_data['n_faces']} faces"
-    for rel_pos in faces_data['rel_pos']:
-        left, top, right, bottom = rel_pos
-        left = int(left * 100)
-        right = int(right * 100)
-        top = int(top * 100)
-        bottom = int(bottom * 100)
-        face_v_position_info = f', fvp {top} {bottom}'
-        face_h_position_info = f' fhp {left} {right}'
-        face_caption += face_v_position_info + face_h_position_info
-    return face_caption
 
 
 def process(args):
