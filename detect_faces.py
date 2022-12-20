@@ -1,9 +1,11 @@
 import argparse
 import cv2
-import glob
 import os
 import json
+import shutil
+
 from tqdm import tqdm
+from pathlib import Path
 
 import numpy as np
 from anime_face_detector import create_detector
@@ -34,7 +36,7 @@ def detect_faces(detector,
         left, top, right, bottom = [int(pos) for pos in bb[:4]]
         fw, fh = right - left, bottom - top
         # ignore the face if too far from square or too low score
-        if (fw / fh > ratio_thres or 
+        if (fw / fh > ratio_thres or
                 fh / fw > ratio_thres or score < score_thres):
             continue
         faces_bbox.append(bb[:4])
@@ -156,6 +158,85 @@ def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
     return image, faces_data
 
 
+def get_nfaces_and_characters_from_tags(tags_content):
+
+    number_dictinary = {
+        '1girl': 1,
+        '1boy': 1,
+        '6+girls': 6,
+        '6+boys': 6,
+    }
+    for k in range(2, 6):
+        number_dictinary[f'{k}girls'] = k
+        number_dictinary[f'{k}boys'] = k
+
+    n_faces = 0
+    characters = ['unknown']
+    for line in tags_content:
+        if line.startswith('character:'):
+            characters = line.lstrip('character:').split(',')
+            characters = [character.strip() for character in characters]
+        for key in number_dictinary:
+            if key in line:
+                n_faces += number_dictinary[key]
+    return n_faces, characters
+
+
+def update_dst_dir_and_facedata(path, faces_data, dst_dir_base,
+                                use_tags, use_character_folder, cropped):
+    fh_ratio = min(int(faces_data['max_height_ratio'] * 100), 99)
+    lb = fh_ratio // args.folder_range * args.folder_range
+    ub = lb + args.folder_range
+    face_ratio_folder = f'face_height_ratio_{lb}-{ub}'
+    faces_data['characters'] = ['unknown']
+    faces_data['cropped'] = cropped
+    if use_character_folder:
+        parent_folder, character_folder = os.path.split(os.path.dirname(path))
+        characters = character_folder.split('+')
+        n_faces = len(characters)
+        if not cropped:
+            faces_data['n_faces'] = n_faces
+            faces_data['characters'] = characters
+        # Notice that number of faces in dictionary can be further modified by
+        # the tag file but as for the folder name we use the number of
+        # characters provide in folder names
+        dst_dir = os.path.join(args.dst_dir, f'{n_faces}_faces')
+        dst_dir = os.path.join(dst_dir, face_ratio_folder)
+        dst_dir = os.path.join(dst_dir, character_folder)
+    if use_tags and not cropped:
+        tags_file = path + '.tags'
+        if os.path.exists(tags_file):
+            with open(tags_file, 'r') as f:
+                lines = f.readlines()
+            n_faces, characters = get_nfaces_and_characters_from_tags(lines)
+            if n_faces >= 6:
+                faces_data['n_faces'] = 'many'
+            elif n_faces > 0:
+                faces_data['n_faces'] = n_faces
+            faces_data['characters'] = characters
+        else:
+            print('Warning: --use_tags specified but tags file '
+                  + f'{tags_file} not found')
+    if not use_character_folder:
+        n_faces = faces_data['n_faces']
+        dst_dir = os.path.join(args.dst_dir, f'{n_faces}_faces')
+        dst_dir = os.path.join(dst_dir, face_ratio_folder)
+    return dst_dir, faces_data
+
+
+def get_files_recursively(folder_path):
+    allowed_patterns = [
+        '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+    ]
+
+    image_path_list = [
+        str(path) for pattern in allowed_patterns
+        for path in Path(folder_path).rglob(pattern)
+    ]
+
+    return image_path_list
+
+
 def process(args):
 
     print("loading face detector.")
@@ -164,11 +245,10 @@ def process(args):
     print("processing.")
     output_extension = ".png"
 
-    paths = glob.glob(os.path.join(args.src_dir, "*.png"))
-    paths = paths + glob.glob(os.path.join(args.src_dir, "*.jpg"))
-    paths = paths + glob.glob(os.path.join(args.src_dir, "*.webp"))
+    paths = get_files_recursively(args.src_dir)
 
     for path in tqdm(paths):
+        print(path)
         basename = os.path.splitext(os.path.basename(path))[0]
 
         image = cv2.imdecode(np.fromfile(path, np.uint8), cv2.IMREAD_UNCHANGED)
@@ -182,69 +262,97 @@ def process(args):
 
         images, faces_data_list = detect_faces(detector,
                                                image,
-                                               crop=(not args.no_cropping),
+                                               crop=args.crop,
                                                score_thres=args.score_thres,
                                                ratio_thres=args.ratio_thres,
                                                debug=args.debug)
+        tags_file = path + '.tags'
 
-        idx = 0
-        for image, faces_data in zip(images, faces_data_list):
-            n_faces = faces_data['n_faces']
-            if (args.min_face_number <= n_faces
-                    and n_faces <= args.max_face_number):
-                _, buf = cv2.imencode(output_extension, image)
-                fh_ratio = min(int(faces_data['max_height_ratio'] * 100), 99)
-                lb = fh_ratio // args.folder_range * args.folder_range
-                ub = lb + args.folder_range
-                dst_dir = os.path.join(args.dst_dir, f'{n_faces}_faces')
-                dst_dir = os.path.join(dst_dir, f'face_height_ratio_{lb}-{ub}')
+        for idx, (image, facedata) in enumerate(
+                zip(images, faces_data_list)):
+            dst_dir, facedata = update_dst_dir_and_facedata(
+                path, facedata, args.dst_dir,
+                args.use_tags, args.use_character_folder, idx != 0)
+            n_faces = facedata['n_faces']
+            if (not isinstance(n_faces, int)
+                    or (args.min_face_number <= n_faces
+                        and n_faces <= args.max_face_number)):
                 os.makedirs(dst_dir, exist_ok=True)
+                new_path_base = os.path.join(dst_dir, basename)
+                if idx > 0:
+                    new_path_base = f'{new_path_base}_{idx}'
+                if idx == 0 and (not args.debug) and args.move_file:
+                    ext = os.path.splitext(path)[1]
+                    new_path = f'{new_path_base}{ext}'
+                    shutil.move(path, new_path)
+                else:
+                    _, buf = cv2.imencode(output_extension, image)
+                    new_path = f'{new_path_base}{output_extension}'
+                    with open(new_path, "wb") as f:
+                        buf.tofile(f)
                 with open(
                         os.path.join(dst_dir,
-                                     f"{basename}_{idx}{output_extension}"),
-                        "wb") as f:
-                    buf.tofile(f)
-                with open(
-                        os.path.join(dst_dir,
-                                     f"{basename}_{idx}_facedata.json"),
+                                     f"{new_path_base}_facedata.json"),
                         "w") as f:
-                    json.dump(faces_data, f)
-                idx += 1
+                    json.dump(facedata, f)
+                if idx == 0 and args.use_tags and os.path.exists(tags_file):
+                    if args.move_file and (not args.debug):
+                        shutil.move(tags_file, new_path + '.tags')
+                    else:
+                        shutil.copy(tags_file, new_path + '.tags')
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--src_dir", type=str, help="directory to load images")
-    parser.add_argument("--dst_dir", type=str, help="directory to save images")
-    parser.add_argument("--no_cropping",
+    parser.add_argument("--src_dir", type=str,
+                        help="Directory to load images")
+    parser.add_argument("--dst_dir", type=str,
+                        help="Directory to save images")
+    parser.add_argument("--crop",
                         action="store_true",
-                        help="do not crop square images around faces")
+                        help="Crop square images around faces")
+    parser.add_argument(
+        "--move_file",
+        action="store_true",
+        help="Move the orignal image instead of saving a new one")
+    parser.add_argument(
+        "--use_tags",
+        action="store_true",
+        help="If provided, write character, number of people " +
+        "information using tags and arrange folder per se"
+    )
+    parser.add_argument(
+        "--use_character_folder",
+        action="store_true",
+        help="If true use character folder to determine number of people " +
+        "in the outer folder"
+    )
     parser.add_argument(
         "--min_face_number",
         type=int,
         default=1,
-        help="the minimum number of faces an image should contain")
+        help="The minimum number of faces an image should contain")
     parser.add_argument(
         "--max_face_number",
         type=int,
         default=10,
-        help="the maximum number of faces an image can contain")
+        help="The maximum number of faces an image can contain")
     parser.add_argument("--score_thres",
                         type=float,
                         default=0.75,
-                        help="score threshold above which is counted as face")
+                        help="Score threshold above which is counted as face")
     parser.add_argument("--ratio_thres",
                         type=float,
                         default=2,
-                        help="ratioi threshold below which is counted as face")
+                        help="Ratio threshold below which is counted as face")
     parser.add_argument("--folder_range",
                         type=int,
                         default=25,
-                        help="the height ratio range of each separate folder")
+                        help="The height ratio range of each separate folder")
     parser.add_argument("--debug",
                         action="store_true",
-                        help="render rect for face")
+                        help="Render rect for face")
     args = parser.parse_args()
 
     process(args)

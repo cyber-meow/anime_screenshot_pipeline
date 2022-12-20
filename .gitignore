@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 .*.swp
 
+tagger/wd14_tagger_model/
 data/
 models/
 *.egg-info

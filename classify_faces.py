@@ -223,9 +223,9 @@ def main(args):
 
         image = cv2.imdecode(np.fromfile(file_path, np.uint8),
                              cv2.IMREAD_UNCHANGED)
-        basename = os.path.splitext(file_path)[0]
+        filename_noext = os.path.splitext(file_path)[0]
 
-        json_file = basename + '_facedata.json'
+        json_file = filename_noext + '_facedata.json'
         with open(json_file, 'r') as f:
             facedata = json.load(f)
         os.remove(json_file)
@@ -234,6 +234,10 @@ def main(args):
             image, facedata, model,
             classid_classname_dic, args.image_size, device)
         dirname, filename = os.path.split(file_path)
+        characters = sorted(
+            [item for item in characters if item not in ['unknown', 'ood']])
+        if len(characters) == 0:
+            characters = ['ood']
         character_folder = '+'.join(sorted(characters))
         dst_dir = os.path.join(dirname, character_folder)
         os.makedirs(dst_dir, exist_ok=True)
@@ -241,8 +245,8 @@ def main(args):
         shutil.move(file_path, new_file_path)
 
         facedata['characters'] = characters
-        basename = os.path.splitext(filename)[0]
-        json_file = os.path.join(dst_dir, f"{basename}_facedata.json")
+        filename_noext = os.path.splitext(filename)[0]
+        json_file = os.path.join(dst_dir, f"{filename_noext}_facedata.json")
         with open(json_file, "w") as f:
             json.dump(facedata, f)
 
