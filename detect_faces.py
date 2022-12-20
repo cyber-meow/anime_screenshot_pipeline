@@ -158,7 +158,7 @@ def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
     return image, faces_data
 
 
-def get_nfaces_and_characters_from_tags(tags_content):
+def get_npeople_and_characters_from_tags(tags_content):
 
     number_dictinary = {
         '1girl': 1,
@@ -170,7 +170,7 @@ def get_nfaces_and_characters_from_tags(tags_content):
         number_dictinary[f'{k}girls'] = k
         number_dictinary[f'{k}boys'] = k
 
-    n_faces = 0
+    n_people = 0
     characters = ['unknown']
     for line in tags_content:
         if line.startswith('character:'):
@@ -178,8 +178,8 @@ def get_nfaces_and_characters_from_tags(tags_content):
             characters = [character.strip() for character in characters]
         for key in number_dictinary:
             if key in line:
-                n_faces += number_dictinary[key]
-    return n_faces, characters
+                n_people += number_dictinary[key]
+    return n_people, characters
 
 
 def update_dst_dir_and_facedata(path, faces_data, dst_dir_base,
@@ -193,14 +193,14 @@ def update_dst_dir_and_facedata(path, faces_data, dst_dir_base,
     if use_character_folder:
         parent_folder, character_folder = os.path.split(os.path.dirname(path))
         characters = character_folder.split('+')
-        n_faces = len(characters)
         if not cropped:
-            faces_data['n_faces'] = n_faces
+            # faces_data['n_people'] = len(characters)
             faces_data['characters'] = characters
-        # Notice that number of faces in dictionary can be further modified by
+        # Notice that number of people in dictionary can be further modified by
         # the tag file but as for the folder name we use the number of
         # characters provide in folder names
-        dst_dir = os.path.join(args.dst_dir, f'{n_faces}_faces')
+        n_characters = len(characters)
+        dst_dir = os.path.join(args.dst_dir, f'{n_characters}_characters')
         dst_dir = os.path.join(dst_dir, face_ratio_folder)
         dst_dir = os.path.join(dst_dir, character_folder)
     if use_tags and not cropped:
@@ -208,16 +208,19 @@ def update_dst_dir_and_facedata(path, faces_data, dst_dir_base,
         if os.path.exists(tags_file):
             with open(tags_file, 'r') as f:
                 lines = f.readlines()
-            n_faces, characters = get_nfaces_and_characters_from_tags(lines)
-            if n_faces >= 6:
-                faces_data['n_faces'] = 'many'
-            elif n_faces > 0:
-                faces_data['n_faces'] = n_faces
+            n_people, characters = get_npeople_and_characters_from_tags(lines)
+            if n_people >= 6:
+                faces_data['n_people'] = 'many'
+            elif n_people > 0:
+                faces_data['n_people'] = n_people
             faces_data['characters'] = characters
         else:
             print('Warning: --use_tags specified but tags file '
                   + f'{tags_file} not found')
-    if not use_character_folder:
+        if not use_character_folder:
+            dst_dir = os.path.join(args.dst_dir, f'{n_people}_people')
+            dst_dir = os.path.join(dst_dir, face_ratio_folder)
+    elif not use_character_folder:
         n_faces = faces_data['n_faces']
         dst_dir = os.path.join(args.dst_dir, f'{n_faces}_faces')
         dst_dir = os.path.join(dst_dir, face_ratio_folder)
@@ -292,7 +295,7 @@ def process(args):
                         buf.tofile(f)
                 with open(
                         os.path.join(dst_dir,
-                                     f"{new_path_base}_facedata.json"),
+                                     f"{new_path_base}.facedata.json"),
                         "w") as f:
                     json.dump(facedata, f)
                 if idx == 0 and args.use_tags and os.path.exists(tags_file):
