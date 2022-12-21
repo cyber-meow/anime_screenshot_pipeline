@@ -19,7 +19,7 @@ def rearrange(path, dst_dir, character_list=None, copy_file=False):
             assert character in character_list, \
                     f'Invalid character {character}'
     if len(characters) == 0:
-        dst_dir = os.path.join(dst_dir, 'others')
+        dst_dir = os.path.join(dst_dir, 'others', face_ratio_folder)
     else:
         character_folder = '+'.join(characters)
         dst_dir = os.path.join(

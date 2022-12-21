@@ -221,6 +221,7 @@ def main(args):
     print('Processing...')
     for file_path in tqdm(file_list):
 
+        print(file_path)
         image = cv2.imdecode(np.fromfile(file_path, np.uint8),
                              cv2.IMREAD_UNCHANGED)
         filename_noext = os.path.splitext(file_path)[0]
@@ -234,19 +235,22 @@ def main(args):
             image, facedata, model,
             classid_classname_dic, args.image_size, device)
         dirname, filename = os.path.split(file_path)
+        facedata['characters'] = characters
         characters = sorted(
             [item for item in characters if item not in ['unknown', 'ood']])
         if len(characters) == 0:
             characters = ['ood']
-        character_folder = '+'.join(sorted(characters))
-        dst_dir = os.path.join(dirname, character_folder)
-        os.makedirs(dst_dir, exist_ok=True)
-        new_file_path = os.path.join(dst_dir, filename)
-        shutil.move(file_path, new_file_path)
+        if args.create_character_folder:
+            character_folder = '+'.join(sorted(characters))
+            dst_dir = os.path.join(dirname, character_folder)
+            os.makedirs(dst_dir, exist_ok=True)
+            new_file_path = os.path.join(dst_dir, filename)
+            shutil.move(file_path, new_file_path)
+        else:
+            dst_dir = dirname
 
-        facedata['characters'] = characters
         filename_noext = os.path.splitext(filename)[0]
-        json_file = os.path.join(dst_dir, f"{filename_noext}_facedata.json")
+        json_file = os.path.join(dst_dir, f"{filename_noext}.facedata.json")
         with open(json_file, "w") as f:
             json.dump(facedata, f)
 
@@ -260,6 +264,8 @@ if __name__ == '__main__':
         '--dataset_path',
         help='Path for the dataset. For classifier id correspondance.')
     parser.add_argument('--checkpoint_path', type=str, default=None)
+    parser.add_argument('--create_character_folder', action='store_true',
+                        help='Whether to create character folder or not')
     parser.add_argument('--image_size',
                         default=128,
                         type=int,
