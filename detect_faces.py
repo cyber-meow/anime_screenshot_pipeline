@@ -11,6 +11,19 @@ import numpy as np
 from anime_face_detector import create_detector
 
 
+def get_files_recursively(folder_path):
+    allowed_patterns = [
+        '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+    ]
+
+    image_path_list = [
+        str(path) for pattern in allowed_patterns
+        for path in Path(folder_path).rglob(pattern)
+    ]
+
+    return image_path_list
+
+
 def detect_faces(detector,
                  image,
                  crop=True,
@@ -182,15 +195,19 @@ def get_npeople_and_characters_from_tags(tags_content):
     return n_people, characters
 
 
-def update_dst_dir_and_facedata(path, faces_data, dst_dir_base,
-                                use_tags, use_character_folder, cropped):
+def update_dst_dir_and_facedata(path, faces_data, cropped, args):
     fh_ratio = min(int(faces_data['max_height_ratio'] * 100), 99)
     lb = fh_ratio // args.folder_range * args.folder_range
     ub = lb + args.folder_range
     face_ratio_folder = f'face_height_ratio_{lb}-{ub}'
     faces_data['characters'] = ['unknown']
     faces_data['cropped'] = cropped
-    if use_character_folder:
+    if args.use_class_folder:
+        class_folder = os.path.basename(os.path.dirname(path))
+        dst_dir = os.path.join(args.dst_dir, class_folder)
+    else:
+        dst_dir = args.dst_dir
+    if args.use_character_folder:
         parent_folder, character_folder = os.path.split(os.path.dirname(path))
         characters = character_folder.split('+')
         if not cropped:
@@ -200,44 +217,48 @@ def update_dst_dir_and_facedata(path, faces_data, dst_dir_base,
         # the tag file but as for the folder name we use the number of
         # characters provide in folder names
         n_characters = len(characters)
-        dst_dir = os.path.join(args.dst_dir, f'{n_characters}_characters')
-        dst_dir = os.path.join(dst_dir, face_ratio_folder)
-        dst_dir = os.path.join(dst_dir, character_folder)
-    if use_tags and not cropped:
+        dst_dir = os.path.join(
+            dst_dir, f'{n_characters}_characters',
+            face_ratio_folder, character_folder)
+    if args.use_tags and not cropped:
         tags_file = path + '.tags'
         if os.path.exists(tags_file):
             with open(tags_file, 'r') as f:
                 lines = f.readlines()
             n_people, characters = get_npeople_and_characters_from_tags(lines)
             if n_people >= 6:
-                faces_data['n_people'] = 'many'
-            elif n_people > 0:
-                faces_data['n_people'] = n_people
+                n_people = 'many'
+            faces_data['n_people'] = n_people
             faces_data['characters'] = characters
+            if not args.use_character_folder:
+                dst_dir = os.path.join(
+                    dst_dir, f'{n_people}_people', face_ratio_folder)
         else:
             print('Warning: --use_tags specified but tags file '
-                  + f'{tags_file} not found')
-        if not use_character_folder:
-            dst_dir = os.path.join(args.dst_dir, f'{n_people}_people')
-            dst_dir = os.path.join(dst_dir, face_ratio_folder)
-    elif not use_character_folder:
+                  + f'{tags_file} not found; use detector results')
+            n_faces = faces_data['n_faces']
+            dst_dir = os.path.join(
+                dst_dir, f'{n_faces}_faces', face_ratio_folder)
+    elif not args.use_character_folder:
         n_faces = faces_data['n_faces']
-        dst_dir = os.path.join(args.dst_dir, f'{n_faces}_faces')
-        dst_dir = os.path.join(dst_dir, face_ratio_folder)
+        dst_dir = os.path.join(dst_dir, f'{n_faces}_faces', face_ratio_folder)
     return dst_dir, faces_data
 
 
-def get_files_recursively(folder_path):
-    allowed_patterns = [
-        '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
-    ]
+# Written by chatgpt
+def resize_image(image, max_size):
 
-    image_path_list = [
-        str(path) for pattern in allowed_patterns
-        for path in Path(folder_path).rglob(pattern)
-    ]
+    height, width = image.shape[:2]
+    if max_size > max(height, width):
+        return image
 
-    return image_path_list
+    # Calculate the scaling factor
+    scaling_factor = max_size / max(height, width)
+
+    # Resize the image
+    return cv2.resize(
+        image, None, fx=scaling_factor, fy=scaling_factor,
+        interpolation=cv2.INTER_AREA)
 
 
 def process(args):
@@ -260,6 +281,7 @@ def process(args):
         if image.shape[2] == 4:
             print(f"image has alpha. ignore: {path}")
             image = image[:, :, :3].copy()
+        image = resize_image(image, args.max_image_size)
 
         h, w = image.shape[:2]
 
@@ -274,8 +296,7 @@ def process(args):
         for idx, (image, facedata) in enumerate(
                 zip(images, faces_data_list)):
             dst_dir, facedata = update_dst_dir_and_facedata(
-                path, facedata, args.dst_dir,
-                args.use_tags, args.use_character_folder, idx != 0)
+                path, facedata, idx != 0, args)
             n_faces = facedata['n_faces']
             if (not isinstance(n_faces, int)
                     or (args.min_face_number <= n_faces
@@ -312,6 +333,8 @@ if __name__ == '__main__':
                         help="Directory to load images")
     parser.add_argument("--dst_dir", type=str,
                         help="Directory to save images")
+    parser.add_argument("--max_image_size", type=int, default=1024,
+                        help="Maximum size of the resulting image")
     parser.add_argument("--crop",
                         action="store_true",
                         help="Crop square images around faces")
@@ -330,6 +353,11 @@ if __name__ == '__main__':
         action="store_true",
         help="If true use character folder to determine number of people " +
         "in the outer folder"
+    )
+    parser.add_argument(
+        "--use_class_folder",
+        action="store_true",
+        help="If true use class folder is kept in folder structure"
     )
     parser.add_argument(
         "--min_face_number",

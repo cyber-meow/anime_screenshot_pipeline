@@ -34,10 +34,13 @@ def json_to_description(file_path, args):
 
     if args.use_character_folder:
         parentdir, characters = os.path.split(os.path.dirname(file_path))
-        characters = characters.split('+')
+        characters = list(set(characters.split('+')))
     else:
         parentdir = os.path.dirname(file_path)
         characters = facedata['characters']
+    for to_remove in ['unknown', 'ood']:
+        if to_remove in characters:
+            characters.remove(to_remove)
 
     if args.use_count_folder:
         count = os.path.basename(os.path.dirname(parentdir))
@@ -45,7 +48,7 @@ def json_to_description(file_path, args):
     else:
         count = str(facedata[args.count_description])
 
-    mark_face_position = False
+    mark_face_position = args.always_mark_facepos
     if count.isnumeric() and int(count) == 1:
         mark_face_position = True
     else:
@@ -53,6 +56,8 @@ def json_to_description(file_path, args):
         if (str(count) == str(facedata[args.count_description])
                 and sorted(characters) == sorted(facedata['characters'])):
             mark_face_position = True
+            # Use the order in face data that corresponds to face position
+            characters = facedata['characters']
 
     info_dict = {
         'count': count,
@@ -107,6 +112,9 @@ if __name__ == '__main__':
     parser.add_argument(
         "--use_count_folder", action="store_true",
         help="Use count folder structure for number of people etc")
+    parser.add_argument(
+        "--always_mark_facepos", action="store_true",
+        help="Always save face position data if provided")
     parser.add_argument(
         "--count_description", default='n_people',
         help="The dictionary key to retrieve count information")

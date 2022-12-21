@@ -225,7 +225,7 @@ def main(args):
                              cv2.IMREAD_UNCHANGED)
         filename_noext = os.path.splitext(file_path)[0]
 
-        json_file = filename_noext + '_facedata.json'
+        json_file = filename_noext + '.facedata.json'
         with open(json_file, 'r') as f:
             facedata = json.load(f)
         os.remove(json_file)
