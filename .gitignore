@@ -132,5 +132,6 @@ dmypy.json
 tagger/wd14_tagger_model/
 data/
 models/
+logs/
 *.egg-info
 */*.ckpt
