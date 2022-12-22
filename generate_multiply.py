@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--src_dir', type=str,
                         help='Directory to generate multiply.txt')
-    parser.add_argument('--logdir', default=None,
+    parser.add_argument('--logdir', default='logs',
                         help='Directory to save log file')
     parser.add_argument(
         '--max_multiply', type=int, default=100,
