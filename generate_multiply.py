@@ -46,7 +46,7 @@ class WeightTree(object):
             path = os.path.join(self.dirname, path)
             if os.path.isfile(path):
                 extension = os.path.splitext(path)[1]
-                if extension.lower() in ['.jpg', '.jpeg', '.png', '.gif']:
+                if extension.lower() in ['.jpg', '.jpeg', '.png']:
                     if progress_bar is not None:
                         progress_bar.update(1)
                     self.n_images += 1
@@ -69,8 +69,8 @@ class WeightTree(object):
             return float(training_weights[basename])
         for pattern in training_weights:
             if fnmatch.fnmatch(self.dirname, pattern):
-                print(self.dirname)
-                print(training_weights[pattern])
+                # print(self.dirname)
+                # print(training_weights[pattern])
                 return float(training_weights[pattern])
         return 1
 
@@ -139,14 +139,14 @@ if __name__ == '__main__':
         logging.basicConfig(
             filename=logfile, level=logging.INFO, filemode='w')
 
-    n_images_totol = 0
+    n_images_total = 0
     n_images_virtual_total = 0
 
     for k in np.argsort(per_image_multiply):
         dirname = dir_list[k]
         n_images = n_images_list[k]
         multiply = per_image_multiply_final[k]
-        n_images_totol += n_images
+        n_images_total += n_images
         n_images_virtual_total += n_images * multiply
         with open(os.path.join(dirname, 'multiply.txt'), 'w') as f:
             f.write(str(multiply))
