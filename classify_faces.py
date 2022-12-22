@@ -221,15 +221,18 @@ def main(args):
     print('Processing...')
     for file_path in tqdm(file_list):
 
-        print(file_path)
         image = cv2.imdecode(np.fromfile(file_path, np.uint8),
                              cv2.IMREAD_UNCHANGED)
         filename_noext = os.path.splitext(file_path)[0]
 
         json_file = filename_noext + '.facedata.json'
-        with open(json_file, 'r') as f:
-            facedata = json.load(f)
-        os.remove(json_file)
+        try:
+            with open(json_file, 'r') as f:
+                facedata = json.load(f)
+            os.remove(json_file)
+        except FileNotFoundError:
+            print(f'Warning: {json_file} not found')
+            facedata = dict()
 
         characters = get_characters(
             image, facedata, model,

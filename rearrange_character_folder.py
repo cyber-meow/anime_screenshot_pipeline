@@ -5,7 +5,8 @@ import shutil
 from tqdm import tqdm
 
 
-def rearrange(path, dst_dir, character_list=None, copy_file=False):
+def rearrange(path, dst_dir, character_list=None,
+              max_character_number=6, copy_file=False):
     # path of the form n_faces/face_ratio.../characters
     dirname, filename = os.path.split(path)
     dirname, character_folder = os.path.split(dirname)
@@ -17,20 +18,61 @@ def rearrange(path, dst_dir, character_list=None, copy_file=False):
     if character_list is not None:
         for character in characters:
             assert character in character_list, \
-                    f'Invalid character {character}'
+                f'Invalid character {character} for {path}'
     if len(characters) == 0:
+        character_folder = None
         dst_dir = os.path.join(dst_dir, 'others', face_ratio_folder)
     else:
         character_folder = '+'.join(characters)
-        dst_dir = os.path.join(
-            dst_dir, f'{len(characters)}_charcters',
-            character_folder, face_ratio_folder)
+        if len(characters) >= max_character_number:
+            dst_dir = os.path.join(
+                dst_dir, f'{max_character_number}+_charcters',
+                character_folder, face_ratio_folder)
+        else:
+            suffix = 'character' if len(characters) == 1 else 'characters'
+            dst_dir = os.path.join(
+                dst_dir, f'{len(characters)}_{suffix}',
+                character_folder, face_ratio_folder)
     os.makedirs(dst_dir, exist_ok=True)
     new_path = os.path.join(dst_dir, filename)
     if copy_file:
         shutil.copy(path, new_path)
     else:
         shutil.move(path, new_path)
+    return character_folder, new_path
+
+
+def count_n_images(filenames):
+    count = 0
+    # Iterate through the list of filenames
+    for filename in filenames:
+        # Get the file extension
+        extension = os.path.splitext(filename)[1]
+        # Check if the extension is one of the common image file extensions
+        if extension.lower() in [".png", ".jpg", ".jpeg", ".gif"]:
+            # If it is, increment the count
+            count += 1
+    return count
+
+
+def merge_folder(character_comb_dict, min_image_per_comb):
+    for comb in tqdm(character_comb_dict):
+        files = character_comb_dict[comb]
+        n_images = count_n_images(files)
+        if n_images < min_image_per_comb:
+            print(f'{comb} has fewer than {min_image_per_comb} images; '
+                  + 'renamed as character_others')
+            for file in files:
+                new_path = file.replace(comb, 'character_others')
+                os.makedirs(os.path.dirname(new_path), exist_ok=True)
+                shutil.move(file, new_path)
+
+
+def remove_empty_folders(path_abs):
+    walk = list(os.walk(path_abs))
+    for path, _, _ in walk[::-1]:
+        if len(os.listdir(path)) == 0:
+            os.rmdir(path)
 
 
 if __name__ == '__main__':
@@ -42,6 +84,13 @@ if __name__ == '__main__':
                         help="Directory to save images")
     parser.add_argument("--copy", action="store_true",
                         help="Copy instead of move files")
+    parser.add_argument(
+        "--max_character_number", type=int, default=6,
+        help="If have more than X characters put X+")
+    parser.add_argument(
+        "--min_image_per_combination", type=int, default=1,
+        help="Put others instead of character name if nnumber of images "
+        + "of the character combination is smaller then this number")
     parser.add_argument(
         "--character_list", type=str, default=None,
         help="Txt file containing character names separated "
@@ -56,6 +105,18 @@ if __name__ == '__main__':
     print(character_list)
 
     paths = glob.glob(f"{args.src_dir}/**/*", recursive=True)
+    character_combination_dict = dict()
     for path in tqdm(paths):
         if os.path.isfile(path):
-            rearrange(path, args.dst_dir, character_list, args.copy)
+            character_folder, new_path = rearrange(
+                path, args.dst_dir, character_list,
+                args.max_character_number, args.copy)
+            if character_folder in character_combination_dict:
+                character_combination_dict[character_folder].append(new_path)
+            else:
+                character_combination_dict[character_folder] = [new_path]
+
+    if args.min_image_per_combination > 1:
+        merge_folder(
+            character_combination_dict, args.min_image_per_combination)
+        remove_empty_folders(args.dst_dir)

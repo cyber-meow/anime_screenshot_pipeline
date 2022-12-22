@@ -1,0 +1,3126 @@
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 1085
+INFO:root:original multipy: 1.0
+INFO:root:final multipy: 1
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007785467128027682
+INFO:root:number of images: 470
+INFO:root:original multipy: 1.0184605757196497
+INFO:root:final multipy: 1
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015570934256055363
+INFO:root:number of images: 735
+INFO:root:original multipy: 1.3025210084033612
+INFO:root:final multipy: 1
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014829461196243202
+INFO:root:number of images: 683
+INFO:root:original multipy: 1.334941004220136
+INFO:root:final multipy: 1
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 370
+INFO:root:original multipy: 1.4662162162162162
+INFO:root:final multipy: 1
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0013852813852813853
+INFO:root:number of images: 569
+INFO:root:original multipy: 1.496866734125082
+INFO:root:final multipy: 1
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0011544011544011544
+INFO:root:number of images: 451
+INFO:root:original multipy: 1.5737567843998
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0033635429318882555
+INFO:root:number of images: 1286
+INFO:root:original multipy: 1.6081013317438795
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 659
+INFO:root:original multipy: 1.6464339908952959
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0008408857329720639
+INFO:root:number of images: 305
+INFO:root:original multipy: 1.695096977559532
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 613
+INFO:root:original multipy: 1.7699836867862968
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009453781512605041
+INFO:root:number of images: 322
+INFO:root:original multipy: 1.8051242236024843
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/character_others/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039354584809130267
+INFO:root:number of images: 131
+INFO:root:original multipy: 1.8470618748203758
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 193
+INFO:root:original multipy: 1.873920552677029
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0020361990950226246
+INFO:root:number of images: 632
+INFO:root:original multipy: 1.9808909444985394
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 501
+INFO:root:original multipy: 2.165668662674651
+INFO:root:final multipy: 2
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014705882352941176
+INFO:root:number of images: 342
+INFO:root:original multipy: 2.643762183235867
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 91
+INFO:root:original multipy: 2.649572649572649
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 196
+INFO:root:original multipy: 2.767857142857143
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.002802952443240213
+INFO:root:number of images: 610
+INFO:root:original multipy: 2.8251616292658865
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 251
+INFO:root:original multipy: 2.881806108897742
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0018007202881152459
+INFO:root:number of images: 371
+INFO:root:original multipy: 2.984212552945706
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002802952443240213
+INFO:root:number of images: 523
+INFO:root:original multipy: 3.2951215943636534
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 163
+INFO:root:original multipy: 3.328220858895705
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002352941176470588
+INFO:root:number of images: 433
+INFO:root:original multipy: 3.341031562740569
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007870916961826053
+INFO:root:number of images: 140
+INFO:root:original multipy: 3.456644365735275
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0033635429318882555
+INFO:root:number of images: 598
+INFO:root:original multipy: 3.4582246030478747
+INFO:root:final multipy: 3
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 103
+INFO:root:original multipy: 3.5113268608414234
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014705882352941176
+INFO:root:number of images: 247
+INFO:root:original multipy: 3.6605937921727394
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 98
+INFO:root:original multipy: 3.69047619047619
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+KuraueHinata/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 106
+INFO:root:original multipy: 4.017533828854583
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+KuraueHinata/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 86
+INFO:root:original multipy: 4.126536684676219
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 101
+INFO:root:original multipy: 4.216421642164216
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002352941176470588
+INFO:root:number of images: 339
+INFO:root:original multipy: 4.2674532940019665
+INFO:root:final multipy: 4
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0023096821877309688
+INFO:root:number of images: 315
+INFO:root:original multipy: 4.5081574553119275
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 51
+INFO:root:original multipy: 4.727668845315903
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 229
+INFO:root:original multipy: 4.737991266375546
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 25
+INFO:root:original multipy: 4.822222222222221
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007414730598121601
+INFO:root:number of images: 93
+INFO:root:original multipy: 4.901960784313725
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 110
+INFO:root:original multipy: 4.931818181818182
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001384083044982699
+INFO:root:number of images: 171
+INFO:root:original multipy: 4.976493521385162
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 48
+INFO:root:original multipy: 5.023148148148147
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata/face_height_ratio_50-75
+INFO:root:sampling probability: 0.002802952443240213
+INFO:root:number of images: 341
+INFO:root:original multipy: 5.0538081931149295
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002352941176470588
+INFO:root:number of images: 281
+INFO:root:original multipy: 5.148279952550414
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0018907563025210082
+INFO:root:number of images: 225
+INFO:root:original multipy: 5.166666666666665
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 23
+INFO:root:original multipy: 5.241545893719805
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001384083044982699
+INFO:root:number of images: 160
+INFO:root:original multipy: 5.318627450980391
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/character_others/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00047225501770956324
+INFO:root:number of images: 54
+INFO:root:original multipy: 5.377002346699317
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0008408857329720639
+INFO:root:number of images: 96
+INFO:root:original multipy: 5.385464355788097
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006920415224913495
+INFO:root:number of images: 79
+INFO:root:original multipy: 5.385951849094067
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 79
+INFO:root:original multipy: 5.390615010868175
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 134
+INFO:root:original multipy: 5.398009950248756
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 99
+INFO:root:original multipy: 5.479797979797979
+INFO:root:final multipy: 5
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0028029524432402132
+INFO:root:number of images: 311
+INFO:root:original multipy: 5.541313806598684
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 43
+INFO:root:original multipy: 5.607235142118862
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 185
+INFO:root:original multipy: 5.864864864864865
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0011544011544011544
+INFO:root:number of images: 117
+INFO:root:original multipy: 6.066361621917177
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0010180995475113123
+INFO:root:number of images: 102
+INFO:root:original multipy: 6.136877828054299
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005903187721369539
+INFO:root:number of images: 59
+INFO:root:original multipy: 6.151655227155997
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SaitoKaede/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0007007381108100533
+INFO:root:number of images: 70
+INFO:root:original multipy: 6.154816406614968
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 68
+INFO:root:original multipy: 6.262626262626263
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/character_others/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006060606060606061
+INFO:root:number of images: 59
+INFO:root:original multipy: 6.3156993665468235
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 38
+INFO:root:original multipy: 6.34502923976608
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008311688311688312
+INFO:root:number of images: 80
+INFO:root:original multipy: 6.387878787878788
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006920415224913495
+INFO:root:number of images: 66
+INFO:root:original multipy: 6.446821152703505
+INFO:root:final multipy: 6
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 37
+INFO:root:original multipy: 6.516516516516515
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0002941176470588235
+INFO:root:number of images: 27
+INFO:root:original multipy: 6.69753086419753
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009003601440576229
+INFO:root:number of images: 81
+INFO:root:original multipy: 6.834215167548499
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaKokona/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0033635429318882555
+INFO:root:number of images: 300
+INFO:root:original multipy: 6.893394375408763
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 34
+INFO:root:original multipy: 7.091503267973855
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 75
+INFO:root:original multipy: 7.233333333333333
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/nsfw/hagikora
+INFO:root:sampling probability: 0.08333333333333333
+INFO:root:number of images: 7078
+INFO:root:original multipy: 7.238783711657404
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SasaharaYuka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 49
+INFO:root:original multipy: 7.24249295677867
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0003463203463203463
+INFO:root:number of images: 29
+INFO:root:original multipy: 7.342389411354928
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/character_others/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009238728750923875
+INFO:root:number of images: 77
+INFO:root:original multipy: 7.376984926874063
+INFO:root:final multipy: 7
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/character_others/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005050505050505052
+INFO:root:number of images: 41
+INFO:root:original multipy: 7.573704524924039
+INFO:root:final multipy: 8
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007352941176470588
+INFO:root:number of images: 57
+INFO:root:original multipy: 7.931286549707601
+INFO:root:final multipy: 8
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 43
+INFO:root:original multipy: 8.253073369352437
+INFO:root:final multipy: 8
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 58
+INFO:root:original multipy: 8.314176245210726
+INFO:root:final multipy: 8
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 42
+INFO:root:original multipy: 8.449575116241784
+INFO:root:final multipy: 8
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002352941176470588
+INFO:root:number of images: 170
+INFO:root:original multipy: 8.509803921568627
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 14
+INFO:root:original multipy: 8.611111111111109
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YukimuraMegumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 45
+INFO:root:original multipy: 8.625607931163485
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 41
+INFO:root:original multipy: 8.6556623141989
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008403361344537813
+INFO:root:number of images: 58
+INFO:root:original multipy: 8.908045977011492
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 27
+INFO:root:original multipy: 8.930041152263373
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 27
+INFO:root:original multipy: 8.930041152263373
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006920415224913495
+INFO:root:number of images: 47
+INFO:root:original multipy: 9.052982895285773
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009445100354191265
+INFO:root:number of images: 64
+INFO:root:original multipy: 9.073691460055096
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.002335793702700177
+INFO:root:number of images: 156
+INFO:root:original multipy: 9.205921975706147
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SasaharaYuka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 46
+INFO:root:original multipy: 9.257795344751866
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 13
+INFO:root:original multipy: 9.27350427350427
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 39
+INFO:root:original multipy: 9.273504273504273
+INFO:root:final multipy: 9
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 50
+INFO:root:original multipy: 9.644444444444442
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 50
+INFO:root:original multipy: 9.644444444444442
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 22
+INFO:root:original multipy: 9.670231729055256
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0016806722689075627
+INFO:root:number of images: 103
+INFO:root:original multipy: 10.032362459546922
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 96
+INFO:root:original multipy: 10.046296296296294
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0016806722689075627
+INFO:root:number of images: 100
+INFO:root:original multipy: 10.33333333333333
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaKokona/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0008408857329720639
+INFO:root:number of images: 50
+INFO:root:original multipy: 10.340091563113145
+INFO:root:final multipy: 10
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMegumi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011211809772960853
+INFO:root:number of images: 65
+INFO:root:original multipy: 10.605222116013483
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0017647058823529412
+INFO:root:number of images: 102
+INFO:root:original multipy: 10.637254901960784
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaKokona/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002802952443240213
+INFO:root:number of images: 161
+INFO:root:original multipy: 10.704028533243422
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 66
+INFO:root:original multipy: 10.959595959595957
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008403361344537815
+INFO:root:number of images: 47
+INFO:root:original multipy: 10.992907801418438
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KurosakiHonoka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 30
+INFO:root:original multipy: 11.027055593816959
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 30
+INFO:root:original multipy: 11.027055593816959
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 32
+INFO:root:original multipy: 11.302083333333332
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 84
+INFO:root:original multipy: 11.481481481481477
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 63
+INFO:root:original multipy: 11.481481481481481
+INFO:root:final multipy: 11
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001515151515151515
+INFO:root:number of images: 81
+INFO:root:original multipy: 11.500810574884646
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi Twintail/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 36
+INFO:root:original multipy: 11.829405162738496
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006920415224913495
+INFO:root:number of images: 35
+INFO:root:original multipy: 12.156862745098039
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 79
+INFO:root:original multipy: 12.208157524613219
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiHonoka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0028029524432402132
+INFO:root:number of images: 141
+INFO:root:original multipy: 12.222330452852418
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata Hairdown+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 29
+INFO:root:original multipy: 12.237315685591547
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002335793702700177
+INFO:root:number of images: 117
+INFO:root:original multipy: 12.274562634274861
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002802952443240213
+INFO:root:number of images: 140
+INFO:root:original multipy: 12.309632813229934
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0018099547511312218
+INFO:root:number of images: 90
+INFO:root:original multipy: 12.364672364672364
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0027027027027027024
+INFO:root:number of images: 134
+INFO:root:original multipy: 12.400833669490384
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SenjuinKoharu/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0022423619545921705
+INFO:root:number of images: 111
+INFO:root:original multipy: 12.420530406141916
+INFO:root:final multipy: 12
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 17
+INFO:root:original multipy: 12.514417531718568
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/1_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001680672268907563
+INFO:root:number of images: 82
+INFO:root:original multipy: 12.60162601626016
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 38
+INFO:root:original multipy: 12.69005847953216
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaKokona/face_height_ratio_50-75
+INFO:root:sampling probability: 0.002802952443240213
+INFO:root:number of images: 135
+INFO:root:original multipy: 12.765545139645857
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 31
+INFO:root:original multipy: 12.805612947658402
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/TakekanaKasumi+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 30
+INFO:root:original multipy: 12.938411896745228
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0013513513513513512
+INFO:root:number of images: 63
+INFO:root:original multipy: 13.188188188188185
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/MioYama+TakekanaKasumi+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 30
+INFO:root:original multipy: 13.232466712580349
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 9
+INFO:root:original multipy: 13.395061728395058
+INFO:root:final multipy: 13
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi Twintail/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 26
+INFO:root:original multipy: 13.649313649313648
+INFO:root:final multipy: 14
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 34
+INFO:root:original multipy: 13.699494949494946
+INFO:root:final multipy: 14
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 39
+INFO:root:original multipy: 13.910256410256409
+INFO:root:final multipy: 14
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007083825265643448
+INFO:root:number of images: 31
+INFO:root:original multipy: 14.049586776859504
+INFO:root:final multipy: 14
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 15
+INFO:root:original multipy: 14.183006535947712
+INFO:root:final multipy: 14
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/OnozukaHikari/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0016817714659441278
+INFO:root:number of images: 72
+INFO:root:original multipy: 14.36123828210159
+INFO:root:final multipy: 14
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/KuraueHinata+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.003798670465337132
+INFO:root:number of images: 155
+INFO:root:original multipy: 15.068059512503957
+INFO:root:final multipy: 15
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 8
+INFO:root:original multipy: 15.069444444444441
+INFO:root:final multipy: 15
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 16
+INFO:root:original multipy: 15.069444444444441
+INFO:root:final multipy: 15
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 8
+INFO:root:original multipy: 15.069444444444441
+INFO:root:final multipy: 15
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.000774793388429752
+INFO:root:number of images: 31
+INFO:root:original multipy: 15.36673553719008
+INFO:root:final multipy: 15
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 14
+INFO:root:original multipy: 17.222222222222218
+INFO:root:final multipy: 17
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SasaharaYuka/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00042044286648603194
+INFO:root:number of images: 15
+INFO:root:original multipy: 17.23348593852191
+INFO:root:final multipy: 17
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi Twintail/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0016817714659441278
+INFO:root:number of images: 59
+INFO:root:original multipy: 17.525578920530755
+INFO:root:final multipy: 18
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 54
+INFO:root:original multipy: 17.860082304526745
+INFO:root:final multipy: 18
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009049773755656109
+INFO:root:number of images: 31
+INFO:root:original multipy: 17.94871794871795
+INFO:root:final multipy: 18
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMegumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000934317481080071
+INFO:root:number of images: 32
+INFO:root:original multipy: 17.951547852626987
+INFO:root:final multipy: 18
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 52
+INFO:root:original multipy: 18.54700854700854
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 13
+INFO:root:original multipy: 18.54700854700854
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+KuraueHinata/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 19
+INFO:root:original multipy: 18.67800815169236
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/TakekanaKasumi+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 30
+INFO:root:original multipy: 18.819508213447605
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 19
+INFO:root:original multipy: 19.035087719298243
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 11
+INFO:root:original multipy: 19.340463458110513
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 11
+INFO:root:original multipy: 19.340463458110513
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YukimuraMegumi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 24
+INFO:root:original multipy: 19.40761784511784
+INFO:root:final multipy: 19
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 37
+INFO:root:original multipy: 19.549549549549546
+INFO:root:final multipy: 20
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/OnozukaHikari/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00042044286648603194
+INFO:root:number of images: 13
+INFO:root:original multipy: 19.88479146752528
+INFO:root:final multipy: 20
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 6
+INFO:root:original multipy: 20.092592592592588
+INFO:root:final multipy: 20
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 12
+INFO:root:original multipy: 20.092592592592588
+INFO:root:final multipy: 20
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 12
+INFO:root:original multipy: 20.092592592592588
+INFO:root:final multipy: 20
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiHonoka/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0007007381108100533
+INFO:root:number of images: 21
+INFO:root:original multipy: 20.51605468871656
+INFO:root:final multipy: 21
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KurosakiHonoka+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 16
+INFO:root:original multipy: 20.6757292384068
+INFO:root:final multipy: 21
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueMai/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011211809772960853
+INFO:root:number of images: 33
+INFO:root:original multipy: 20.889073864875044
+INFO:root:final multipy: 21
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+YukimuraAoi+YukimuraMegumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 23
+INFO:root:original multipy: 20.920895988269326
+INFO:root:final multipy: 21
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 46
+INFO:root:original multipy: 20.96618357487922
+INFO:root:final multipy: 21
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/nsfw/censored/general
+INFO:root:sampling probability: 0.041666666666666664
+INFO:root:number of images: 1193
+INFO:root:original multipy: 21.473642544472384
+INFO:root:final multipy: 21
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueMai/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0002802952443240213
+INFO:root:number of images: 8
+INFO:root:original multipy: 21.541857423152386
+INFO:root:final multipy: 22
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/MioYama+TakekanaKasumi+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.000774793388429752
+INFO:root:number of images: 22
+INFO:root:original multipy: 21.65312734785875
+INFO:root:final multipy: 22
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+SenjuinKoharu+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 22
+INFO:root:original multipy: 21.871845805917932
+INFO:root:final multipy: 22
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 11
+INFO:root:original multipy: 21.919191919191913
+INFO:root:final multipy: 22
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KurosakiHonoka+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 18
+INFO:root:original multipy: 22.05411118763391
+INFO:root:final multipy: 22
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0002941176470588235
+INFO:root:number of images: 8
+INFO:root:original multipy: 22.604166666666664
+INFO:root:final multipy: 23
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0012626262626262625
+INFO:root:number of images: 34
+INFO:root:original multipy: 22.832491582491578
+INFO:root:final multipy: 23
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SenjuinKoharu/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0005605904886480426
+INFO:root:number of images: 15
+INFO:root:original multipy: 22.977981251362547
+INFO:root:final multipy: 23
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 15
+INFO:root:original multipy: 23.658810325476992
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007352941176470588
+INFO:root:number of images: 19
+INFO:root:original multipy: 23.79385964912281
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/KuraueHinata/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0027027027027027024
+INFO:root:number of images: 69
+INFO:root:original multipy: 24.082778430604513
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 15
+INFO:root:original multipy: 24.111111111111107
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 10
+INFO:root:original multipy: 24.111111111111107
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 5
+INFO:root:original multipy: 24.111111111111107
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 5
+INFO:root:original multipy: 24.111111111111107
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 5
+INFO:root:original multipy: 24.111111111111107
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 16
+INFO:root:original multipy: 24.2595223063973
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/others/face_height_ratio_0-25
+INFO:root:sampling probability: 0.004734848484848486
+INFO:root:number of images: 119
+INFO:root:original multipy: 24.46338383838384
+INFO:root:final multipy: 24
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueMai/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000934317481080071
+INFO:root:number of images: 23
+INFO:root:original multipy: 24.976066577567984
+INFO:root:final multipy: 25
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/AobaKokona+KuraueHinata+KurosakiHonoka+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0036894923258559624
+INFO:root:number of images: 90
+INFO:root:original multipy: 25.204698500153047
+INFO:root:final multipy: 25
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 14
+INFO:root:original multipy: 25.83333333333333
+INFO:root:final multipy: 26
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/1_people/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0001680672268907563
+INFO:root:number of images: 4
+INFO:root:original multipy: 25.833333333333332
+INFO:root:final multipy: 26
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 15
+INFO:root:original multipy: 26.464933425160698
+INFO:root:final multipy: 26
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+YukimuraAoi+YukimuraMakoto/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0016797688638043409
+INFO:root:number of images: 39
+INFO:root:original multipy: 26.481484352881253
+INFO:root:final multipy: 26
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00017301038062283736
+INFO:root:number of images: 4
+INFO:root:original multipy: 26.593137254901958
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00012975778546712804
+INFO:root:number of images: 3
+INFO:root:original multipy: 26.59313725490196
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0002595155709342561
+INFO:root:number of images: 6
+INFO:root:original multipy: 26.59313725490196
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 9
+INFO:root:original multipy: 26.790123456790116
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 9
+INFO:root:original multipy: 26.790123456790116
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0001770956316410862
+INFO:root:number of images: 4
+INFO:root:original multipy: 27.221074380165287
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+AobaMai/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 13
+INFO:root:original multipy: 27.298627298627295
+INFO:root:final multipy: 27
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SasaharaYuka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0016817714659441278
+INFO:root:number of images: 37
+INFO:root:original multipy: 27.94619341381931
+INFO:root:final multipy: 28
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KuraueKenichi+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 17
+INFO:root:original multipy: 28.304741631187913
+INFO:root:final multipy: 28
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 17
+INFO:root:original multipy: 28.36601307189542
+INFO:root:final multipy: 28
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiHonoka/face_height_ratio_50-75
+INFO:root:sampling probability: 0.002335793702700177
+INFO:root:number of images: 50
+INFO:root:original multipy: 28.722476564203173
+INFO:root:final multipy: 29
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueMai/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000934317481080071
+INFO:root:number of images: 20
+INFO:root:original multipy: 28.72247656420318
+INFO:root:final multipy: 29
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/TakekanaKasumi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0016817714659441278
+INFO:root:number of images: 36
+INFO:root:original multipy: 28.72247656420318
+INFO:root:final multipy: 29
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMakoto/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001226291693917593
+INFO:root:number of images: 26
+INFO:root:original multipy: 28.99865422347436
+INFO:root:final multipy: 29
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi Twintail/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 12
+INFO:root:original multipy: 29.573512906846236
+INFO:root:final multipy: 30
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 8
+INFO:root:original multipy: 30.138888888888882
+INFO:root:final multipy: 30
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0002941176470588235
+INFO:root:number of images: 6
+INFO:root:original multipy: 30.138888888888886
+INFO:root:final multipy: 30
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.002771618625277162
+INFO:root:number of images: 56
+INFO:root:original multipy: 30.43006282335551
+INFO:root:final multipy: 30
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/AobaKokona/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0027027027027027024
+INFO:root:number of images: 53
+INFO:root:original multipy: 31.353051164371912
+INFO:root:final multipy: 31
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002252252252252252
+INFO:root:number of images: 43
+INFO:root:original multipy: 32.20371534325022
+INFO:root:final multipy: 32
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 11
+INFO:root:original multipy: 32.2620140801959
+INFO:root:final multipy: 32
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/KuraueHinata+MioYama+TakekanaKasumi+YukimuraAoi+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0025365259740259744
+INFO:root:number of images: 48
+INFO:root:original multipy: 32.490431660353536
+INFO:root:final multipy: 32
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 13
+INFO:root:original multipy: 32.75835275835276
+INFO:root:final multipy: 33
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/OnozukaHikari+Suusan+YukimuraAoi Twintail/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 10
+INFO:root:original multipy: 33.08116678145088
+INFO:root:final multipy: 33
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/KuraueHinata/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0013513513513513512
+INFO:root:number of images: 25
+INFO:root:original multipy: 33.23423423423423
+INFO:root:final multipy: 33
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMegumi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000934317481080071
+INFO:root:number of images: 17
+INFO:root:original multipy: 33.79114889906256
+INFO:root:final multipy: 34
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/KuraueHinata+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001899335232668566
+INFO:root:number of images: 34
+INFO:root:original multipy: 34.346312124089906
+INFO:root:final multipy: 34
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 7
+INFO:root:original multipy: 34.444444444444436
+INFO:root:final multipy: 34
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/OnozukaHikari/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 25
+INFO:root:original multipy: 34.46697187704382
+INFO:root:final multipy: 34
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/character_others/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005050505050505052
+INFO:root:number of images: 9
+INFO:root:original multipy: 34.50243172465395
+INFO:root:final multipy: 35
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+KurosakiHonoka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0013774104683195593
+INFO:root:number of images: 24
+INFO:root:original multipy: 35.28657790021426
+INFO:root:final multipy: 35
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00017301038062283736
+INFO:root:number of images: 3
+INFO:root:original multipy: 35.45751633986928
+INFO:root:final multipy: 35
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi Twintail/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 3
+INFO:root:original multipy: 35.48821548821549
+INFO:root:final multipy: 35
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SasaharaYuka/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 3
+INFO:root:original multipy: 35.48821548821549
+INFO:root:final multipy: 35
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 3
+INFO:root:original multipy: 35.48821548821549
+INFO:root:final multipy: 35
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+KurosakiHonoka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002351676409326077
+INFO:root:number of images: 40
+INFO:root:original multipy: 36.14722614168291
+INFO:root:final multipy: 36
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 20
+INFO:root:original multipy: 36.166666666666664
+INFO:root:final multipy: 36
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 10
+INFO:root:original multipy: 36.166666666666664
+INFO:root:final multipy: 36
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+KurosakiHonoka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001652892561983471
+INFO:root:number of images: 28
+INFO:root:original multipy: 36.29476584022038
+INFO:root:final multipy: 36
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/SaitoKaede+SasaharaYuka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 9
+INFO:root:original multipy: 36.756851979389864
+INFO:root:final multipy: 37
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 13
+INFO:root:original multipy: 37.09401709401708
+INFO:root:final multipy: 37
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/character_others/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001108647450110865
+INFO:root:number of images: 18
+INFO:root:original multipy: 37.86852262462019
+INFO:root:final multipy: 38
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 12
+INFO:root:original multipy: 38.81523569023568
+INFO:root:final multipy: 39
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 10
+INFO:root:original multipy: 38.81523569023569
+INFO:root:final multipy: 39
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YukimuraMakoto/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 10
+INFO:root:original multipy: 38.81523569023569
+INFO:root:final multipy: 39
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/others/face_height_ratio_25-50
+INFO:root:sampling probability: 0.005681818181818182
+INFO:root:number of images: 90
+INFO:root:original multipy: 38.81523569023569
+INFO:root:final multipy: 39
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SenjuinKoharu/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001868634962160142
+INFO:root:number of images: 29
+INFO:root:original multipy: 39.617209054073356
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009049773755656109
+INFO:root:number of images: 14
+INFO:root:original multipy: 39.743589743589745
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata Hairdown/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0016817714659441278
+INFO:root:number of images: 26
+INFO:root:original multipy: 39.76958293505056
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiHonoka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002335793702700177
+INFO:root:number of images: 36
+INFO:root:original multipy: 39.8923285613933
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KuraueMai+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 12
+INFO:root:original multipy: 40.098383977516214
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+MioYama+TakekanaKasumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 12
+INFO:root:original multipy: 40.098383977516214
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 3
+INFO:root:original multipy: 40.185185185185176
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 6
+INFO:root:original multipy: 40.185185185185176
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 12
+INFO:root:original multipy: 40.185185185185176
+INFO:root:final multipy: 40
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueMai+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.000404040404040404
+INFO:root:number of images: 6
+INFO:root:original multipy: 41.40291806958473
+INFO:root:final multipy: 41
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SenjuinKoharu+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 16
+INFO:root:original multipy: 42.34389348025711
+INFO:root:final multipy: 42
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 16
+INFO:root:original multipy: 42.34389348025711
+INFO:root:final multipy: 42
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KurosakiHonoka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 11
+INFO:root:original multipy: 42.34389348025711
+INFO:root:final multipy: 42
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/1_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 17
+INFO:root:original multipy: 42.54901960784313
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0008403361344537813
+INFO:root:number of images: 12
+INFO:root:original multipy: 43.05555555555554
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006302521008403361
+INFO:root:number of images: 9
+INFO:root:original multipy: 43.05555555555555
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/TakekanaKasumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 20
+INFO:root:original multipy: 43.083714846304765
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/barefoot
+INFO:root:sampling probability: 0.05
+INFO:root:number of images: 713
+INFO:root:original multipy: 43.11594202898551
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 9
+INFO:root:original multipy: 43.128039655817425
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0012626262626262625
+INFO:root:number of images: 18
+INFO:root:original multipy: 43.128039655817425
+INFO:root:final multipy: 43
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KurosakiHonoka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 11
+INFO:root:original multipy: 43.743691611835864
+INFO:root:final multipy: 44
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+YukimuraAoi+YukimuraMakoto/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 11
+INFO:root:original multipy: 43.743691611835864
+INFO:root:final multipy: 44
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KurosakiHonoka+SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 9
+INFO:root:original multipy: 44.10822237526782
+INFO:root:final multipy: 44
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMakoto/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0010219097449313277
+INFO:root:number of images: 14
+INFO:root:original multipy: 44.878869631567476
+INFO:root:final multipy: 45
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 16
+INFO:root:original multipy: 45.20833333333333
+INFO:root:final multipy: 45
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi Twintail/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 19
+INFO:root:original multipy: 45.351278785583965
+INFO:root:final multipy: 45
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/1_people/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00014829461196243202
+INFO:root:number of images: 2
+INFO:root:original multipy: 45.58823529411764
+INFO:root:final multipy: 46
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/SaitoKaede/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001126126126126126
+INFO:root:number of images: 15
+INFO:root:original multipy: 46.158658658658645
+INFO:root:final multipy: 46
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/TakekanaKasumi+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 10
+INFO:root:original multipy: 46.578282828282816
+INFO:root:final multipy: 47
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/MioYama+TakekanaKasumi+YukimuraAoi+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0011548410938654844
+INFO:root:number of images: 15
+INFO:root:original multipy: 47.33565328077524
+INFO:root:final multipy: 47
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SasaharaYuka/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 18
+INFO:root:original multipy: 47.87079427367197
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata Hairdown/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 18
+INFO:root:original multipy: 47.87079427367197
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiTaiki/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0007007381108100532
+INFO:root:number of images: 9
+INFO:root:original multipy: 47.87079427367197
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/TakekanaKasumi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 18
+INFO:root:original multipy: 47.87079427367197
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/OnozukaHikari/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 18
+INFO:root:original multipy: 47.87079427367197
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+SenjuinKoharu+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 12
+INFO:root:original multipy: 48.11806077301946
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 5
+INFO:root:original multipy: 48.222222222222214
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 10
+INFO:root:original multipy: 48.222222222222214
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/character_others/face_height_ratio_50-75
+INFO:root:sampling probability: 0.00039354584809130267
+INFO:root:number of images: 5
+INFO:root:original multipy: 48.39302112029385
+INFO:root:final multipy: 48
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/Suusan+YukimuraAoi Twintail/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 8
+INFO:root:original multipy: 48.5190446127946
+INFO:root:final multipy: 49
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/OnozukaHikari+Suusan+YukimuraAoi Twintail/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 8
+INFO:root:original multipy: 49.621750172176306
+INFO:root:final multipy: 50
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SenjuinKoharu/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 7
+INFO:root:original multipy: 50.69745069745069
+INFO:root:final multipy: 51
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 11
+INFO:root:original multipy: 51.32593149122074
+INFO:root:final multipy: 51
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 7
+INFO:root:original multipy: 51.66666666666666
+INFO:root:final multipy: 52
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 7
+INFO:root:original multipy: 51.66666666666666
+INFO:root:final multipy: 52
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KuraueKenichi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 9
+INFO:root:original multipy: 51.75364758698091
+INFO:root:final multipy: 52
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00017301038062283736
+INFO:root:number of images: 2
+INFO:root:original multipy: 53.186274509803916
+INFO:root:final multipy: 53
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00017301038062283736
+INFO:root:number of images: 2
+INFO:root:original multipy: 53.186274509803916
+INFO:root:final multipy: 53
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/Suusan/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001226291693917593
+INFO:root:number of images: 14
+INFO:root:original multipy: 53.85464355788096
+INFO:root:final multipy: 54
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/KuraueHinata+KuraueKenichi+KuraueMai+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0016797688638043409
+INFO:root:number of images: 19
+INFO:root:original multipy: 54.35673104012467
+INFO:root:final multipy: 54
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/character_others/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0025974025974025983
+INFO:root:number of images: 29
+INFO:root:original multipy: 55.06792058516198
+INFO:root:final multipy: 55
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YukimuraMegumi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 7
+INFO:root:original multipy: 55.450336700336685
+INFO:root:final multipy: 55
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SenjuinKoharu+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 10
+INFO:root:original multipy: 56.458524640342816
+INFO:root:final multipy: 56
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/horiguchi_yukiko/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008403361344537815
+INFO:root:number of images: 9
+INFO:root:original multipy: 57.4074074074074
+INFO:root:final multipy: 57
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMegumi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0002802952443240213
+INFO:root:number of images: 3
+INFO:root:original multipy: 57.44495312840637
+INFO:root:final multipy: 57
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 8
+INFO:root:original multipy: 58.22285353535352
+INFO:root:final multipy: 58
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+AobaMai/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 6
+INFO:root:original multipy: 59.14702581369247
+INFO:root:final multipy: 59
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata Hairdown+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 6
+INFO:root:original multipy: 59.14702581369247
+INFO:root:final multipy: 59
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0007785467128027682
+INFO:root:number of images: 8
+INFO:root:original multipy: 59.834558823529406
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 8
+INFO:root:original multipy: 60.277777777777764
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 2
+INFO:root:original multipy: 60.277777777777764
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 2
+INFO:root:original multipy: 60.277777777777764
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 2
+INFO:root:original multipy: 60.277777777777764
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 4
+INFO:root:original multipy: 60.277777777777764
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 2
+INFO:root:original multipy: 60.277777777777764
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005903187721369539
+INFO:root:number of images: 6
+INFO:root:original multipy: 60.491276400367305
+INFO:root:final multipy: 60
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 7
+INFO:root:original multipy: 60.83694083694083
+INFO:root:final multipy: 61
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueKenichi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014864141744455675
+INFO:root:number of images: 15
+INFO:root:original multipy: 60.926465439218866
+INFO:root:final multipy: 61
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi Twintail/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 14
+INFO:root:original multipy: 61.54816406614967
+INFO:root:final multipy: 62
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/TakekanaKasumi+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 11
+INFO:root:original multipy: 61.59111778946489
+INFO:root:final multipy: 62
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+SasaharaYuka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 11
+INFO:root:original multipy: 61.59111778946489
+INFO:root:final multipy: 62
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+SenjuinKoharu/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 11
+INFO:root:original multipy: 61.59111778946489
+INFO:root:final multipy: 62
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/AobaKokona/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0013513513513513512
+INFO:root:number of images: 13
+INFO:root:original multipy: 63.9119889119889
+INFO:root:final multipy: 64
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/MioYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0016817714659441278
+INFO:root:number of images: 16
+INFO:root:original multipy: 64.62557226945715
+INFO:root:final multipy: 65
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiTaiki/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00021022143324301597
+INFO:root:number of images: 2
+INFO:root:original multipy: 64.62557226945715
+INFO:root:final multipy: 65
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 6
+INFO:root:original multipy: 64.69205948372614
+INFO:root:final multipy: 65
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 8
+INFO:root:original multipy: 67.8125
+INFO:root:final multipy: 68
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata Hairdown+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 7
+INFO:root:original multipy: 68.74008681859921
+INFO:root:final multipy: 69
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/2_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015686274509803919
+INFO:root:number of images: 14
+INFO:root:original multipy: 68.88888888888887
+INFO:root:final multipy: 69
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 7
+INFO:root:original multipy: 68.88888888888887
+INFO:root:final multipy: 69
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 3
+INFO:root:original multipy: 70.91503267973856
+INFO:root:final multipy: 71
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata Hairdown+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0011548410938654844
+INFO:root:number of images: 10
+INFO:root:original multipy: 71.00347992116286
+INFO:root:final multipy: 71
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SenjuinKoharu/face_height_ratio_50-75
+INFO:root:sampling probability: 0.001868634962160142
+INFO:root:number of images: 16
+INFO:root:original multipy: 71.80619141050795
+INFO:root:final multipy: 72
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+YukimuraAoi+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 8
+INFO:root:original multipy: 72.17709115952918
+INFO:root:final multipy: 72
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KuraueMai+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 8
+INFO:root:original multipy: 72.17709115952918
+INFO:root:final multipy: 72
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 5
+INFO:root:original multipy: 72.33333333333333
+INFO:root:final multipy: 72
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 10
+INFO:root:original multipy: 72.33333333333333
+INFO:root:final multipy: 72
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/character_others/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00011806375442739081
+INFO:root:number of images: 1
+INFO:root:original multipy: 72.58953168044077
+INFO:root:final multipy: 73
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueKenichi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0017836970093346811
+INFO:root:number of images: 15
+INFO:root:original multipy: 73.11175852706265
+INFO:root:final multipy: 73
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/MioYama+TakekanaKasumi+YukimuraAoi+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001385809312638581
+INFO:root:number of images: 11
+INFO:root:original multipy: 77.45834173217764
+INFO:root:final multipy: 77
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006302521008403361
+INFO:root:number of images: 5
+INFO:root:original multipy: 77.49999999999999
+INFO:root:final multipy: 77
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+TakekanaKasumi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 6
+INFO:root:original multipy: 77.63047138047136
+INFO:root:final multipy: 78
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraMakoto+YukimuraMegumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00101010101010101
+INFO:root:number of images: 8
+INFO:root:original multipy: 77.63047138047138
+INFO:root:final multipy: 78
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/SasaharaYuka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 11
+INFO:root:original multipy: 78.3340269932814
+INFO:root:final multipy: 78
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0015328646173969913
+INFO:root:number of images: 12
+INFO:root:original multipy: 78.53802185524306
+INFO:root:final multipy: 79
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraMakoto/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0010219097449313277
+INFO:root:number of images: 8
+INFO:root:original multipy: 78.53802185524307
+INFO:root:final multipy: 79
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0005190311418685121
+INFO:root:number of images: 4
+INFO:root:original multipy: 79.77941176470588
+INFO:root:final multipy: 80
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/5_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.00012975778546712804
+INFO:root:number of images: 1
+INFO:root:original multipy: 79.77941176470588
+INFO:root:final multipy: 80
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata Hairdown+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 6
+INFO:root:original multipy: 80.19676795503243
+INFO:root:final multipy: 80
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 3
+INFO:root:original multipy: 80.37037037037035
+INFO:root:final multipy: 80
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 3
+INFO:root:original multipy: 80.37037037037035
+INFO:root:final multipy: 80
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 3
+INFO:root:original multipy: 80.37037037037035
+INFO:root:final multipy: 80
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+SasaharaYuka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 7
+INFO:root:original multipy: 80.65503520048973
+INFO:root:final multipy: 81
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/nsfw/censored/bukkake
+INFO:root:sampling probability: 0.041666666666666664
+INFO:root:number of images: 312
+INFO:root:original multipy: 82.10915242165241
+INFO:root:final multipy: 82
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KuraueKenichi+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 7
+INFO:root:original multipy: 82.48810418231906
+INFO:root:final multipy: 82
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KuraueMai/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 8
+INFO:root:original multipy: 84.68778696051422
+INFO:root:final multipy: 85
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata Hairdown+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 5
+INFO:root:original multipy: 85.17171717171716
+INFO:root:final multipy: 85
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SenjuinKoharu/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 5
+INFO:root:original multipy: 85.17171717171716
+INFO:root:final multipy: 85
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+AobaMai/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006926406926406926
+INFO:root:number of images: 5
+INFO:root:original multipy: 85.17171717171716
+INFO:root:final multipy: 85
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiTaiki/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007007381108100532
+INFO:root:number of images: 5
+INFO:root:original multipy: 86.16742969260953
+INFO:root:final multipy: 86
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KurosakiTaiki/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008408857329720639
+INFO:root:number of images: 6
+INFO:root:original multipy: 86.16742969260955
+INFO:root:final multipy: 86
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+KurosakiHonoka+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0028220116911912923
+INFO:root:number of images: 20
+INFO:root:original multipy: 86.75334274003897
+INFO:root:final multipy: 87
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SasaharaYuka/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 4
+INFO:root:original multipy: 88.72053872053871
+INFO:root:final multipy: 89
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/2_people/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00014705882352941175
+INFO:root:number of images: 1
+INFO:root:original multipy: 90.41666666666666
+INFO:root:final multipy: 90
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 4
+INFO:root:original multipy: 90.41666666666666
+INFO:root:final multipy: 90
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 4
+INFO:root:original multipy: 90.41666666666666
+INFO:root:final multipy: 90
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/momoko/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 4
+INFO:root:original multipy: 90.41666666666666
+INFO:root:final multipy: 90
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/2_people/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00014705882352941175
+INFO:root:number of images: 1
+INFO:root:original multipy: 90.41666666666666
+INFO:root:final multipy: 90
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/2_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 4
+INFO:root:original multipy: 90.41666666666666
+INFO:root:final multipy: 90
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 5
+INFO:root:original multipy: 93.15656565656563
+INFO:root:final multipy: 93
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KuraueMai/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 6
+INFO:root:original multipy: 94.09754106723803
+INFO:root:final multipy: 94
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+SenjuinKoharu/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 6
+INFO:root:original multipy: 94.09754106723803
+INFO:root:final multipy: 94
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+YukimuraAoi+YukimuraMakoto/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 6
+INFO:root:original multipy: 96.23612154603892
+INFO:root:final multipy: 96
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+KurosakiHonoka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 6
+INFO:root:original multipy: 96.23612154603892
+INFO:root:final multipy: 96
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+YukimuraAoi Twintail/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 7
+INFO:root:original multipy: 96.78604224058769
+INFO:root:final multipy: 97
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0009453781512605041
+INFO:root:number of images: 6
+INFO:root:original multipy: 96.87499999999999
+INFO:root:final multipy: 97
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KuraueKenichi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 4
+INFO:root:original multipy: 97.0380892255892
+INFO:root:final multipy: 97
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KurosakiHonoka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 4
+INFO:root:original multipy: 97.0380892255892
+INFO:root:final multipy: 97
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/KurosakiHonoka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.003003003003003002
+INFO:root:number of images: 18
+INFO:root:original multipy: 102.57479701924143
+INFO:root:final multipy: 103
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0008403361344537813
+INFO:root:number of images: 5
+INFO:root:original multipy: 103.33333333333331
+INFO:root:final multipy: 103
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001176470588235294
+INFO:root:number of images: 7
+INFO:root:original multipy: 103.33333333333331
+INFO:root:final multipy: 103
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+SaitoKaede/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 1
+INFO:root:original multipy: 106.46464646464646
+INFO:root:final multipy: 106
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+KuraueHinata/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 1
+INFO:root:original multipy: 106.46464646464646
+INFO:root:final multipy: 106
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata Hairdown+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 1
+INFO:root:original multipy: 106.46464646464646
+INFO:root:final multipy: 106
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SenjuinKoharu/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 1
+INFO:root:original multipy: 106.46464646464646
+INFO:root:final multipy: 106
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+AobaMai/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 1
+INFO:root:original multipy: 106.46464646464646
+INFO:root:final multipy: 106
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00017316017316017316
+INFO:root:number of images: 1
+INFO:root:original multipy: 106.46464646464646
+INFO:root:final multipy: 106
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/MioYama/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 8
+INFO:root:original multipy: 107.70928711576192
+INFO:root:final multipy: 108
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 5
+INFO:root:original multipy: 108.5
+INFO:root:final multipy: 108
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 5
+INFO:root:original multipy: 108.5
+INFO:root:final multipy: 108
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/1_people/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00018007202881152457
+INFO:root:number of images: 1
+INFO:root:original multipy: 110.71428571428568
+INFO:root:final multipy: 111
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+SenjuinKoharu/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011019283746556473
+INFO:root:number of images: 6
+INFO:root:original multipy: 112.91704928068563
+INFO:root:final multipy: 113
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+SenjuinKoharu/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 5
+INFO:root:original multipy: 112.91704928068563
+INFO:root:final multipy: 113
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+YukimuraAoi Twintail/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0009182736455463728
+INFO:root:number of images: 5
+INFO:root:original multipy: 112.91704928068563
+INFO:root:final multipy: 113
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0018394375408763894
+INFO:root:number of images: 10
+INFO:root:original multipy: 113.09475147155001
+INFO:root:final multipy: 113
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/KurosakiHonoka/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001501501501501501
+INFO:root:number of images: 8
+INFO:root:original multipy: 115.3966466466466
+INFO:root:final multipy: 115
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata Hairdown+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 5
+INFO:root:original multipy: 115.48334585524668
+INFO:root:final multipy: 115
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KurosakiHonoka+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 5
+INFO:root:original multipy: 115.48334585524668
+INFO:root:final multipy: 115
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/OnozukaHikari+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 3
+INFO:root:original multipy: 118.29405162738495
+INFO:root:final multipy: 118
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+KurosakiHonoka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 4
+INFO:root:original multipy: 120.29515193254862
+INFO:root:final multipy: 120
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/as109/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 2
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 2
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 4
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/4_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/fuzichoco/5_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00019607843137254898
+INFO:root:number of images: 1
+INFO:root:original multipy: 120.55555555555553
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0007870916961826053
+INFO:root:number of images: 4
+INFO:root:original multipy: 120.98255280073462
+INFO:root:final multipy: 121
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/others/face_height_ratio_50-75
+INFO:root:sampling probability: 0.004734848484848486
+INFO:root:number of images: 23
+INFO:root:original multipy: 126.57142072902944
+INFO:root:final multipy: 127
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/AobaKokona+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0002077922077922078
+INFO:root:number of images: 1
+INFO:root:original multipy: 127.75757575757575
+INFO:root:final multipy: 128
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/many_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00021008403361344534
+INFO:root:number of images: 1
+INFO:root:original multipy: 129.16666666666663
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata Hairdown/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00042044286648603194
+INFO:root:number of images: 2
+INFO:root:original multipy: 129.2511445389143
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/MioYama/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00042044286648603194
+INFO:root:number of images: 2
+INFO:root:original multipy: 129.2511445389143
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/TakekanaKasumi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00042044286648603194
+INFO:root:number of images: 2
+INFO:root:original multipy: 129.2511445389143
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+TakekanaKasumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 3
+INFO:root:original multipy: 129.38411896745228
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 3
+INFO:root:original multipy: 129.38411896745228
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 3
+INFO:root:original multipy: 129.38411896745228
+INFO:root:final multipy: 129
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/hands
+INFO:root:sampling probability: 0.05
+INFO:root:number of images: 232
+INFO:root:original multipy: 132.507183908046
+INFO:root:final multipy: 133
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/asanagi/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 4
+INFO:root:original multipy: 135.625
+INFO:root:final multipy: 136
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006787330316742082
+INFO:root:number of images: 3
+INFO:root:original multipy: 139.10256410256412
+INFO:root:final multipy: 139
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata Hairdown+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001385809312638581
+INFO:root:number of images: 6
+INFO:root:original multipy: 142.0069598423257
+INFO:root:final multipy: 142
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/KuraueHinata Hairdown/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 6
+INFO:root:original multipy: 143.6123828210159
+INFO:root:final multipy: 144
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata Hairdown+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 4
+INFO:root:original multipy: 144.35418231905837
+INFO:root:final multipy: 144
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+MioYama+TakekanaKasumi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 4
+INFO:root:original multipy: 144.35418231905837
+INFO:root:final multipy: 144
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+YukimuraAoi/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00023612750885478162
+INFO:root:number of images: 1
+INFO:root:original multipy: 145.17906336088154
+INFO:root:final multipy: 145
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0007414730598121601
+INFO:root:number of images: 3
+INFO:root:original multipy: 151.96078431372547
+INFO:root:final multipy: 152
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraMakoto+YukimuraMegumi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.00101010101010101
+INFO:root:number of images: 4
+INFO:root:original multipy: 155.26094276094275
+INFO:root:final multipy: 155
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+YukimuraAoi+YuriYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0007826195842724769
+INFO:root:number of images: 3
+INFO:root:original multipy: 160.39353591006486
+INFO:root:final multipy: 160
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KurosakiHonoka+SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 2
+INFO:root:original multipy: 165.4058339072544
+INFO:root:final multipy: 165
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+KuraueHinata+SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 2
+INFO:root:original multipy: 165.4058339072544
+INFO:root:final multipy: 165
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/KuraueHinata+MioYama+TakekanaKasumi+YukimuraAoi+YuriYama/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0030438311688311685
+INFO:root:number of images: 11
+INFO:root:original multipy: 170.13171487603302
+INFO:root:final multipy: 170
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/MioYama/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0014014762216201064
+INFO:root:number of images: 5
+INFO:root:original multipy: 172.33485938521906
+INFO:root:final multipy: 172
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/SaitoKaede+SenjuinKoharu/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0005772005772005772
+INFO:root:number of images: 2
+INFO:root:original multipy: 177.44107744107743
+INFO:root:final multipy: 177
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/2_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 2
+INFO:root:original multipy: 180.83333333333331
+INFO:root:final multipy: 181
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/3_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0002941176470588235
+INFO:root:number of images: 1
+INFO:root:original multipy: 180.83333333333331
+INFO:root:final multipy: 181
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/misaki_kurehito/3_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0002941176470588235
+INFO:root:number of images: 1
+INFO:root:original multipy: 180.83333333333331
+INFO:root:final multipy: 181
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kantoku/3_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0002941176470588235
+INFO:root:number of images: 1
+INFO:root:original multipy: 180.83333333333331
+INFO:root:final multipy: 181
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 3
+INFO:root:original multipy: 180.83333333333334
+INFO:root:final multipy: 181
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 3
+INFO:root:original multipy: 180.83333333333334
+INFO:root:final multipy: 181
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KurosakiHonoka/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 2
+INFO:root:original multipy: 194.0761784511784
+INFO:root:final multipy: 194
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YuriYama/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 2
+INFO:root:original multipy: 194.0761784511784
+INFO:root:final multipy: 194
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaMai/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0009810333551340746
+INFO:root:number of images: 3
+INFO:root:original multipy: 201.05733594942228
+INFO:root:final multipy: 201
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaMai/face_height_ratio_50-75
+INFO:root:sampling probability: 0.003270111183780249
+INFO:root:number of images: 10
+INFO:root:original multipy: 201.05733594942228
+INFO:root:final multipy: 201
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/Suusan/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0010219097449313277
+INFO:root:number of images: 3
+INFO:root:original multipy: 209.43472494731486
+INFO:root:final multipy: 209
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/0_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006920415224913495
+INFO:root:number of images: 2
+INFO:root:original multipy: 212.74509803921566
+INFO:root:final multipy: 213
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/yamamoto_souichirou/0_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00034602076124567473
+INFO:root:number of images: 1
+INFO:root:original multipy: 212.74509803921566
+INFO:root:final multipy: 213
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/shimada_fumikane/0_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0010380622837370243
+INFO:root:number of images: 3
+INFO:root:original multipy: 212.7450980392157
+INFO:root:final multipy: 213
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/OnozukaHikari/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0018018018018018016
+INFO:root:number of images: 5
+INFO:root:original multipy: 221.56156156156152
+INFO:root:final multipy: 222
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YukimuraMakoto/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 2
+INFO:root:original multipy: 232.8914141414141
+INFO:root:final multipy: 233
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mochizuki_kei/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 1
+INFO:root:original multipy: 241.11111111111106
+INFO:root:final multipy: 241
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 1
+INFO:root:original multipy: 241.11111111111106
+INFO:root:final multipy: 241
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 2
+INFO:root:original multipy: 241.11111111111106
+INFO:root:final multipy: 241
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.00039215686274509797
+INFO:root:number of images: 1
+INFO:root:original multipy: 241.11111111111106
+INFO:root:final multipy: 241
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueMai+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.001616161616161616
+INFO:root:number of images: 4
+INFO:root:original multipy: 248.41750841750837
+INFO:root:final multipy: 248
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/nsfw/uncensored/sex
+INFO:root:sampling probability: 0.041666666666666664
+INFO:root:number of images: 102
+INFO:root:original multipy: 251.15740740740736
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0004201680672268907
+INFO:root:number of images: 1
+INFO:root:original multipy: 258.33333333333326
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/ke-ta/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0004201680672268907
+INFO:root:number of images: 1
+INFO:root:original multipy: 258.33333333333326
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YukimuraAoi Twintail/face_height_ratio_75-100
+INFO:root:sampling probability: 0.00042044286648603194
+INFO:root:number of images: 1
+INFO:root:original multipy: 258.5022890778286
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/nsfw/uncensored/pussy
+INFO:root:sampling probability: 0.041666666666666664
+INFO:root:number of images: 97
+INFO:root:original multipy: 264.10366552119126
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/character_others/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0031168831168831173
+INFO:root:number of images: 7
+INFO:root:original multipy: 273.76623376623377
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/OnozukaHikari/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009009009009009008
+INFO:root:number of images: 2
+INFO:root:original multipy: 276.9519519519519
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/3_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.00045248868778280545
+INFO:root:number of images: 1
+INFO:root:original multipy: 278.2051282051282
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/character_others/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0009238728750923875
+INFO:root:number of images: 2
+INFO:root:original multipy: 284.01391968465146
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/6+_charcters/character_others/face_height_ratio_0-25
+INFO:root:sampling probability: 0.015151515151515152
+INFO:root:number of images: 32
+INFO:root:original multipy: 291.11426767676767
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/OnozukaHikari+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002849002849002849
+INFO:root:number of images: 6
+INFO:root:original multipy: 291.9436530547642
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+YukimuraAoi+YukimuraMakoto/face_height_ratio_25-50
+INFO:root:sampling probability: 0.002015722636565209
+INFO:root:number of images: 4
+INFO:root:original multipy: 309.8333669287107
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/kase_daiki/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0010180995475113123
+INFO:root:number of images: 2
+INFO:root:original multipy: 312.9807692307692
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/Suusan/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0010219097449313277
+INFO:root:number of images: 2
+INFO:root:original multipy: 314.1520874209723
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/OnozukaHikari+Suusan+YukimuraAoi Twintail/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 1
+INFO:root:original multipy: 330.8116678145088
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+KurosakiHonoka+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 1
+INFO:root:original multipy: 330.8116678145088
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/SaitoKaede+SasaharaYuka+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000538050964187328
+INFO:root:number of images: 1
+INFO:root:original multipy: 330.8116678145088
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.001126126126126126
+INFO:root:number of images: 2
+INFO:root:original multipy: 346.18993993993985
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/AobaKokona+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0011396011396011395
+INFO:root:number of images: 2
+INFO:root:original multipy: 350.332383665717
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/AobaKokona+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002279202279202279
+INFO:root:number of images: 4
+INFO:root:original multipy: 350.332383665717
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/AobaKokona+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002849002849002849
+INFO:root:number of images: 5
+INFO:root:original multipy: 350.33238366571703
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata Hairdown+SaitoKaede+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0011548410938654844
+INFO:root:number of images: 2
+INFO:root:original multipy: 355.0173996058143
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/tinker_bell/many_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 1
+INFO:root:original multipy: 361.66666666666663
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/2_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 1
+INFO:root:original multipy: 361.66666666666663
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/akakura/5_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.000588235294117647
+INFO:root:number of images: 1
+INFO:root:original multipy: 361.66666666666663
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/AobaKokona+KurosakiHonoka/face_height_ratio_0-25
+INFO:root:sampling probability: 0.004273504273504274
+INFO:root:number of images: 7
+INFO:root:original multipy: 375.3561253561254
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/3_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0012605042016806721
+INFO:root:number of images: 2
+INFO:root:original multipy: 387.49999999999994
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/4_people/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0006302521008403361
+INFO:root:number of images: 1
+INFO:root:original multipy: 387.49999999999994
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KuraueHinata+KuraueKenichi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 1
+INFO:root:original multipy: 388.1523569023568
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/Suusan+YukimuraAoi Twintail/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 1
+INFO:root:original multipy: 388.1523569023568
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/TakekanaKasumi+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 1
+INFO:root:original multipy: 388.1523569023568
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/KurosakiHonoka+SaitoKaede/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 1
+INFO:root:original multipy: 388.1523569023568
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/MioYama+TakekanaKasumi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 1
+INFO:root:original multipy: 388.1523569023568
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/YukimuraAoi+YukimuraMakoto/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006313131313131313
+INFO:root:number of images: 1
+INFO:root:original multipy: 388.1523569023568
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/AobaKokona+KuraueHinata+KurosakiHonoka+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.004427390791027155
+INFO:root:number of images: 7
+INFO:root:original multipy: 388.8724911452184
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/SaitoKaede+SasaharaYuka+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 1
+INFO:root:original multipy: 396.97400137741045
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/MioYama+TakekanaKasumi+YuriYama/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 1
+INFO:root:original multipy: 396.97400137741045
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/AobaKokona+SaitoKaede+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0006456611570247934
+INFO:root:number of images: 1
+INFO:root:original multipy: 396.97400137741045
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/KuraueHinata/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0013513513513513512
+INFO:root:number of images: 2
+INFO:root:original multipy: 415.42792792792784
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/2_characters/Suusan+YukimuraAoi Twintail/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007575757575757575
+INFO:root:number of images: 1
+INFO:root:original multipy: 465.7828282828282
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/YuriYama/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0015328646173969913
+INFO:root:number of images: 2
+INFO:root:original multipy: 471.2281311314584
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/character_others/face_height_ratio_75-100
+INFO:root:sampling probability: 0.0007792207792207793
+INFO:root:number of images: 1
+INFO:root:original multipy: 479.0909090909091
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/alphonse/2_people/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0007843137254901959
+INFO:root:number of images: 1
+INFO:root:original multipy: 482.2222222222221
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/4_charcters/AobaKokona+KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0130718954248366
+INFO:root:number of images: 16
+INFO:root:original multipy: 502.3148148148147
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/onono_imoko/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0008823529411764706
+INFO:root:number of images: 1
+INFO:root:original multipy: 542.5
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/AobaKokona+KuraueHinata+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0044444444444444444
+INFO:root:number of images: 5
+INFO:root:original multipy: 546.5185185185185
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/regularization/artists/mignon/1_people/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0009003601440576229
+INFO:root:number of images: 1
+INFO:root:original multipy: 553.5714285714284
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/3_characters/KuraueHinata+YukimuraAoi+YukimuraMegumi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0009391435011269723
+INFO:root:number of images: 1
+INFO:root:original multipy: 577.4167292762335
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/AobaKokona+KuraueHinata/face_height_ratio_0-25
+INFO:root:sampling probability: 0.001899335232668566
+INFO:root:number of images: 2
+INFO:root:original multipy: 583.8873061095284
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/AobaKokona+KuraueHinata/face_height_ratio_25-50
+INFO:root:sampling probability: 0.000949667616334283
+INFO:root:number of images: 1
+INFO:root:original multipy: 583.8873061095284
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/4_charcters/AobaKokona+KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0065359477124183
+INFO:root:number of images: 6
+INFO:root:original multipy: 669.753086419753
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/AobaKokona+KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0023096821877309688
+INFO:root:number of images: 2
+INFO:root:original multipy: 710.0347992116286
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/MioYama+TakekanaKasumi+YukimuraAoi+YuriYama/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0011548410938654844
+INFO:root:number of images: 1
+INFO:root:original multipy: 710.0347992116286
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/SenjuinKoharu/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0012012012012012011
+INFO:root:number of images: 1
+INFO:root:original multipy: 738.5385385385384
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/1_character/AobaMai/face_height_ratio_25-50
+INFO:root:sampling probability: 0.003924133420536298
+INFO:root:number of images: 3
+INFO:root:original multipy: 804.2293437976891
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/YukimuraAoi/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0013513513513513512
+INFO:root:number of images: 1
+INFO:root:original multipy: 830.8558558558557
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/AobaKokona/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0013513513513513512
+INFO:root:number of images: 1
+INFO:root:original multipy: 830.8558558558557
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/YukimuraMegumi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0018018018018018018
+INFO:root:number of images: 1
+INFO:root:original multipy: 1107.8078078078076
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/4_characters/KuraueHinata+KuraueKenichi+KuraueMai+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.002015722636565209
+INFO:root:number of images: 1
+INFO:root:original multipy: 1239.3334677148428
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/KuraueHinata+KurosakiHonoka+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.004166666666666667
+INFO:root:number of images: 2
+INFO:root:original multipy: 1280.9027777777776
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/AobaKokona+KuraueHinata+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.0022222222222222222
+INFO:root:number of images: 1
+INFO:root:original multipy: 1366.2962962962963
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/1_charcter/SenjuinKoharu/face_height_ratio_0-25
+INFO:root:sampling probability: 0.0024024024024024023
+INFO:root:number of images: 1
+INFO:root:original multipy: 1477.0770770770769
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/5_charcters/AobaKokona+KuraueHinata+KurosakiHonoka+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.02222222222222222
+INFO:root:number of images: 9
+INFO:root:original multipy: 1518.1069958847734
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/5_characters/KuraueHinata+MioYama+TakekanaKasumi+YukimuraAoi+YuriYama/face_height_ratio_50-75
+INFO:root:sampling probability: 0.0025365259740259744
+INFO:root:number of images: 1
+INFO:root:original multipy: 1559.5407196969697
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/Suusan+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.002849002849002849
+INFO:root:number of images: 1
+INFO:root:original multipy: 1751.661918328585
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/SenjuinKoharu+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.002849002849002849
+INFO:root:number of images: 1
+INFO:root:original multipy: 1751.661918328585
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/4_charcters/AobaKokona+KuraueHinata+KurosakiHonoka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.013725490196078431
+INFO:root:number of images: 4
+INFO:root:original multipy: 2109.722222222222
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/6+_charcters/character_others/face_height_ratio_25-50
+INFO:root:sampling probability: 0.01818181818181818
+INFO:root:number of images: 5
+INFO:root:original multipy: 2235.7575757575755
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/AobaKokona+KuraueHinata+SaitoKaede/face_height_ratio_0-25
+INFO:root:sampling probability: 0.004166666666666667
+INFO:root:number of images: 1
+INFO:root:original multipy: 2561.805555555555
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/KuraueHinata+SenjuinKoharu+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.004166666666666667
+INFO:root:number of images: 1
+INFO:root:original multipy: 2561.805555555555
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/AobaKokona+KurosakiHonoka+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.004166666666666667
+INFO:root:number of images: 1
+INFO:root:original multipy: 2561.805555555555
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/screenshots/6+_charcters/character_others/face_height_ratio_75-100
+INFO:root:sampling probability: 0.004545454545454545
+INFO:root:number of images: 1
+INFO:root:original multipy: 2794.6969696969695
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/KuraueHinata+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.005
+INFO:root:number of images: 1
+INFO:root:original multipy: 3074.1666666666665
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/3_charcters/AobaKokona+SaitoKaede+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.005
+INFO:root:number of images: 1
+INFO:root:original multipy: 3074.1666666666665
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/5_charcters/AobaKokona+KuraueHinata+KurosakiHonoka+SaitoKaede+YukimuraAoi/face_height_ratio_25-50
+INFO:root:sampling probability: 0.01111111111111111
+INFO:root:number of images: 2
+INFO:root:original multipy: 3415.74074074074
+INFO:root:final multipy: 250
+
+INFO:root:/media/sashi/DATA1/pictures/ACG-extra/training_data/yama_no_susume/processed/yamanosusume/fanart/2_charcters/KurosakiHonoka+YukimuraAoi/face_height_ratio_0-25
+INFO:root:sampling probability: 0.005698005698005698
+INFO:root:number of images: 1
+INFO:root:original multipy: 3503.32383665717
+INFO:root:final multipy: 250
+

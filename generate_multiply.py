@@ -69,6 +69,8 @@ class WeightTree(object):
             return float(training_weights[basename])
         for pattern in training_weights:
             if fnmatch.fnmatch(self.dirname, pattern):
+                print(self.dirname)
+                print(training_weights[pattern])
                 return float(training_weights[pattern])
         return 1
 

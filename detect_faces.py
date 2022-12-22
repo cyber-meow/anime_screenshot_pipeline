@@ -197,8 +197,9 @@ def get_npeople_and_characters_from_tags(tags_content):
 
 def update_dst_dir_and_facedata(path, faces_data, cropped, args):
     fh_ratio = min(int(faces_data['max_height_ratio'] * 100), 99)
-    lb = fh_ratio // args.folder_range * args.folder_range
-    ub = lb + args.folder_range
+    folder_range = args.face_ratio_folder_range
+    lb = fh_ratio // folder_range * folder_range
+    ub = lb + folder_range
     face_ratio_folder = f'face_height_ratio_{lb}-{ub}'
     faces_data['characters'] = ['unknown']
     faces_data['cropped'] = cropped
@@ -217,9 +218,12 @@ def update_dst_dir_and_facedata(path, faces_data, cropped, args):
         # the tag file but as for the folder name we use the number of
         # characters provide in folder names
         n_characters = len(characters)
-        dst_dir = os.path.join(
-            dst_dir, f'{n_characters}_characters',
-            face_ratio_folder, character_folder)
+        if args.create_count_folder:
+            suffix = 'character' if n_characters == 1 else 'characters'
+            dst_dir = os.path.join(dst_dir, f'{n_characters}_{suffix}')
+        if args.create_face_ratio_folder:
+            dst_dir = os.path.join(dst_dir, face_ratio_folder)
+        dst_dir = os.path.join(dst_dir, character_folder)
     if args.use_tags and not cropped:
         tags_file = path + '.tags'
         if os.path.exists(tags_file):
@@ -230,18 +234,23 @@ def update_dst_dir_and_facedata(path, faces_data, cropped, args):
                 n_people = 'many'
             faces_data['n_people'] = n_people
             faces_data['characters'] = characters
-            if not args.use_character_folder:
-                dst_dir = os.path.join(
-                    dst_dir, f'{n_people}_people', face_ratio_folder)
+            suffix = 'person' if n_people == 1 else 'people'
+            count = n_people
         else:
             print('Warning: --use_tags specified but tags file '
                   + f'{tags_file} not found; use detector results')
+            count = faces_data['n_faces']
+            suffix = 'face' if count == 1 else 'faces'
+    else:
+        count = faces_data['n_faces']
+        suffix = 'face' if count == 1 else 'faces'
+    if not args.use_character_folder:
+        if args.create_count_folder:
             n_faces = faces_data['n_faces']
-            dst_dir = os.path.join(
-                dst_dir, f'{n_faces}_faces', face_ratio_folder)
-    elif not args.use_character_folder:
-        n_faces = faces_data['n_faces']
-        dst_dir = os.path.join(dst_dir, f'{n_faces}_faces', face_ratio_folder)
+            suffix = 'face' if n_faces == 1 else 'faces'
+            dst_dir = os.path.join(dst_dir, f'{count}_{suffix}')
+        if args.create_face_ratio_folder:
+            dst_dir = os.path.join(dst_dir, face_ratio_folder)
     return dst_dir, faces_data
 
 
@@ -263,6 +272,9 @@ def resize_image(image, max_size):
 
 def process(args):
 
+    if args.dst_dir is None:
+        args.dst_dir = args.src_dir
+
     print("loading face detector.")
     detector = create_detector('yolov3')
 
@@ -272,7 +284,7 @@ def process(args):
     paths = get_files_recursively(args.src_dir)
 
     for path in tqdm(paths):
-        print(path)
+        # print(path)
         basename = os.path.splitext(os.path.basename(path))[0]
 
         image = cv2.imdecode(np.fromfile(path, np.uint8), cv2.IMREAD_UNCHANGED)
@@ -308,7 +320,8 @@ def process(args):
                 if idx == 0 and (not args.debug) and args.move_file:
                     ext = os.path.splitext(path)[1]
                     new_path = f'{new_path_base}{ext}'
-                    shutil.move(path, new_path)
+                    if path != new_path:
+                        shutil.move(path, new_path)
                 else:
                     _, buf = cv2.imencode(output_extension, image)
                     new_path = f'{new_path_base}{output_extension}'
@@ -329,15 +342,18 @@ def process(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--src_dir", type=str,
-                        help="Directory to load images")
-    parser.add_argument("--dst_dir", type=str,
-                        help="Directory to save images")
-    parser.add_argument("--max_image_size", type=int, default=1024,
-                        help="Maximum size of the resulting image")
-    parser.add_argument("--crop",
-                        action="store_true",
-                        help="Crop square images around faces")
+    parser.add_argument(
+        "--src_dir", type=str,
+        help="Directory to load images")
+    parser.add_argument(
+        "--dst_dir", type=str, default=None,
+        help="Directory to save images; use source directory if not providied")
+    parser.add_argument(
+        "--max_image_size", type=int, default=1024,
+        help="Maximum size of the resulting image")
+    parser.add_argument(
+        "--crop", action="store_true",
+        help="Crop square images around faces")
     parser.add_argument(
         "--move_file",
         action="store_true",
@@ -369,21 +385,34 @@ if __name__ == '__main__':
         type=int,
         default=10,
         help="The maximum number of faces an image can contain")
-    parser.add_argument("--score_thres",
-                        type=float,
-                        default=0.75,
-                        help="Score threshold above which is counted as face")
-    parser.add_argument("--ratio_thres",
-                        type=float,
-                        default=2,
-                        help="Ratio threshold below which is counted as face")
-    parser.add_argument("--folder_range",
-                        type=int,
-                        default=25,
-                        help="The height ratio range of each separate folder")
-    parser.add_argument("--debug",
-                        action="store_true",
-                        help="Render rect for face")
+    parser.add_argument(
+        "--score_thres",
+        type=float,
+        default=0.75,
+        help="Score threshold above which is counted as face")
+    parser.add_argument(
+        "--ratio_thres",
+        type=float,
+        default=2,
+        help="Ratio threshold below which is counted as face")
+    parser.add_argument(
+        "--create_count_folder",
+        action="store_true",
+        help="Create subfolder for different count")
+    parser.add_argument(
+        "--create_face_ratio_folder",
+        action="store_true",
+        help="Creat subfolder for different face ratio range"
+    )
+    parser.add_argument(
+        "--face_ratio_folder_range",
+        type=int,
+        default=25,
+        help="The height ratio range of each separate folder")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Render rect for face")
     args = parser.parse_args()
 
     process(args)
