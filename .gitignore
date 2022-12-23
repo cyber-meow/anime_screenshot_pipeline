@@ -134,4 +134,5 @@ data/
 models/
 logs/
 *.egg-info
+**/wandb/
 */*.ckpt
