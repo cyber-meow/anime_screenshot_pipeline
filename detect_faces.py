@@ -173,25 +173,34 @@ def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
 
 def get_npeople_and_characters_from_tags(tags_content):
 
-    number_dictinary = {
+    girl_dictinary = {
         '1girl': 1,
-        '1boy': 1,
         '6+girls': 6,
+    }
+    boy_dictinary = {
+        '1boy': 1,
         '6+boys': 6,
     }
     for k in range(2, 6):
-        number_dictinary[f'{k}girls'] = k
-        number_dictinary[f'{k}boys'] = k
+        girl_dictinary[f'{k}girls'] = k
+        boy_dictinary[f'{k}boys'] = k
 
-    n_people = 0
+    n_girls = 0
+    n_boys = 0
     characters = ['unknown']
     for line in tags_content:
         if line.startswith('character:'):
             characters = line.lstrip('character:').split(',')
             characters = [character.strip() for character in characters]
-        for key in number_dictinary:
+        for key in girl_dictinary:
             if key in line:
-                n_people += number_dictinary[key]
+                n_girls = max(n_girls, girl_dictinary[key])
+        for key in boy_dictinary:
+            if key in line:
+                n_boys = max(n_boys, boy_dictinary[key])
+    n_people = n_girls + n_boys
+    if n_people >= 6:
+        n_people = 'many'
     return n_people, characters
 
 
@@ -230,15 +239,13 @@ def update_dst_dir_and_facedata(path, faces_data, cropped, args):
             with open(tags_file, 'r') as f:
                 lines = f.readlines()
             n_people, characters = get_npeople_and_characters_from_tags(lines)
-            if n_people >= 6:
-                n_people = 'many'
             faces_data['n_people'] = n_people
             faces_data['characters'] = characters
             suffix = 'person' if n_people == 1 else 'people'
             count = n_people
         else:
-            print('Warning: --use_tags specified but tags file '
-                  + f'{tags_file} not found; use detector results')
+            # print('Warning: --use_tags specified but tags file '
+            #       + f'{tags_file} not found; use detector results')
             count = faces_data['n_faces']
             suffix = 'face' if count == 1 else 'faces'
     else:
@@ -272,9 +279,6 @@ def resize_image(image, max_size):
 
 def process(args):
 
-    if args.dst_dir is None:
-        args.dst_dir = args.src_dir
-
     print("loading face detector.")
     detector = create_detector('yolov3')
 
@@ -287,11 +291,19 @@ def process(args):
         # print(path)
         basename = os.path.splitext(os.path.basename(path))[0]
 
-        image = cv2.imdecode(np.fromfile(path, np.uint8), cv2.IMREAD_UNCHANGED)
+        try:
+            image = cv2.imdecode(
+                np.fromfile(path, np.uint8), cv2.IMREAD_UNCHANGED)
+        except cv2.error as e:
+            print(f'Error reading the image {path}: {e}')
+            continue
+        if image is None:
+            print(f'Error reading the image {path}: get None')
+            continue
         if len(image.shape) == 2:
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         if image.shape[2] == 4:
-            print(f"image has alpha. ignore: {path}")
+            # print(f"image has alpha. ignore: {path}")
             image = image[:, :, :3].copy()
         image = resize_image(image, args.max_image_size)
 
@@ -414,5 +426,8 @@ if __name__ == '__main__':
         action="store_true",
         help="Render rect for face")
     args = parser.parse_args()
+
+    if args.dst_dir is None:
+        args.dst_dir = args.src_dir
 
     process(args)
