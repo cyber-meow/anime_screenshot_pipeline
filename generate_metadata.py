@@ -68,22 +68,14 @@ def json_to_description(file_path, args):
             # Use the order in face data that corresponds to face position
             characters = facedata['characters']
 
-    info_dict['count'] = count
+    if count.isnumeric():
+        info_dict['count'] = int(count)
+    else:
+        info_dict['count'] = count
     info_dict['characters'] = characters
 
     if mark_face_position:
-        face_position_descr = []
-        for rel_pos in facedata['rel_pos']:
-            left, top, right, bottom = rel_pos
-            left = int(left * 100)
-            right = int(right * 100)
-            top = int(top * 100)
-            bottom = int(bottom * 100)
-            face_v_position_info = f'fvp {top} {bottom}'
-            face_h_position_info = f' fhp {left} {right}'
-            face_position_descr.append(
-                face_v_position_info + face_h_position_info)
-        info_dict['facepos'] = face_position_descr
+        info_dict['facepos'] = facedata['rel_pos']
     return info_dict
 
 

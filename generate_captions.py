@@ -20,11 +20,50 @@ def get_files_recursively(folder_path):
     return image_path_list
 
 
+def parse_facepos(facepos_info):
+    descrs = []
+    for facepos in facepos_info:
+        # For legacy
+        if isinstance(facepos, str):
+            components = facepos.split(' ')
+            top = int(components[1])/100
+            bottom = int(components[2])/100
+            left = int(components[4])/100
+            right = int(components[5])/100
+        else:
+            left, top, right, bottom = facepos
+        cx = (left + right)/2
+        cy = (top + bottom)/2
+        if cx < 0.2:
+            posh = 'fhleft'
+        elif cx < 0.4:
+            posh = 'fhmleft'
+        elif cx < 0.6:
+            posh = 'fhmid'
+        elif cx < 0.8:
+            posh = 'fhmright'
+        else:
+            posh = 'fhright'
+        if cy < 0.2:
+            posv = 'fvtop'
+        elif cy < 0.4:
+            posv = 'fvmtop'
+        elif cy < 0.6:
+            posv = 'fvmid'
+        elif cy < 0.8:
+            posv = 'fvmbottom'
+        else:
+            posv = 'fvbottom'
+        descrs.append(f'{posh} {posv}')
+    return ' '.join(descrs)
+
+
 def dict_to_caption(info_dict, args):
     caption = ""
     if random.random() < args.use_count_prob and 'count' in info_dict:
         count = info_dict['count']
-        suffix = args.count_singular if count == 1 else args.count_plural
+        suffix = (args.count_singular if str(count) == '1'
+                  else args.count_plural)
         caption += f'{count}{suffix}'
     if (random.random() < args.use_character_prob
             and 'characters' in info_dict):
@@ -42,9 +81,9 @@ def dict_to_caption(info_dict, args):
         if len(artist) > 0:
             caption += ', style of ' + ' '.join(artist)
     if random.random() < args.use_facepos_prob and 'facepos' in info_dict:
-        facepos = info_dict['facepos']
-        if len(facepos) > 0:
-            caption += ', ' + ' '.join(facepos)
+        facepos_info = info_dict['facepos']
+        if len(facepos_info) > 0:
+            caption += ', ' + parse_facepos(facepos_info)
     if random.random() < args.use_tags_prob and 'tags' in info_dict:
         tags = info_dict['tags']
         if args.shuffle_tags:
