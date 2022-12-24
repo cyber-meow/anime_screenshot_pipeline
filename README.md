@@ -489,4 +489,4 @@ python utilities/rename_chracter.py --src_dir /path/to/src_dir --class_mapping_c
 - [The blog post about how to remove similar images with `fiftyone`](https://towardsdatascience.com/find-and-remove-duplicate-images-in-your-dataset-3e3ec818b978)
 - [Kohya S's training guide](https://note.com/kohya_ss/n/nbf7ce8d80f29#c9d7ee61-5779-4436-b4e6-9053741c46bb)
 
-**And of course, most importantly, all the artists, animators, and stuffs that have created so many impressive artworks and animes**, and also the engineers that built Stable Diffusion, the community that curated datasets, and all researchers that work towards the path of better AI technologies
+**And of course, most importantly, all the artists, animators, and staffs that have created so many impressive artworks and animes**, and also the engineers that built Stable Diffusion, the community that curated datasets, and all researchers that work towards the path of better AI technologies
