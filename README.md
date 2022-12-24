@@ -70,11 +70,12 @@ Enough for the introduction. Now let me explain in detail how this is achieved! 
 1. [Folder Rearrangement](#Folder-Arrangement)
 1. [Get Ready for Training](#Get-Ready-for-Training)
 1. [Using Fan Arts and Regularization Data](#Using-Fan-Arts-and-Regularization-Data)
+1. [Useful Links](#Useful-Links)
 
 
 ### TODO / Potential improvements
 
-- [ ] README.md
+- [x] README.md
 - [ ] Requirements.txt
 - [ ] Create script for removal of similar images as alternative of jupyter notebook
 - [ ] Separate folder creation, arrangement, and data augmentation from basic metadata generation
