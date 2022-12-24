@@ -469,7 +469,7 @@ python utilities/rename_chracter.py --src_dir /path/to/src_dir --class_mapping_c
 - [SD RESOURCE GOLDMINE](https://rentry.org/sdgoldmine)
 - [Huggingface Diffusers](https://github.com/huggingface/diffusers) (yeah of course this is beyond Stable Diffusion)
 
-### Some anime models to starts with
+### Some anime models to start with
 
 - [Waifu Diffusion](https://huggingface.co/hakurei/waifu-diffusion-v1-4)
 - [ACertainty](https://huggingface.co/JosephusCheung/ACertainty)
