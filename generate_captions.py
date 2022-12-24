@@ -90,8 +90,8 @@ def dict_to_caption(info_dict, args):
             random.shuffle(tags)
         tags = tags[:args.max_tag_number]
         if len(tags) > 0:
-            caption += ', ' + ', '.join(tags).replace('_', ' ')
-    return caption
+            caption += ', ' + ', '.join(tags)
+    return caption.replace('_', ' ')
 
 
 if __name__ == '__main__':
