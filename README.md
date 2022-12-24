@@ -51,11 +51,11 @@ As far as I known, the only trainer that is compatible with such organization no
 Therefore, I also provide the instruction to generate `multiply.txt` automatically at the end. As for other trainers that are available out there, you will need to modify the data loader yourself for data balance.
 
 On top of this, I also generate a json file for each image to store their metadata. That is, for some image `XXX.png`, there is also a corresponding `XXX.json` of for example the following content
-> {"count": "2", "characters": ["KuraueHinata", "AobaKokona"], "general": "anishot yamaS2EP04", "facepos": ["fvp 42 70 fhp 22 39", "fvp 15 37 fhp 62 75"], "tags": ["long_hair", "looking_at_viewer", "blush", "short_hair", "open_mouth", "multiple_girls", "skirt", "brown_hair", "shirt", "black_hair", "hair_ornament", "red_eyes", "2girls", "twintails", "purple_eyes", "braid", "pantyhose", "outdoors", "hairclip", "bag", "sunlight", "backpack", "braided_bangs"]}
+> {"count": "2", "characters": ["KuraueHinata", "AobaKokona"], "general": "anishot yamaS2EP04", "facepos": [[0.22447916666666667, 0.42592592592592593, 0.3927083333333333, 0.7083333333333334], [0.6296875, 0.15185185185185185, 0.7520833333333333, 0.3712962962962963]], "tags": ["long_hair", "looking_at_viewer", "blush", "short_hair", "open_mouth", "multiple_girls", "skirt", "brown_hair", "shirt", "black_hair", "hair_ornament", "red_eyes", "2girls", "twintails", "purple_eyes", "braid", "pantyhose", "outdoors", "hairclip", "bag", "sunlight", "backpack", "braided_bangs"]}
 
 Using the json file we can create the caption easily. This will be `XXX.txt` and it may contain some like
 
-> 2people, KuraueHinata AobaKokona, anishot yamaS2EP04, fvp 42 70 fhp 22 39 fvp 15 37 fhp 62 75, backpack, outdoors, hair_ornament, pantyhose, braid, short_hair, hairclip, skirt, shirt, long_hair, open_mouth, multiple_girls, brown_hair, bag, twintails
+> 2people, KuraueHinata AobaKokona, anishot yamaS2EP04, fhml fvmd fhmr fvmt, brown hair, multiple girls, long hair, sunlight, twintails, short hair, shirt, outdoors, 2girls, hairclip, looking at viewer, pantyhose, purple eyes, red eyes, black hair
 
 Enough for the introduction. Now let me explain in detail how this is achieved! The design of the workflow is quite modular so you may just need some of the following steps.
 
@@ -108,7 +108,7 @@ python extract_frames.py --src_dir /path/to/scr_dir \
 --prefix series_episode \
 --pattern "my_favorite_anime_*.mp4"
 ```
-With the above command, if `my_favorite_anime_04.mp4` exists in `/path/to/scr_dir`, the aforementioned `ffmppeg` command is run for it and the outputs are saved to `/path/to/dst_dir/EP04/` with names `series_episode_%d.png`. I recommend using the `series_episode` pattern without `_` in series and anime names so that latter on we can read this as metadata.
+With the above command, if `my_favorite_anime_04.mp4` exists in `/path/to/scr_dir`, the aforementioned `ffmppeg` command is run for it and the outputs are saved to `/path/to/dst_dir/EP04/` with names `series_episode_%d.png`.
 
 ## Similar Image Removal
 
@@ -149,7 +149,7 @@ pip install huggingface-hub
 
 Now that we have a preliminary dataset. The next step is to tag the images, again by neural networks. Note this step may be done before or after the face detection step (see pros and cons of each alternative at the end of the next section).
 
-Nowadays we are fortunate enough to have several taggers that work quite well for anime images as we can see from [toriato/stable-diffusion-webui-wd14-tagger](https://github.com/toriato/stable-diffusion-webui-wd14-tagger#mrsmilingwolfs-model-aka-waifu-diffusion-14-tagger). I simply follow [Kohya S's blog post](https://note.com/kohya_ss/n/nbf7ce8d80f29) (in Japanese) and tag all the images by [SmilingWolf/wd-v1-4-vit-tagger](https://huggingface.co/SmilingWolf/wd-v1-4-vit-tagger/tree/main).
+Nowadays we are fortunate enough to have several taggers that work quite well for images as we can see from [toriato/stable-diffusion-webui-wd14-tagger](https://github.com/toriato/stable-diffusion-webui-wd14-tagger#mrsmilingwolfs-model-aka-waifu-diffusion-14-tagger). I simply follow [Kohya S's blog post](https://note.com/kohya_ss/n/nbf7ce8d80f29) (in Japanese) and tag all the images by [SmilingWolf/wd-v1-4-vit-tagger](https://huggingface.co/SmilingWolf/wd-v1-4-vit-tagger/tree/main).
 
 I made the following two simple modifications to Kohya S's script `tag_images_by_wd14_tagger.py`
 1. The images of all the subdirectories are tagged
@@ -337,8 +337,89 @@ At this point, or even before this, you may want to manually inspect the subfold
 
 ## Metadata Generation
 
+**Generate the corresponding json file for each image to store metadata**
+
+We are mostly done. It just remains several steps before launching the training process! First, let us store all the relevant information contained in tags, the facedata.json file, and indicated by the folder structure in a json file `XXX.json`. In most cases it is sufficient to run
+
+```
+python generate_metadata.py --use_tags --general_description anishot \
+--count_description n_faces --src_dir /path/to/src_dir
+```
+
+From `XXX.png.tags` it reads the tag information, and characters if the tags has one line `character: ...`. From `XXX.facedata.json` it reads relative face position, number of some quantities store in `count` so you can always use `n_faces` as it is always defined in `XXX.facedata.json`. It also reads characters from the face data file if this cannot be found in the tag file. `unknown` and `ood` are subsequently removed from the character list. Therefore, you should get something like the following in the end.
+> {"count": "2", "characters": ["KuraueHinata", "AobaKokona"], "general": "anishot yamaS2EP04", "facepos": [[0.22447916666666667, 0.42592592592592593, 0.3927083333333333, 0.7083333333333334], [0.6296875, 0.15185185185185185, 0.7520833333333333, 0.3712962962962963]], "tags": ["long_hair", "looking_at_viewer", "blush", "short_hair", "open_mouth", "multiple_girls", "skirt", "brown_hair", "shirt", "black_hair", "hair_ornament", "red_eyes", "2girls", "twintails", "purple_eyes", "braid", "pantyhose", "outdoors", "hairclip", "bag", "sunlight", "backpack", "braided_bangs"]}
+
+The first part of `general` comes from the `general_description` argument. The second part comes from the file name as I specify `--retrieve_description_from_filename` when generating this.
+
+Other options include `--use_tags_for_count` that count number of people of the image using tags `[...]girls` and `[...]boys` and store this in `count` instead. If the images are arrange in some folders and you intend to use information contained in folder name, you can pass the argument `--use_character_folder` and/or `--use_count_folder`. For now, the character folder should be the immediate parent of the image. The count folder should be the at the grand-parent level of either the image or the character folder depending on whether `--use_character_folder` is used or not (.i.e `count_folder/something/character_folder/image` or `count_folder/something/image`).
+
+
 ## Folder Arrangement
 
+**Rearrange folder from `count/face_ratio/character` to `n_characters/character/face_ratio`**
+
+This is kind of an ad-hoc script that helps the creation of my own dataset. If you run `detect_faces.py` with `--create_count_folder` and `--create_face_ratio_folder` and run `classify_faces.py` with `--create_character_folder`, then the images are now found in `/path/to/dataset_dir/count_folder/face_ratio_folder/character_folder`. I actually used this structure with the arguments `--use_count_folder` and `--use_character_folder` to generate metadata after some manual inspection.
+
+However, when it comes to data balance. I prefer to prioritize balance between scenes with different numbers of characters and different character combinations. Moreover, if a character combination shows up too few times, we probably should avoid creating a specific folder for it. This is thus the script that does this job.
+```
+python rearrange_character_folder.py \
+--max_charactere_number 6 \
+--min_image_per_combinaition 10 \
+--character_list /path/to/chararcter_list \
+--src_dir /path/to/src_dir --dst_dir /path/to/dst_dir
+```
+With the above command, I put all the scenes with more than 6 characters into the folder `6+_characters` and scenes with no known characters into `others`. I then put all the character combination with fewer than 10 images into `[...]_characters/character_others`. In `character_list` I provide the list of characters separated by comma to make sure that my folder names are valid.
+
 ## Get Ready for Training
+
+**Generate captions and multiplies for training**
+
+At this point, we have an organized dataset and a json file for each image containing its metadata. If you are not going to train locally, you can already upload these data to cloud to be downloaded for further use. You will just need to run the two scripts `generate_captions.py`  and `gnerate_multiply.py` on your training instance (local, colab, runpod, vast.ai, lambdalab, paperspace, or whatever) before launching the trainer.
+
+### Caption generation
+
+This is pretty self-explanatory. It reads the json file and (randomly) generates some caption.
+```
+python generate_captions.py \
+--use_count_prob 1 --count_singular person --count_plural people \
+--use_character_prob 1 --use_general_prob 1 --use_facepos_prob 0.75 \
+--use_tags_prob 0.8 --max_tag_numbe 15 --shuffle_tags \
+--src_dir /path/to/datset_dir
+```
+
+The `use_[...]_prob` arguments specific the probability that a component will be put in the caption on condition that information about this component is stored in the metadata. I am still exploring how to make the model understand face position. For now I use five descriptions (each with two token) for horizontal positions and another five for vertical positions. 
+
+### Multiply generation
+
+Finally we need to generate the `multipy.txt` in each image folder to indicate the number of times that the images of this folder should be used in a repeat, with the goal to balance between different concepts during training. This is done by
+```
+python generate_multiply.py --weight_csv /path/to/weight_csv --max_multiply 250 --src_dir /path/to/datset_dir
+```
+
+To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with a provided csv file ([example](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/concept_weights_eg.csv)). It first searches for the for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
+
+For example, consider the folder structure
+```
+├── ./1_character
+│   ├── ./1_character/class1
+│   └── ./1_character/class2
+└── ./others
+    ├── ./others/class1
+    └── ./others/class3
+```
+and the csv
+```
+1_character, 3
+class1, 4
+*class2, 6
+```
+For simplicity (and this should be the good practice) assume images are only in the class folders. Then, the sampling probabilities of `./1_character/class1`, `./1_character/class2`, `./others/class1`, and `./others/class3` are respectively 0.75 * 0.4 = 0.3, 0.75 * 0.6 = 0.45, 0.25 * 0.8 = 0.2, and 0.25 * 0.2 = 0.05. Note that the same weight of `class1` can yield different sampling probability because of the other folders at the same level can have different weights (in this case `./1_character/class2` has weight 6 while `./others/class3` has weight 1).
+
+Now that we have the sampling probability of each image folder, we can compute the weight per image by diving it by the number of images in that image folder. Finally, we convert it into multiply by setting the minimum multiply to 1, and then round the results to integer. The argument `--max_multiply` sets a hard limit on the maximum multiply of each image folder above which we clip to this value. After running the command you can check the log file to see if you are satisfied with the generated multiplies.
+
+### Start fine-tuning
+
+The dataset is ready now. Check [EveryDream](https://github.com/victorchall/EveryDream-trainer) / [EveryDream2](https://github.com/victorchall/EveryDream2trainer#readme) for the fine-tuning of Stable Diffusion.
+
 
 ## Using Fan Arts and Regularization Data
