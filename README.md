@@ -212,7 +212,7 @@ The script can also arrange images into subfolder as following
 ```
 
 - The first level is created if `--create_count_folder` is specified. By default it creates folders `[...]_faces` using the number of detected faces. 
-The behavior however changes when `--use_character_folder` or `--use_tags` are specified. With `--use_character_folder` it creates `[...]_characters` folders using the number of characters in some folder name; with `--use_tags` it creates `[...]_people` folders with tag information thanks to the presence of `[...]girl(s)` and `[...]boy(s)`. See the [fan art section](#Using-Fan-Arts-and-Regularization-Data) for details.
+The behavior however changes when `--use_character_folder` or `--use_tags` are specified. With `--use_character_folder` it creates `[...]_characters` folders using the number of characters in some folder name; with `--use_tags` it creates `[...]_people` folders with tag information thanks to the presence of `[...]girl(s)` and `[...]boy(s)`.
 - The second level is created if `--create_face_ratio_folder` is specified. I am taking the height the ratio here. The range of percentage of each folder can be changed with `--face_ratio_folder_range` (default to 25).
 
 ### Other useful options
@@ -396,7 +396,7 @@ Finally we need to generate the `multipy.txt` in each image folder to indicate t
 python generate_multiply.py --weight_csv /path/to/weight_csv --max_multiply 250 --src_dir /path/to/datset_dir
 ```
 
-To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with a provided csv file ([example](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/concept_weights_eg.csv)). It first searches for the for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
+To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with a provided csv file ([example](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/csv_examplese/concept_weights_example.csv)). It first searches for the for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
 
 For example, consider the folder structure
 ```
@@ -423,3 +423,69 @@ The dataset is ready now. Check [EveryDream](https://github.com/victorchall/Ever
 
 
 ## Using Fan Arts and Regularization Data
+
+Beyond anime screenshot, you may also want to add fan art and arbitrary regularization images into your dataset. Thanks to the hierarchical structure, we don't need to worry too much about the data imbalance. An example folder structure wold be following.
+
+```
+├── ./anime_series_1
+│   ├── ./screenshots
+│   └── .fanart
+├── ./anime_series_2
+│   ├── ./screenshots
+│   └── .fanart
+└── ./regularization
+    ├── ./regularization_concept_1
+    ├── ./regularization_concept_2
+    └── ./regularization_concept_3
+```
+For each of the screenshots folder we then have the structure described previously.
+
+If you only have images for other things you want to add in the dataset, you can repeat the above process. Otherwise, if you use for example [
+imgbrd grabber](https://github.com/Bionus/imgbrd-grabber) to download training data, you can also have character, copyright, artist, and tag information about the images.
+Personally, I set suffix to `.tag` and text file content to
+```
+character: %character:spaces,separator=^, %
+copyright: %copyright:spaces,separator=^, %
+artist: %artist:spaces,separator=^, %
+general: %general:spaces,separator=^, %
+```
+This format is thus also understood by my scripts.
+
+Finally, if you download images and organize them into character directory. You can use `utilities/rename_characters.py` to rename the characters in folder names and in tag files of the above format with the help of a provided csv file ([example](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/csv_examplese/character_mapping_example.csv)).
+```
+python utilities/rename_chracter.py --src_dir /path/to/src_dir --class_mapping_csv /path/to/character_mapping.csv
+```
+
+## Useful Links
+
+### Stable Diffusion
+
+- [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+- [EveryDream1](https://github.com/victorchall/EveryDream-trainer) / [EveryDream2](https://github.com/victorchall/EveryDream2trainer#readme)
+- [Linaqruf/kohya-trainer](https://github.com/Linaqruf/kohya-trainer)
+- [TheLastBen's fast DreamBooth Colab](https://colab.research.google.com/github/TheLastBen/fast-stable-diffusion/blob/main/fast-DreamBooth.ipynb)
+- [Dreambooth Extension for Stable-Diffusion-WebUI](https://github.com/d8ahazard/sd_dreambooth_extension)
+- [SD RESOURCE GOLDMINE](https://rentry.org/sdgoldmine)
+- [Huggingface Diffusers](https://github.com/huggingface/diffusers) (yeah of course this is beyond Stable Diffusion)
+
+### Some anime models to starts with
+
+- [Waifu Diffusion](https://huggingface.co/hakurei/waifu-diffusion-v1-4)
+- [ACertainty](https://huggingface.co/JosephusCheung/ACertainty)
+- [Anything V-3.0](https://huggingface.co/Linaqruf/anything-v3.0)
+- [8528-diffusion](https://huggingface.co/852wa/8528-diffusion)
+- [EimisAnimeDiffusion](https://huggingface.co/eimiss/EimisAnimeDiffusion_1.0v)
+
+### Collection of papers about diffusion / score-based generative model
+- [heejkoo/Awesome-Diffusion-Models](https://github.com/heejkoo/Awesome-Diffusion-Models)
+- [What's the score?](https://scorebasedgenerativemodeling.github.io/)
+
+### Credits
+
+- [arkel23/animesion](https://github.com/arkel23/animesion)
+- [SmilingWolf/wd-v1-4-vit-tagger](https://huggingface.co/SmilingWolf/wd-v1-4-vit-tagger)
+- [hysts/anime-face-detector](https://github.com/hysts/anime-face-detector)
+- [The blog post about how to remove similar images with `fiftyone`](https://towardsdatascience.com/find-and-remove-duplicate-images-in-your-dataset-3e3ec818b978)
+- [Kohya S's training guide](https://note.com/kohya_ss/n/nbf7ce8d80f29#c9d7ee61-5779-4436-b4e6-9053741c46bb)
+
+**And of course, most importantly, all the artists, animators, and stuffs that have created so many impressive artworks and animes**, and also the engineers that built Stable Diffusion, the community that curated datasets, and all researchers that work towards the path of better AI technologies
