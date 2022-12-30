@@ -26,7 +26,7 @@ def rearrange(path, dst_dir, character_list=None,
         character_folder = '+'.join(characters)
         if len(characters) >= max_character_number:
             dst_dir = os.path.join(
-                dst_dir, f'{max_character_number}+_charcters',
+                dst_dir, f'{max_character_number}+_characters',
                 character_folder, face_ratio_folder)
         else:
             suffix = 'character' if len(characters) == 1 else 'characters'

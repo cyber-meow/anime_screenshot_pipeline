@@ -1,5 +1,4 @@
 import os
-import shutil
 import argparse
 import json
 
@@ -41,9 +40,14 @@ def get_characters(
         classid_classname_dic,
         image_size,
         device,
-        score_thres=0.6):
+        score_thres=0.5):
 
-    faces_bbox = facedata['abs_pos']
+    h, w = image.shape[:2]
+    faces_bbox = []
+    for rel_pos in facedata['rel_pos']:
+        left, top, right, bottom = rel_pos
+        faces_bbox.append(
+            [left*w, top*h, right*w, bottom*h])
     characters = []
 
     with torch.no_grad():
@@ -229,7 +233,6 @@ def main(args):
         try:
             with open(json_file, 'r') as f:
                 facedata = json.load(f)
-            os.remove(json_file)
         except FileNotFoundError:
             print(f'Warning: {json_file} not found')
             facedata = dict()
@@ -237,23 +240,11 @@ def main(args):
         characters = get_characters(
             image, facedata, model,
             classid_classname_dic, args.image_size, device)
-        dirname, filename = os.path.split(file_path)
         facedata['characters'] = characters
         characters = sorted(
             [item for item in characters if item not in ['unknown', 'ood']])
         if len(characters) == 0:
             characters = ['ood']
-        if args.create_character_folder:
-            character_folder = '+'.join(sorted(characters))
-            dst_dir = os.path.join(dirname, character_folder)
-            os.makedirs(dst_dir, exist_ok=True)
-            new_file_path = os.path.join(dst_dir, filename)
-            shutil.move(file_path, new_file_path)
-        else:
-            dst_dir = dirname
-
-        filename_noext = os.path.splitext(filename)[0]
-        json_file = os.path.join(dst_dir, f"{filename_noext}.facedata.json")
         with open(json_file, "w") as f:
             json.dump(facedata, f)
 
@@ -267,8 +258,6 @@ if __name__ == '__main__':
         '--dataset_path',
         help='Path for the dataset. For classifier id correspondance.')
     parser.add_argument('--checkpoint_path', type=str, default=None)
-    parser.add_argument('--create_character_folder', action='store_true',
-                        help='Whether to create character folder or not')
     parser.add_argument('--image_size',
                         default=128,
                         type=int,

@@ -69,7 +69,9 @@ def dict_to_caption(info_dict, args):
             and 'characters' in info_dict):
         characters = info_dict['characters']
         if len(characters) > 0:
-            caption += ', ' + ' '.join(characters)
+            if caption != "":
+                caption += ', '
+            caption += ' '.join(characters)
     if random.random() < args.use_copyright_prob and 'copyright' in info_dict:
         copyright = info_dict['copyright']
         if len(copyright) > 0:
@@ -85,13 +87,31 @@ def dict_to_caption(info_dict, args):
         if len(facepos_info) > 0:
             caption += ', ' + parse_facepos(facepos_info)
     if random.random() < args.use_tags_prob and 'tags' in info_dict:
-        tags = info_dict['tags']
-        if args.shuffle_tags:
-            random.shuffle(tags)
-        tags = tags[:args.max_tag_number]
+        tags = process_tags(info_dict['tags'], args)
         if len(tags) > 0:
             caption += ', ' + ', '.join(tags)
     return caption.replace('_', ' ')
+
+
+def process_tags(tags, args):
+    new_tags = []
+    general_tags = []
+    for tag in tags:
+        if 'boy' in tag or 'girl' in tag or 'solo' in tag:
+            general_tags.append(tag)
+        elif 'hair' in tag or 'ponytail' in tag or 'twintail' in tag:
+            if not args.drop_hair_tag:
+                new_tags.append(tag)
+        elif 'eye' in tag:
+            if not args.drop_eye_tag:
+                new_tags.append(tag)
+        else:
+            new_tags.append(tag)
+    if args.shuffle_tags:
+        random.shuffle(new_tags)
+    tags = general_tags + new_tags
+    tags = tags[:args.max_tag_number]
+    return tags
 
 
 if __name__ == '__main__':
@@ -109,6 +129,8 @@ if __name__ == '__main__':
     parser.add_argument('--use_tags_prob', type=float, default=1)
     parser.add_argument('--max_tag_number', type=int, default=15)
     parser.add_argument('--shuffle_tags', action='store_true')
+    parser.add_argument('--drop_hair_tag', action='store_true')
+    parser.add_argument('--drop_eye_tag', action='store_true')
     args = parser.parse_args()
 
     files = get_files_recursively(args.src_dir)

@@ -2,7 +2,6 @@ import argparse
 import cv2
 import os
 import json
-import shutil
 
 from tqdm import tqdm
 from pathlib import Path
@@ -26,22 +25,17 @@ def get_files_recursively(folder_path):
 
 def detect_faces(detector,
                  image,
-                 crop=True,
                  score_thres=0.75,
                  ratio_thres=2,
                  debug=False):
     preds = detector(image)  # bgr
     h, w = image.shape[:2]
-    images = [image]
-    faces_data_main = {
+    face_data = {
         'n_faces': 0,
-        'abs_pos': [],
         'rel_pos': [],
         'max_height_ratio': 0,
+        'cropped': False,
     }
-    faces_data_list = [faces_data_main]
-    faces_bbox = []
-    faces_bbox_to_crop = []
 
     for pred in preds:
         bb = pred['bbox']
@@ -52,244 +46,34 @@ def detect_faces(detector,
         if (fw / fh > ratio_thres or
                 fh / fw > ratio_thres or score < score_thres):
             continue
-        faces_bbox.append(bb[:4])
-        faces_data_main['n_faces'] = faces_data_main['n_faces'] + 1
+        face_data['n_faces'] = face_data['n_faces'] + 1
         left_rel = left / w
         top_rel = top / h
         right_rel = right / w
         bottom_rel = bottom / h
-        faces_data_main['abs_pos'].append([left, top, right, bottom])
-        faces_data_main['rel_pos'].append(
+        face_data['rel_pos'].append(
             [left_rel, top_rel, right_rel, bottom_rel])
-        if fh / h > faces_data_main['max_height_ratio']:
-            faces_data_main['max_height_ratio'] = fh / h
+        if fh / h > face_data['max_height_ratio']:
+            face_data['max_height_ratio'] = fh / h
         if debug:
             cv2.rectangle(image, (left, top), (right, bottom), (255, 0, 255),
                           4)
-        # Crop only if the face is not too big
-        if max(fw, fh) < min(w, h):
-            faces_bbox_to_crop.append(bb[:4])
 
-    # Crop some sqaures in case where the image is not square
-    # Potential improvement: we can crop the character with some
-    # script that can deteect the character position
-    if h != w and crop:
-        for face_bbox in faces_bbox_to_crop:
-            image_cropped, faces_data = crop_sqaure(image, face_bbox,
-                                                    faces_bbox)
-            images.append(image_cropped)
-            faces_data_list.append(faces_data)
-
-    return images, faces_data_list
+    return face_data
 
 
-# Crop images to contain a certain face
-def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
-    h, w = image.shape[:2]
-    left, top, right, bottom = [int(pos) for pos in face_bbox]
-    # crop to the largest sqaure
-    crop_size = min(h, w)
-    n_faces = 0
-    abs_pos = []
-    rel_pos = []
-    max_height_ratio = 0
-    # paysage
-    if h < w:
-        # Put face in the middle, horizontally
-        cx = int((left + right) / 2)
-        left_crop = max(cx - crop_size // 2, 0)
-        right_crop = left_crop + crop_size
-        if right_crop > w:
-            right_crop = w
-            left_crop = right_crop - crop_size
-        image = image[:, left_crop:right_crop]
-        # Find faces mostly (more than 60%) contained in the cropped image
-        for bb in faces_bbox:
-            left, top, right, bottom = [int(pos) for pos in bb[:4]]
-            cx = (left + right) / 2
-            fw = right - left
-            left_tight = cx - fw * 0.1
-            right_tight = cx + fw * 0.1
-            if left_tight >= left_crop and right_tight <= right_crop:
-                n_faces += 1
-                left = left - left_crop
-                right = right - left_crop
-                left_rel = left / crop_size
-                top_rel = top / crop_size
-                right_rel = right / crop_size
-                bottom_rel = bottom / crop_size
-                abs_pos.append([left, top, right, bottom])
-                rel_pos.append([left_rel, top_rel, right_rel, bottom_rel])
-                fh = bottom - top
-                if fh / crop_size > max_height_ratio:
-                    max_height_ratio = fh / h
-                if debug:
-                    cv2.rectangle(image, (left, top), (right, bottom),
-                                  (255, 0, 255), 4)
-    # portrait
-    if h > w:
-        # Try to put the head including hair at the top
-        fh = bottom - top
-        top_crop = max(top - int(fh // 2), 0)
-        bottom_crop = top_crop + crop_size
-        if bottom_crop > h:
-            bottom_crop = h
-            top_crop = bottom_crop - crop_size
-        image = image[top_crop:bottom_crop]
-        # Find faces mostly (more than 60%) contained in the cropped image
-        for bb in faces_bbox:
-            left, top, right, bottom = [int(pos) for pos in bb[:4]]
-            cy = (top + bottom) / 2
-            fh = bottom - top
-            top_tight = cy - fh * 0.1
-            bottom_tight = cy + fh * 0.1
-            if top_tight >= top_crop and bottom_tight <= bottom_crop:
-                n_faces += 1
-                top = top - top_crop
-                bottom = bottom - top_crop
-                left_rel = left / crop_size
-                top_rel = top / crop_size
-                right_rel = right / crop_size
-                bottom_rel = bottom / crop_size
-                abs_pos.append([left, top, right, bottom])
-                rel_pos.append([left_rel, top_rel, right_rel, bottom_rel])
-                fh = bottom - top
-                if fh / crop_size > max_height_ratio:
-                    max_height_ratio = fh / h
-                if debug:
-                    cv2.rectangle(image, (left, top), (right, bottom),
-                                  (255, 0, 255), 4)
-    if h == w:
-        raise Exception(
-            'This function should only be called for non-square images')
-    faces_data = {
-        'n_faces': n_faces,
-        'abs_pos': abs_pos,
-        'rel_pos': rel_pos,
-        'max_height_ratio': max_height_ratio,
-    }
-    return image, faces_data
-
-
-def get_npeople_and_characters_from_tags(tags_content):
-
-    girl_dictinary = {
-        '1girl': 1,
-        '6+girls': 6,
-    }
-    boy_dictinary = {
-        '1boy': 1,
-        '6+boys': 6,
-    }
-    for k in range(2, 6):
-        girl_dictinary[f'{k}girls'] = k
-        boy_dictinary[f'{k}boys'] = k
-
-    n_girls = 0
-    n_boys = 0
-    characters = ['unknown']
-    for line in tags_content:
-        if line.startswith('character:'):
-            characters = line.lstrip('character:').split(',')
-            characters = [character.strip() for character in characters]
-        for key in girl_dictinary:
-            if key in line:
-                n_girls = max(n_girls, girl_dictinary[key])
-        for key in boy_dictinary:
-            if key in line:
-                n_boys = max(n_boys, boy_dictinary[key])
-    n_people = n_girls + n_boys
-    if n_people >= 6:
-        n_people = 'many'
-    return n_people, characters
-
-
-def update_dst_dir_and_facedata(path, faces_data, cropped, args):
-    fh_ratio = min(int(faces_data['max_height_ratio'] * 100), 99)
-    folder_range = args.face_ratio_folder_range
-    lb = fh_ratio // folder_range * folder_range
-    ub = lb + folder_range
-    face_ratio_folder = f'face_height_ratio_{lb}-{ub}'
-    faces_data['characters'] = ['unknown']
-    faces_data['cropped'] = cropped
-    if args.use_class_folder:
-        class_folder = os.path.basename(os.path.dirname(path))
-        dst_dir = os.path.join(args.dst_dir, class_folder)
-    else:
-        dst_dir = args.dst_dir
-    if args.use_character_folder:
-        parent_folder, character_folder = os.path.split(os.path.dirname(path))
-        characters = character_folder.split('+')
-        if not cropped:
-            # faces_data['n_people'] = len(characters)
-            faces_data['characters'] = characters
-        # Notice that number of people in dictionary can be further modified by
-        # the tag file but as for the folder name we use the number of
-        # characters provide in folder names
-        n_characters = len(characters)
-        if args.create_count_folder:
-            suffix = 'character' if n_characters == 1 else 'characters'
-            dst_dir = os.path.join(dst_dir, f'{n_characters}_{suffix}')
-        if args.create_face_ratio_folder:
-            dst_dir = os.path.join(dst_dir, face_ratio_folder)
-        dst_dir = os.path.join(dst_dir, character_folder)
-    if args.use_tags and not cropped:
-        tags_file = path + '.tags'
-        if os.path.exists(tags_file):
-            with open(tags_file, 'r') as f:
-                lines = f.readlines()
-            n_people, characters = get_npeople_and_characters_from_tags(lines)
-            faces_data['n_people'] = n_people
-            faces_data['characters'] = characters
-            suffix = 'person' if n_people == 1 else 'people'
-            count = n_people
-        else:
-            # print('Warning: --use_tags specified but tags file '
-            #       + f'{tags_file} not found; use detector results')
-            count = faces_data['n_faces']
-            suffix = 'face' if count == 1 else 'faces'
-    else:
-        count = faces_data['n_faces']
-        suffix = 'face' if count == 1 else 'faces'
-    if not args.use_character_folder:
-        if args.create_count_folder:
-            n_faces = faces_data['n_faces']
-            suffix = 'face' if n_faces == 1 else 'faces'
-            dst_dir = os.path.join(dst_dir, f'{count}_{suffix}')
-        if args.create_face_ratio_folder:
-            dst_dir = os.path.join(dst_dir, face_ratio_folder)
-    return dst_dir, faces_data
-
-
-# Written by chatgpt
-def resize_image(image, max_size):
-
-    height, width = image.shape[:2]
-    if max_size > max(height, width):
-        return image
-
-    # Calculate the scaling factor
-    scaling_factor = max_size / max(height, width)
-
-    # Resize the image
-    return cv2.resize(
-        image, None, fx=scaling_factor, fy=scaling_factor,
-        interpolation=cv2.INTER_AREA)
-
-
-def process(args):
+def main(args):
 
     print("loading face detector.")
     detector = create_detector('yolov3')
 
     print("processing.")
-    output_extension = ".png"
 
     paths = get_files_recursively(args.src_dir)
 
     for path in tqdm(paths):
         # print(path)
-        basename = os.path.splitext(os.path.basename(path))[0]
+        filename_noext = os.path.splitext(path)[0]
 
         try:
             image = cv2.imdecode(
@@ -305,50 +89,17 @@ def process(args):
         if image.shape[2] == 4:
             # print(f"image has alpha. ignore: {path}")
             image = image[:, :, :3].copy()
-        image = resize_image(image, args.max_image_size)
 
         h, w = image.shape[:2]
 
-        images, faces_data_list = detect_faces(detector,
-                                               image,
-                                               crop=args.crop,
-                                               score_thres=args.score_thres,
-                                               ratio_thres=args.ratio_thres,
-                                               debug=args.debug)
-        tags_file = path + '.tags'
+        face_data = detect_faces(detector,
+                                 image,
+                                 score_thres=args.score_thres,
+                                 ratio_thres=args.ratio_thres,
+                                 debug=args.debug)
 
-        for idx, (image, facedata) in enumerate(
-                zip(images, faces_data_list)):
-            dst_dir, facedata = update_dst_dir_and_facedata(
-                path, facedata, idx != 0, args)
-            n_faces = facedata['n_faces']
-            if (not isinstance(n_faces, int)
-                    or (args.min_face_number <= n_faces
-                        and n_faces <= args.max_face_number)):
-                os.makedirs(dst_dir, exist_ok=True)
-                new_path_base = os.path.join(dst_dir, basename)
-                if idx > 0:
-                    new_path_base = f'{new_path_base}_{idx}'
-                if idx == 0 and (not args.debug) and args.move_file:
-                    ext = os.path.splitext(path)[1]
-                    new_path = f'{new_path_base}{ext}'
-                    if path != new_path:
-                        shutil.move(path, new_path)
-                else:
-                    _, buf = cv2.imencode(output_extension, image)
-                    new_path = f'{new_path_base}{output_extension}'
-                    with open(new_path, "wb") as f:
-                        buf.tofile(f)
-                with open(
-                        os.path.join(dst_dir,
-                                     f"{new_path_base}.facedata.json"),
-                        "w") as f:
-                    json.dump(facedata, f)
-                if idx == 0 and args.use_tags and os.path.exists(tags_file):
-                    if args.move_file and (not args.debug):
-                        shutil.move(tags_file, new_path + '.tags')
-                    else:
-                        shutil.copy(tags_file, new_path + '.tags')
+        with open(f"{filename_noext}.facedata.json", "w") as f:
+            json.dump(face_data, f)
 
 
 if __name__ == '__main__':
@@ -357,46 +108,6 @@ if __name__ == '__main__':
     parser.add_argument(
         "--src_dir", type=str,
         help="Directory to load images")
-    parser.add_argument(
-        "--dst_dir", type=str, default=None,
-        help="Directory to save images; use source directory if not providied")
-    parser.add_argument(
-        "--max_image_size", type=int, default=1024,
-        help="Maximum size of the resulting image")
-    parser.add_argument(
-        "--crop", action="store_true",
-        help="Crop square images around faces")
-    parser.add_argument(
-        "--move_file",
-        action="store_true",
-        help="Move the orignal image instead of saving a new one")
-    parser.add_argument(
-        "--use_tags",
-        action="store_true",
-        help="If provided, write character, number of people " +
-        "information using tags and arrange folder per se"
-    )
-    parser.add_argument(
-        "--use_character_folder",
-        action="store_true",
-        help="If true use character folder to determine number of people " +
-        "in the outer folder"
-    )
-    parser.add_argument(
-        "--use_class_folder",
-        action="store_true",
-        help="If true use class folder is kept in folder structure"
-    )
-    parser.add_argument(
-        "--min_face_number",
-        type=int,
-        default=1,
-        help="The minimum number of faces an image should contain")
-    parser.add_argument(
-        "--max_face_number",
-        type=int,
-        default=10,
-        help="The maximum number of faces an image can contain")
     parser.add_argument(
         "--score_thres",
         type=float,
@@ -408,26 +119,9 @@ if __name__ == '__main__':
         default=2,
         help="Ratio threshold below which is counted as face")
     parser.add_argument(
-        "--create_count_folder",
-        action="store_true",
-        help="Create subfolder for different count")
-    parser.add_argument(
-        "--create_face_ratio_folder",
-        action="store_true",
-        help="Creat subfolder for different face ratio range"
-    )
-    parser.add_argument(
-        "--face_ratio_folder_range",
-        type=int,
-        default=25,
-        help="The height ratio range of each separate folder")
-    parser.add_argument(
         "--debug",
         action="store_true",
         help="Render rect for face")
     args = parser.parse_args()
 
-    if args.dst_dir is None:
-        args.dst_dir = args.src_dir
-
-    process(args)
+    main(args)

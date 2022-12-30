@@ -20,7 +20,7 @@ def get_files_recursively(folder_path):
     return image_path_list
 
 
-def json_to_description(file_path, args):
+def retrieve_facedata_info(file_path, args):
 
     info_dict = {
         'general': args.general_description,
@@ -36,46 +36,23 @@ def json_to_description(file_path, args):
     json_file = filename_noext + '.facedata.json'
     with open(json_file, 'r') as f:
         facedata = json.load(f)
-        # characters = [char.replace('Korosaki', 'Kurosaki')
-        #               for char in facedata['characters']]
-        # facedata['characters'] = characters
 
-    # filepath is of the form n_faces/face_height_ratio/character/X.png
-    if args.use_character_folder:
-        parentdir, characters = os.path.split(os.path.dirname(file_path))
-        characters = list(set(characters.split('+')))
-    else:
-        parentdir = os.path.dirname(file_path)
+    if 'characters' in facedata:
         characters = facedata['characters']
-    for to_remove in ['unknown', 'ood']:
-        if to_remove in characters:
-            characters.remove(to_remove)
-
-    if args.use_count_folder:
-        count = os.path.basename(os.path.dirname(parentdir))
-        count = count.split('_')[0]
+        for to_remove in ['unknown', 'ood']:
+            characters = list(filter(
+                lambda item: item != to_remove, characters))
     else:
-        count = str(facedata[args.count_description])
+        characters = []
+    info_dict['characters'] = characters
 
-    mark_face_position = args.always_mark_facepos
-    if count.isnumeric() and int(count) == 1:
-        mark_face_position = True
-    else:
-        # If detection and classification is good
-        if (str(count) == str(facedata[args.count_description])
-                and sorted(characters) == sorted(facedata['characters'])):
-            mark_face_position = True
-            # Use the order in face data that corresponds to face position
-            characters = facedata['characters']
-
+    count = str(facedata[args.count_description])
     if count.isnumeric():
         info_dict['count'] = int(count)
     else:
         info_dict['count'] = count
-    info_dict['characters'] = characters
-
-    if mark_face_position:
-        info_dict['facepos'] = facedata['rel_pos']
+    info_dict['facepos'] = facedata['rel_pos']
+    info_dict['fh_ratio'] = facedata['max_height_ratio']
     return info_dict
 
 
@@ -108,7 +85,7 @@ def retrieve_tag_info(basic_info, tags_content, remove_before_girl):
         glist = ['1girl', '2girls', '3girls', '4girls', '5girls', '6+girls']
         for k, tag in enumerate(tags):
             if tag in glist:
-                del(tags[:k])
+                del (tags[:k])
                 break
 
     basic_info['tags'] = tags
@@ -149,15 +126,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_dir", type=str, help="directory to load images")
     parser.add_argument(
-        "--use_character_folder", action="store_true",
-        help="Use character folder structure for characters")
-    parser.add_argument(
-        "--use_count_folder", action="store_true",
-        help="Use count folder structure for number of people etc")
-    parser.add_argument(
-        "--always_mark_facepos", action="store_true",
-        help="Always save face position data if provided")
-    parser.add_argument(
         "--count_description", default='n_faces',
         help="The dictionary key to retrieve count information")
     parser.add_argument(
@@ -181,7 +149,7 @@ if __name__ == '__main__':
 
     file_paths = get_files_recursively(args.src_dir)
     for file_path in tqdm(file_paths):
-        basic_info = json_to_description(file_path, args)
+        basic_info = retrieve_facedata_info(file_path, args)
         if args.use_tags or args.use_tags_for_count:
             tags_file = file_path + '.tags'
             if os.path.exists(tags_file):
