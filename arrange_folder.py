@@ -25,15 +25,24 @@ def get_files_recursively(folder_path):
 
 def get_folder_name(folder_type, info_dict, args):
 
-    valid_folder_types = ['count', 'n_character', 'character', 'face_ratio']
+    valid_folder_types = [
+        'n_people',
+        'n_faces',
+        'fh_ratio',
+        'n_characters',
+        'character',
+    ]
     assert folder_type in valid_folder_types,\
         f'invalid folder type {folder_type}'
-    if folder_type == 'count':
-        count = info_dict['count']
-        suffix = (args.count_singular if str(count) == '1'
-                  else args.count_plural)
+    if folder_type == 'n_people':
+        count = info_dict['n_people']
+        suffix = 'person' if count == 1 else 'people'
         return f'{count}_{suffix}'
-    elif folder_type == 'n_character':
+    elif folder_type == 'n_faces':
+        count = info_dict['n_faces']
+        suffix = 'face' if count == 1 else 'faces'
+        return f'{count}_{suffix}'
+    elif folder_type == 'n_characters':
         characters = sorted(list(set(info_dict['characters'])))
         for to_remove in ['unknown', 'ood']:
             characters = list(filter(
@@ -51,7 +60,7 @@ def get_folder_name(folder_type, info_dict, args):
         if len(characters) == 0:
             return 'character_others'
         return '+'.join(sorted(characters))
-    elif folder_type == 'face_ratio':
+    elif folder_type == 'fh_ratio':
         fh_ratio = min(int(info_dict['fh_ratio'] * 100), 99)
         folder_range = args.face_ratio_folder_range
         lb = fh_ratio // folder_range * folder_range
@@ -104,7 +113,7 @@ def move_aux_files(old_path, new_path, move_file):
 
     original_aux_files = [
         old_path + '.tags',
-        old_path_noext + '.facedata.json',
+        old_path_noext + '.facedata.json',  # for legacy
         old_path_noext + '.json',
         old_path_noext + '.txt',
     ]
@@ -172,12 +181,18 @@ def main(args):
 
         path_noext = os.path.splitext(path)[0]
 
-        with open(f'{path_noext}.facedata.json', 'r') as f:
-            face_data = json.load(f)
-        n_faces = face_data['n_faces']
-        if (isinstance(n_faces, int)
-            and (n_faces < args.min_face_number
-                 or n_faces > args.max_face_number)):
+        json_file = f'{path_noext}.json'
+        try:
+            with open(json_file, 'r') as f:
+                metadata = json.load(f)
+        except FileNotFoundError:
+            print(f'Warning: {json_file} not found, skip')
+            continue
+        if 'n_faces' not in metadata:
+            print(f'Warning: `n_faces` not found in {json_file}')
+        n_faces = metadata['n_faces']
+        if (n_faces < args.min_face_number
+                or n_faces > args.max_face_number):
             continue
 
         dst_dir, character_folder = get_dst_dir(path, args)
@@ -257,7 +272,7 @@ if __name__ == '__main__':
         help='If true the directory structure of the source directory is kept'
     )
     parser.add_argument(
-        '--format', type=str, default='n_character/character/face_ratio',
+        '--format', type=str, default='n_characters/character/fh_ratio',
         help='Description of the output directory hierarchy'
     )
     parser.add_argument('--count_singular', type=str, default='person')

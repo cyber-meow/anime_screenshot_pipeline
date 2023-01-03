@@ -30,10 +30,10 @@ def detect_faces(detector,
                  debug=False):
     preds = detector(image)  # bgr
     h, w = image.shape[:2]
-    face_data = {
+    facedata = {
         'n_faces': 0,
-        'rel_pos': [],
-        'max_height_ratio': 0,
+        'facepos': [],
+        'fh_ratio': 0,
         'cropped': False,
     }
 
@@ -46,20 +46,20 @@ def detect_faces(detector,
         if (fw / fh > ratio_thres or
                 fh / fw > ratio_thres or score < score_thres):
             continue
-        face_data['n_faces'] = face_data['n_faces'] + 1
+        facedata['n_faces'] = facedata['n_faces'] + 1
         left_rel = left / w
         top_rel = top / h
         right_rel = right / w
         bottom_rel = bottom / h
-        face_data['rel_pos'].append(
+        facedata['facepos'].append(
             [left_rel, top_rel, right_rel, bottom_rel])
-        if fh / h > face_data['max_height_ratio']:
-            face_data['max_height_ratio'] = fh / h
+        if fh / h > facedata['fh_ratio']:
+            facedata['fh_ratio'] = fh / h
         if debug:
             cv2.rectangle(image, (left, top), (right, bottom), (255, 0, 255),
                           4)
 
-    return face_data
+    return facedata
 
 
 def main(args):
@@ -92,14 +92,21 @@ def main(args):
 
         h, w = image.shape[:2]
 
-        face_data = detect_faces(detector,
-                                 image,
-                                 score_thres=args.score_thres,
-                                 ratio_thres=args.ratio_thres,
-                                 debug=args.debug)
+        facedata = detect_faces(detector,
+                                image,
+                                score_thres=args.score_thres,
+                                ratio_thres=args.ratio_thres,
+                                debug=args.debug)
 
-        with open(f"{filename_noext}.facedata.json", "w") as f:
-            json.dump(face_data, f)
+        json_file = f"{filename_noext}.json"
+        if os.path.exists(json_file):
+            with open(json_file, "r") as f:
+                metadata = json.load(json_file) | facedata
+        else:
+            metadata = facedata
+
+        with open(json_file, "w") as f:
+            json.dump(metadata, f)
 
 
 if __name__ == '__main__':

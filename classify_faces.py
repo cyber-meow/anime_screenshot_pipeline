@@ -44,7 +44,7 @@ def get_characters(
 
     h, w = image.shape[:2]
     faces_bbox = []
-    for rel_pos in facedata['rel_pos']:
+    for rel_pos in facedata['facepos']:
         left, top, right, bottom = rel_pos
         faces_bbox.append(
             [left*w, top*h, right*w, bottom*h])
@@ -61,6 +61,8 @@ def get_characters(
                 class_name = classid_classname_dic.loc[
                     classid_classname_dic['class_id'] == idx,
                     'class_name'].item()
+                if class_name == 'ood':
+                    class_name = 'unknown'
             else:
                 class_name = 'unknown'
             characters.append(class_name)
@@ -229,39 +231,44 @@ def main(args):
                              cv2.IMREAD_UNCHANGED)
         filename_noext = os.path.splitext(file_path)[0]
 
-        json_file = filename_noext + '.facedata.json'
+        json_file = filename_noext + '.json'
         try:
             with open(json_file, 'r') as f:
-                facedata = json.load(f)
+                metadata = json.load(f)
         except FileNotFoundError:
             print(f'Warning: {json_file} not found')
-            facedata = dict()
+            metadata = dict()
+
+        if 'characters' in metadata and not args.overwrite:
+            print(f'Warning: attribute `characters` found in {json_file}, ' +
+                  'skip')
+            continue
 
         characters = get_characters(
-            image, facedata, model,
+            image, metadata, model,
             classid_classname_dic, args.image_size, device)
-        facedata['characters'] = characters
-        characters = sorted(
-            [item for item in characters if item not in ['unknown', 'ood']])
-        if len(characters) == 0:
-            characters = ['ood']
+        metadata['characters'] = characters
         with open(json_file, "w") as f:
-            json.dump(facedata, f)
+            json.dump(metadata, f)
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--src_dir',
-                        help='Source directory of images')
+    parser.add_argument('--src_dir', help='Source directory of images')
+    parser.add_argument('--checkpoint_path', type=str, default=None)
     parser.add_argument(
         '--dataset_path',
-        help='Path for the dataset. For classifier id correspondance.')
-    parser.add_argument('--checkpoint_path', type=str, default=None)
-    parser.add_argument('--image_size',
-                        default=128,
-                        type=int,
-                        help='Image (square) resolution size')
+        help='Path for the dataset; For classifier id correspondance')
+    parser.add_argument(
+        '--image_size',
+        default=128,
+        type=int,
+        help='Image (square) resolution size')
+    parser.add_argument(
+        '--overwrite',
+        action='store_true',
+        help='Overwrite existing character metadata')
     args = parser.parse_args()
 
     classid_classname_dic = pd.read_csv(os.path.join(args.dataset_path,

@@ -103,8 +103,8 @@ def crop_sqaure(image, face_bbox, faces_bbox, debug=False):
             'This function should only be called for non-square images')
     faces_data = {
         'n_faces': n_faces,
-        'rel_pos': rel_pos,
-        'max_height_ratio': max_height_ratio,
+        'facepos': rel_pos,
+        'fh_ratio': max_height_ratio,
         'cropped': True,
     }
     return image, faces_data
@@ -141,7 +141,7 @@ def main(args):
         if h == w:
             continue
         try:
-            with open(f'{path_noext}.facedata.json', 'r') as f:
+            with open(f'{path_noext}.json', 'r') as f:
                 facedata = json.load(f)
         except FileNotFoundError:
             print(f'facedata of {path} not found, skip')
@@ -150,7 +150,7 @@ def main(args):
             continue
 
         faces_bbox = []
-        for rel_pos in facedata['rel_pos']:
+        for rel_pos in facedata['facepos']:
             left, top, right, bottom = rel_pos
             faces_bbox.append(
                 [left*w, top*h, right*w, bottom*h])
@@ -168,7 +168,7 @@ def main(args):
             new_path = f'{new_path_noext}{output_extension}'
             with open(new_path, 'wb') as f:
                 buf.tofile(f)
-            with open(f'{new_path_noext}.facedata.json', 'w') as f:
+            with open(f'{new_path_noext}.json', 'w') as f:
                 json.dump(facedata_cropped, f)
 
 

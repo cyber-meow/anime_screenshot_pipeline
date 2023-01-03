@@ -26,14 +26,14 @@ def parse_facepos(facepos_info):
         # For legacy
         if isinstance(facepos, str):
             components = facepos.split(' ')
-            top = int(components[1])/100
-            bottom = int(components[2])/100
-            left = int(components[4])/100
-            right = int(components[5])/100
+            top = int(components[1]) / 100
+            bottom = int(components[2]) / 100
+            left = int(components[4]) / 100
+            right = int(components[5]) / 100
         else:
             left, top, right, bottom = facepos
-        cx = (left + right)/2
-        cy = (top + bottom)/2
+        cx = (left + right) / 2
+        cy = (top + bottom) / 2
         if cx < 0.2:
             posh = 'fhll'
         elif cx < 0.4:
@@ -60,14 +60,16 @@ def parse_facepos(facepos_info):
 
 def dict_to_caption(info_dict, args):
     caption = ""
-    if random.random() < args.use_count_prob and 'count' in info_dict:
-        count = info_dict['count']
-        suffix = (args.count_singular if str(count) == '1'
-                  else args.count_plural)
+    if random.random() < args.use_npeople_prob and 'n_people' in info_dict:
+        count = info_dict['n_people']
+        suffix = 'person' if count == 1 else 'people'
         caption += f'{count}{suffix}'
     if (random.random() < args.use_character_prob
             and 'characters' in info_dict):
         characters = info_dict['characters']
+        for to_remove in ['unknown', 'ood']:
+            characters = list(filter(
+                lambda item: item != to_remove, characters))
         if len(characters) > 0:
             if caption != "":
                 caption += ', '
@@ -118,9 +120,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_dir", type=str, help="directory to load images")
-    parser.add_argument('--use_count_prob', type=float, default=1)
-    parser.add_argument('--count_singular', type=str, default='person')
-    parser.add_argument('--count_plural', type=str, default='people')
+    parser.add_argument('--use_npeople_prob', type=float, default=1)
     parser.add_argument('--use_character_prob', type=float, default=1)
     parser.add_argument('--use_general_prob', type=float, default=1)
     parser.add_argument('--use_copyright_prob', type=float, default=0)
