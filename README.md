@@ -4,7 +4,11 @@ In this repository I detail the workflow that I have come out to semi-automatica
 This is a collection of many resources found on internet (credit to the orignal authors), and some python code written by myself and [ChatGPT](https://chat.openai.com/chat).
 I managed to get this done on my personal laptop with 3070 Ti gpu and Ubuntu 22.04 installed.
 
-Working through the workflow, you can get dataset organized in the following way at the end.
+For the sake of illustration, with the workflow I manage to get a model that can generate the following multi-character image (done with some inpainting improve quality).
+
+![00011-1152591343-6people, KuraueHinata, YukimuraAoi, anishot, KuraueHinata with beautiful purple eyes](https://user-images.githubusercontent.com/24396911/210467331-cc8a65d6-cc6c-41b5-bbf1-8620e56e1dd0.png)
+
+As for my dataset it is organized in the following way.
 
 **Level 1**
 ```
@@ -46,16 +50,16 @@ Working through the workflow, you can get dataset organized in the following way
 ...
 ```
 
-The dataset is organized in hierarchy in order to auto-balance between different concepts without too much need of worrying about the number of images in each class.
+The hierarchical organization aims to auto-balance between different concepts without too much need of worrying about the number of images in each class.
 As far as I known, the only trainer that is compatible with such organization now is [EveryDream](https://github.com/victorchall/EveryDream-trainer) (see also [EveryDream2](https://github.com/victorchall/EveryDream2trainer#readme)) with their support of using `multiply.txt`to indicate the number of times that the images of a subfolder should be used during training.
 Therefore, I also provide the instruction to generate `multiply.txt` automatically at the end. As for other trainers that are available out there, you will need to modify the data loader yourself for data balance.
 
 On top of this, I also generate a json file for each image to store their metadata. That is, for some image `XXX.png`, there is also a corresponding `XXX.json` of for example the following content
-> {"count": "2", "characters": ["KuraueHinata", "AobaKokona"], "general": "anishot yamaS2EP04", "facepos": [[0.22447916666666667, 0.42592592592592593, 0.3927083333333333, 0.7083333333333334], [0.6296875, 0.15185185185185185, 0.7520833333333333, 0.3712962962962963]], "tags": ["long_hair", "looking_at_viewer", "blush", "short_hair", "open_mouth", "multiple_girls", "skirt", "brown_hair", "shirt", "black_hair", "hair_ornament", "red_eyes", "2girls", "twintails", "purple_eyes", "braid", "pantyhose", "outdoors", "hairclip", "bag", "sunlight", "backpack", "braided_bangs"]}
+> {"n_faces": 2, "facepos": [[0.20572916666666666, 0.20462962962962963, 0.39791666666666664, 0.5564814814814815], [0.5395833333333333, 0.2657407407407407, 0.7791666666666667, 0.6833333333333333]], "fh_ratio": 0.41759259259259257, "cropped": false, "characters": ["KuraueHinata", "YukimuraAoi"], "general": "aniscreen", "tags": ["looking_at_viewer", "blush", "short_hair", "multiple_girls", "black_hair", "hair_ornament", "2girls", "holding", "twintails", "school_uniform", "green_eyes", "purple_eyes", "collarbone", "upper_body", "grey_hair", "food", "serafuku", "hairclip", "indoors", "holding_food", "onigiri"], "n_people": 2}
 
 Using the json file we can create the caption easily. This will be `XXX.txt` and it may contain some like
 
-> 2people, KuraueHinata AobaKokona, anishot yamaS2EP04, fhml fvmd fhmr fvmt, brown hair, multiple girls, long hair, sunlight, twintails, short hair, shirt, outdoors, 2girls, hairclip, looking at viewer, pantyhose, purple eyes, red eyes, black hair
+> KuraueHinata YukimuraAoi, aniscreen, multiple girls, 2girls, blush, serafuku, school uniform, looking at viewer, food, indoors, onigiri, holding, collarbone, upper body, holding food
 
 Enough for the introduction. Now let me explain in detail how this is achieved! The design of the workflow is quite modular so you may just need some of the following steps.
 
@@ -63,11 +67,11 @@ Enough for the introduction. Now let me explain in detail how this is achieved! 
 
 1. [Frame Extraction](#Frame-Extraction)
 1. [Similar Image Removal](#Similar-Image-Removal)
+1. [Face Detection and Cropping](#Face-Detection-and-Cropping)
 1. [Automatic Tagging](#Automatic-Tagging)
-1. [Face Detection](#Face-Detection)
 1. [Customized Classifier](#Character-Classification-with-Few-Shot-Learning)
-1. [Metadata Generation](#Metadata-Generation)
-1. [Folder Rearrangement](#Folder-Arrangement)
+1. [Folder Arrangement](#Folder-Arrangement)
+1. [Manual Inspection](#Manual-Inspection)
 1. [Get Ready for Training](#Get-Ready-for-Training)
 1. [Using Fan Arts and Regularization Data](#Using-Fan-Arts-and-Regularization-Data)
 1. [Useful Links](#Useful-Links)
@@ -78,9 +82,8 @@ Enough for the introduction. Now let me explain in detail how this is achieved! 
 - [x] README.md
 - [ ] Requirements.txt
 - [ ] Create script for removal of similar images as alternative of jupyter notebook
-- [ ] Separate folder creation, arrangement, and data augmentation from basic metadata generation
-- [ ] Keep source directory structure in destination directory
-- [ ] Allow more flexibility in using folder structure for final metadata generation
+- [x] Separate folder creation, arrangement, and data augmentation from basic metadata generation
+- [x] Keep source directory structure in destination directory
 - [ ] (Advanced) Combined with existing tagging/captioning tool for manual correction
 - [ ] (Advanced) Better few-shot learning model
 
@@ -138,34 +141,7 @@ Personally I find `thresh=0.985` works well for my example so I do not bother to
     - https://github.com/ChsHub/SSIM-PIL
 
 
-## Automatic Tagging
-
-**Tag your images with an off-the-shelf tagger**
-
-**Requirements (suggested done in a separate environment):**
-```
-pip install "tensorflow<2.11"
-pip install huggingface-hub
-```
-
-Now that we have a preliminary dataset. The next step is to tag the images, again by neural networks. Note this step may be done before or after the face detection step (see pros and cons of each alternative at the end of the next section).
-
-Nowadays we are fortunate enough to have several taggers that work quite well for images as we can see from [toriato/stable-diffusion-webui-wd14-tagger](https://github.com/toriato/stable-diffusion-webui-wd14-tagger#mrsmilingwolfs-model-aka-waifu-diffusion-14-tagger). I simply follow [Kohya S's blog post](https://note.com/kohya_ss/n/nbf7ce8d80f29) (in Japanese) and tag all the images by [SmilingWolf/wd-v1-4-vit-tagger](https://huggingface.co/SmilingWolf/wd-v1-4-vit-tagger/tree/main).
-
-I made the following two simple modifications to Kohya S's script `tag_images_by_wd14_tagger.py`
-1. The images of all the subdirectories are tagged
-2. To distinguish tags from the actual caption that will be used by the trainer, the associated file for `XXX.png` is `XXX.png.tags` and not `XXX.txt`.
-
-Example usage
-```
- python tag_images_by_wd14_tagger.py --batch_size 16 --caption_extension ".tags" /path/to/src_dir
-```
-Again, credit to Kohya S. for the script and credit to SmilingWolf for the model. Other existing alternative is [DeepDanbooru](https://github.com/KichangKim/DeepDanbooru/releases) which works in a similar way and BLIP caption trained on natural images. Kohya S. also provides corresponding scripts for these. However, I heard that BLIP caption is not very helpful for anime related models.
-
-
-## Face Detection
-
-**Add metadata containing face information and arrange files into subfolders accordingly if asked to do so**
+## Face Detection and Cropping
 
 **Requirements: [anime-face-detector](https://github.com/hysts/anime-face-detector)**
 ```
@@ -181,64 +157,62 @@ pip install -U numpy
 People have been working on anime face detection for years, and now there is an abundance of models out there that do this job right. I am using [hysts/anime-face-detector](https://github.com/hysts/anime-face-detector) since it seems to be more recent and this is also what Kohya S uses in [his blog post](https://note.com/kohya_ss/n/nad3bce9a3622) (in Japanese).
 The basic idea here is to detect faces and add their position information to a metadata file and potentially somehow describe them in captions later on. It can also be used for cropping.
 
-### Facedata
-
-The metadata for `XXX.png` is named `XXX.facedata.json`. Here is one example.
-> {"n_faces": 3, "abs_pos": [[175, 150, 286, 265], [512, 209, 607, 307], [688, 134, 757, 249]], "rel_pos": [[0.1708984375, 0.2604166666666667, 0.279296875, 0.4600694444444444], [0.5, 0.3628472222222222, 0.5927734375, 0.5329861111111112], [0.671875, 0.2326388888888889, 0.7392578125, 0.4322916666666667]], "max_height_ratio": 0.1996527777777778, "characters": ["unknown"], "cropped": false}
-
-The position format is ``[left, top, right, bottom]``. Since image size may vary I also compute relative positions. To generate metadata, you then run
+### Add face information to metadata
 
 ```
-python detect_faces.py --min_face_number 1 --max_face_number 10 --max_image_size 1024 \
---src_dir /path/to/src_dir --dst_dir /path/to/dst_dir
+python detect_faces.py --src_dir /path/to/src_dir
 ```
 
-With `min_face_number` and `max_face_number` it only saves images whose face number is within this range to `dst_dir`. Note that for now the images are saved directly to `dst_dir` without respecting the original folder structure. The saved images are also resized to ensure that both its width and height are smaller than `max_image_size`. If you want to keep the original image size set it to arbitrarily high value.
+After the above step, a file `XXX.json`is created and contains something like
+> {"n_faces": 2, "facepos": [[0.1, 0.4935185185185185, 0.2984375, 0.8481481481481481], [0.5494791666666666, 0.25555555555555554, 0.7578125, 0.6472222222222223]], "fh_ratio": 0.39166666666666666, "cropped": false}
 
-### Subfolder construction
+The position format is ``[left, top, right, bottom]``. Since image size may vary relative positions are stored here.
 
-The script can also arrange images into subfolder as following
+### Crop out the maximum square for each face
+
 ```
-├── ./1_faces
-│   ├── ./1_faces/face_height_ratio_0-25
-│   ├── ./1_faces/face_height_ratio_25-50
-│   ├── ./1_faces/face_height_ratio_50-75
-│   └── ./1_faces/face_height_ratio_75-100
-├── ./2_faces
-│   ├── ./2_faces/face_height_ratio_0-25
-│   ├── ./2_faces/face_height_ratio_25-50
-│   ├── ./2_faces/face_height_ratio_50-75
-│   └── ./2_faces/face_height_ratio_75-100
-...
+python crop_faces.py --src_dir /path/to/src_dir --min_face_number 2 
 ```
 
-- The first level is created if `--create_count_folder` is specified. By default it creates folders `[...]_faces` using the number of detected faces. 
-The behavior however changes when `--use_character_folder` or `--use_tags` are specified. With `--use_character_folder` it creates `[...]_characters` folders using the number of characters in some folder name; with `--use_tags` it creates `[...]_people` folders with tag information thanks to the presence of `[...]girl(s)` and `[...]boy(s)`.
-- The second level is created if `--create_face_ratio_folder` is specified. I am taking the height the ratio here. The range of percentage of each folder can be changed with `--face_ratio_folder_range` (default to 25).
-
-### Other useful options
-
-- Use `--crop` to save the largest possible square images that contain the faces (one for each detected face). The faces would be placed in the middle horizontally and near the top vertically. The corresponding `.facedata.json` are also created. If the face is too large it does a padding instead to make the resulting image square.
-
-- Use `--move_file` if you want to move file to destination directory instead of creating new ones. `max_image_size` will be ignored for the moved images, but this does not affect the saved cropped images. For example, if your folder only contains one level of images (i.e., no subfolders) you can generate the face metadata as following
-    
-    ```
-    python detect_faces.py --min_face_number 0 --max_face_number 100 --move_file \
-    --src_dir /path/to/image_folder
-    ```
-    No `dst_dir` is provided here so it defaults to `src_dir`.
+This is a simple script to crop the largest possible square images that contain the faces (one for each detected face). The faces would be placed in the middle horizontally and near the top vertically. The corresponding `.json` files are also created. 
+The argument `--min_face_number` indicates the minimum number of faces that should be contained in the original image for the cropping to take place.
+Note that the cropped images are store in the same folders as the input images and no cropping is performed for face that is too large.
 
 
-### Order between automatic tagging and face detection
 
-Although these two steps are pretty much independent, there are some pros and cons of using one before another
+## Automatic Tagging
 
-- **Face detection -> Tagging:**
-    I think this order is actually better because we can first remove images with no or too many faces. This is also the only viable direction when we do data augmentation with cropping/padding. However, the way that my code is written now makes the other way around also beneficial.
-- **Tagging -> Face detection:**
-    The problem is that `detect_faces.py` now does not only detect faces but also arrange folders in subfdirectories. In particular it can read tags and determine the number of people in each image and create folder accordingly. This is unfortunate.
-    
-In the future, I should separate folder creation and data augmentation from face detection. Then face detection and tagging can be run in any order and then we arrange folders according to the generated metadata.
+**Requirements (suggested done in a separate environment)**
+```
+pip install "tensorflow<2.11"
+pip install huggingface-hub
+```
+
+### Tag your images with an off-the-shelf tagger
+
+To supplement our captions we would like also to tag our images.
+Nowadays we are fortunate enough to have several taggers that work quite well for anime drawings as we can see from [toriato/stable-diffusion-webui-wd14-tagger](https://github.com/toriato/stable-diffusion-webui-wd14-tagger#mrsmilingwolfs-model-aka-waifu-diffusion-14-tagger). I simply follow [Kohya S's blog post](https://note.com/kohya_ss/n/nbf7ce8d80f29) (in Japanese) and tag all the images by [SmilingWolf/wd-v1-4-vit-tagger](https://huggingface.co/SmilingWolf/wd-v1-4-vit-tagger/tree/main).
+
+I made the following two simple modifications to Kohya S's script `tag_images_by_wd14_tagger.py`
+1. The images of all the subdirectories are tagged
+2. To distinguish tags from the actual caption that will be used by the trainer, the associated file for `XXX.png` is `XXX.png.tags` and not `XXX.txt`.
+
+Example usage
+```
+ python tag_images_by_wd14_tagger.py --batch_size 16 --caption_extension ".tags" /path/to/src_dir
+```
+Again, credit to Kohya S. for the script and credit to SmilingWolf for the model. Other existing alternative is [DeepDanbooru](https://github.com/KichangKim/DeepDanbooru/releases) which works in a similar way and BLIP caption trained on natural images. Kohya S. also provides corresponding scripts for these. However, I heard that BLIP caption is not very helpful for anime related models.
+
+### Save tag information into metadata
+
+```
+python augment_metadata.py --use_tags --general_description "aniscreen" --src_dir /path/to/src_dir
+```
+
+This command saves information contained in the tag file into the metadata file. It also computes the number of people in the image with the help of the `[...]girls` and `[...]boys` tags. The text provided by `--general_description` is stored in the attribute `general`.
+
+> {"n_faces": 2, "facepos": [[0.1, 0.4935185185185185, 0.2984375, 0.8481481481481481], [0.5494791666666666, 0.25555555555555554, 0.7578125, 0.6472222222222223]], "fh_ratio": 0.39166666666666666, "cropped": false, "general": "aniscreen", "tags": ["1girl", "long_hair", "blush", "short_hair", "brown_hair", "hair_ornament", "red_eyes", "1boy", "closed_eyes", "upper_body", "braid", "hairclip", ":o", "parody", "cardigan", "braided_bangs"], "n_people": 2}
+
 
 ## Character Classification with Few-Shot Learning
 
@@ -252,7 +226,7 @@ cd models
 pip install -e . 
 ```
 
-General taggers are great, face detectors are nice, however chances are that they do not know anything specific to the anime in question. Therefore, we need to train our own model here. Luckily, foundation models are few-shot learners, so this should not be very difficult _as long as we have a good pretrained model._ Fine tuning the tagger we just used may be a solution. For now, I focus on a even simpler task for good performance, that of **character classification**.
+General taggers and face detectors are great, but chances are that they do not know anything specific to the anime in question. Therefore, we need to train our own model here. Luckily, foundation models are few-shot learners, so this should not be very difficult _as long as we have a good pretrained model._ Fine tuning the tagger we just used may be a solution. For now, I focus on a even simpler task for good performance, that of **character classification**.
 
 ### Basics
 
@@ -315,80 +289,82 @@ python classify_faces.py --dataset_path /path/to/classification_data_dir \
 ```
 
 The path of the classification dataset should be provided in order to read the class id mapping csv.
-The images of `image_dir` should have the corresponding `.facedata.json` created in the [face detection section](#Face-Detection) (i.e. it should be the destination directory of `detect_faces.py`) as the face position data are used to create crops fed into the classifier.
-Moreover, we also write the character information into `XXX.facedata.json`. At this point, `XXX.facedata.json` looks like
-> {"n_faces": 3, "abs_pos": [[175, 150, 286, 265], [512, 209, 607, 307], [688, 134, 757, 249]], "rel_pos": [[0.1708984375, 0.2604166666666667, 0.279296875, 0.4600694444444444], [0.5, 0.3628472222222222, 0.5927734375, 0.5329861111111112], [0.671875, 0.2326388888888889, 0.7392578125, 0.4322916666666667]], "max_height_ratio": 0.1996527777777778, "characters": ["AobaKokona", "YukimuraAoi", "KuraueHinata"], "cropped": false}
-
-(in contrast to ``"characters": ["unknown"]`` we just saw before)
+The images of `image_dir` should have their corresponding metadata file containing face position information to be used to create crops fed into the classifier.
+We then write the character information into the metadata file if such information is not present (to overwrite in all the cases pass the argument `--overwrite`). At this point, `XXX.json` looks like
+> {"n_faces": 2, "facepos": [[0.1, 0.4935185185185185, 0.2984375, 0.8481481481481481], [0.5494791666666666, 0.25555555555555554, 0.7578125, 0.6472222222222223]], "fh_ratio": 0.39166666666666666, "cropped": false, "general": "aniscreen", "tags": ["1girl", "long_hair", "blush", "short_hair", "brown_hair", "hair_ornament", "red_eyes", "1boy", "closed_eyes", "upper_body", "braid", "hairclip", ":o", "parody", "cardigan", "braided_bangs"], "n_people": 2, "characters": ["AobaKokona", "SasaharaYuka"]}
 
 #### Character _unknown_ and _ood_
 
-How to deal with random person from anime that we are not interested in is a delicate question. You can see that I include a class _ood_ (out of distribution) above but this does not seem to be very effective. In consequence, I also set a confidence threshold 0.6 and if the probability of belonging to the classified class is lower than this threshold I set character to _unknown_. Both _unknown_ and _ood_ will be ignored in the following treatments.
-
-#### Character folder creation
-
-With the argument `--create_character_folder` the script also sorts the images and the `.metadata.json` files into their respective folder. Note it only add one level of folder to the current position of image, moving it from `/path/to/image_dir/2_faces/face_height_ratio_0-25/XXX.png` to `/path/to/image_dir/2_faces/face_height_ratio_0-25/chracter1+character2/XXX.png` .
-
-_When I am writing this I notice that it does not move the tag files if they are already generated. A bug to be fixed later._
-
-#### Manual inspection
-
-At this point, or even before this, you may want to manually inspect the subfolders to be sure that things are in the good place. For example if you want to tag characters even from behind this can not be achieved with the current workflow as we do not see faces from behind (well I suppose). You can move things between folders to put them in the right place, as in the next step we can also use folder structure to generate the final metadata.
-
-
-## Metadata Generation
-
-**Generate the corresponding json file for each image to store metadata**
-
-We are mostly done. It just remains several steps before launching the training process! First, let us store all the relevant information contained in tags, the facedata.json file, and indicated by the folder structure in a json file `XXX.json`. In most cases it is sufficient to run
-
-```
-python generate_metadata.py --use_tags --general_description anishot \
---count_description n_faces --src_dir /path/to/src_dir
-```
-
-From `XXX.png.tags` it reads the tag information, and characters if the tags has one line `character: ...`. From `XXX.facedata.json` it reads relative face position, number of some quantities store in `count` so you can always use `n_faces` as it is always defined in `XXX.facedata.json`. It also reads characters from the face data file if this cannot be found in the tag file. `unknown` and `ood` are subsequently removed from the character list. Therefore, you should get something like the following in the end.
-> {"count": "2", "characters": ["KuraueHinata", "AobaKokona"], "general": "anishot yamaS2EP04", "facepos": [[0.22447916666666667, 0.42592592592592593, 0.3927083333333333, 0.7083333333333334], [0.6296875, 0.15185185185185185, 0.7520833333333333, 0.3712962962962963]], "tags": ["long_hair", "looking_at_viewer", "blush", "short_hair", "open_mouth", "multiple_girls", "skirt", "brown_hair", "shirt", "black_hair", "hair_ornament", "red_eyes", "2girls", "twintails", "purple_eyes", "braid", "pantyhose", "outdoors", "hairclip", "bag", "sunlight", "backpack", "braided_bangs"]}
-
-The first part of `general` comes from the `general_description` argument. The second part comes from the file name as I specify `--retrieve_description_from_filename` when generating this.
-
-Other options include `--use_tags_for_count` that count number of people of the image using tags `[...]girls` and `[...]boys` and store this in `count` instead. If the images are arrange in some folders and you intend to use information contained in folder name, you can pass the argument `--use_character_folder` and/or `--use_count_folder`. For now, the character folder should be the immediate parent of the image. The count folder should be the at the grand-parent level of either the image or the character folder depending on whether `--use_character_folder` is used or not (.i.e `count_folder/something/character_folder/image` or `count_folder/something/image`).
-
+How to deal with random person from anime that we are not interested in is a delicate question. You can see that I include a class _ood_ (out of distribution) above but this does not seem to be very effective. In consequence, I also set a confidence threshold 0.5 and if the probability of belonging to the classified class is lower than this threshold I set character to _unknown_. Both _unknown_ and _ood_ will be ignored in the following treatments.
 
 ## Folder Arrangement
 
-**Rearrange folder from `count/face_ratio/character` to `n_characters/character/face_ratio`**
+### Only keep images with faces and resize
 
-This is kind of an ad-hoc script that helps the creation of my own dataset. If you run `detect_faces.py` with `--create_count_folder` and `--create_face_ratio_folder` and run `classify_faces.py` with `--create_character_folder`, then the images are now found in `/path/to/dataset_dir/count_folder/face_ratio_folder/character_folder`. I actually used this structure with the arguments `--use_count_folder` and `--use_character_folder` to generate metadata after some manual inspection.
-
-However, when it comes to data balance. I prefer to prioritize balance between scenes with different numbers of characters and different character combinations. Moreover, if a character combination shows up too few times, we probably should avoid creating a specific folder for it. This is thus the script that does this job.
 ```
-python rearrange_character_folder.py \
---max_charactere_number 6 \
---min_image_per_combinaition 10 \
---character_list /path/to/chararcter_list \
+python arrange_folder.py --min_face_number 1 --max_face_number 10 \
+--keep_src_structure --format '' --max_image_size 1024 \
 --src_dir /path/to/src_dir --dst_dir /path/to/dst_dir
 ```
-With the above command, I put all the scenes with more than 6 characters into the folder `6+_characters` and scenes with no known characters into `others`. I then put all the character combination with fewer than 10 images into `[...]_characters/character_others`. In `character_list` I provide the list of characters separated by comma to make sure that my folder names are valid.
+
+The above command can be run before cropping and tagging to eliminate images with no faces.
+
+- With `min_face_number` and `max_face_number` it only saves images whose face number is within this range to `dst_dir`.
+- The argument `--keep_src_structure`  makes sure the original folder structure is respected and new folders are only created on top of this structure.
+- Passing `--max_image_size` makes sure that saved images are resized so that both its width and height are smaller than the provided value. No resize is perform by default.
+- Use `--move_file` if you want to move file to destination directory instead of creating new ones. `max_image_size` is ignored in this case.
+    
+
+### Arrange the folder in hierarchy using metadata
+
+For data balance and manual inspection, we can arrange our images into different subfolders.
+
+```
+python arrange_folder.py \
+--move_file --format 'n_characters/character/fh_ratio' \
+--max_character_number 6 --min_image_per_combination 10 \
+--src_dir /path/to/src_dir --dst_dir /path/to/dst_dir
+```
+
+Using the above command we obtain a folder structure as shown at the beginning. The folder structure itself is specified by the argument `--format`. Different levels of folders are separated by `/`. Accepted folder types are `n_characters`, `n_faces`, `n_people`, `character`, and `fh_ratio`.
+
+- `n_characters`: This creates folders using the number of characters. Passing argument `--max_character_number 6` puts all the scenes with more than 6 characters into the folder `6+_characters`.
+- `character`: This creates folders with sorted character names split by `+`. To avoid creating a specific folder for character combination that shows up too few times, we pass the argument `--min_image_per_combination` so that images of all the character combinations with fewer than a certain number of images are saved in `.../character_others`.
+- `fh_ratio`: This creates folders according to the maximum face height ratio. The range of percentage of each folder can be changed with `--face_ratio_folder_range` (default to 25).
+
+
+
+
+## Manual Inspection
+
+At any point of the workflow we can do manual inspection on the generated metadata. For example if you want to tag characters even from behind this can not be achieved with the current workflow as we do not see faces from behind (well I suppose). Using existing guis to modify the metadata files in batch should be a good option.
+Otherwise you can simply move things between folders to put them in the right place, and run for example the following script
+
+```
+python correct_metadata_from_foldername.py --format '*/character/*' \
+--character_list /path/to/character_list --src_dir /path/to/dataset_dir
+```
+
+For now it mainly supports correcting character information with folder structure. You should put `*` for any intermediate folder. As it reads from the right putting `character/*` would work as well.
+In `character_list` we can provide the list of characters separated by comma to make sure that the folder names are valid.
+
 
 ## Get Ready for Training
 
-**Generate captions and multiplies for training**
-
-At this point, we have an organized dataset and a json file for each image containing its metadata. If you are not going to train locally, you can already upload these data to cloud to be downloaded for further use. You will just need to run the two scripts `generate_captions.py`  and `gnerate_multiply.py` on your training instance (local, colab, runpod, vast.ai, lambdalab, paperspace, or whatever) before launching the trainer.
+We have now an organized dataset and a json file for each image containing its metadata. If you are not going to train locally, you can already upload these data to cloud to be downloaded for further use. You will just need to run the two scripts `generate_captions.py`  and `gnerate_multiply.py` on your training instance (local, colab, runpod, vast.ai, lambdalab, paperspace, or whatever) before launching the trainer.
 
 ### Caption generation
 
 This is pretty self-explanatory. It reads the json file and (randomly) generates some caption.
 ```
 python generate_captions.py \
---use_count_prob 1 --count_singular person --count_plural people \
---use_character_prob 1 --use_general_prob 1 --use_facepos_prob 0.75 \
---use_tags_prob 0.8 --max_tag_numbe 15 --shuffle_tags \
+--use_npeople_prob 1 --use_character_prob 1 --use_general_prob 1 \
+--use_facepos_prob 0 --use_tags_prob 0.8 --max_tag_numbe 15 --shuffle_tags \
 --src_dir /path/to/datset_dir
 ```
 
-The `use_[...]_prob` arguments specific the probability that a component will be put in the caption on condition that information about this component is stored in the metadata. I am still exploring how to make the model understand face position. For now I use five descriptions (each with two token) for horizontal positions and another five for vertical positions. 
+The `use_[...]_prob` arguments specific the probability that a component will be put in the caption on condition that information about this component is stored in the metadata. For face position I used five descriptions (each with two token) for horizontal positions and another five for vertical positions but the model failed to learn its meaning.
+We can also pass the arguments `--drop_hair_tag` and/or `--drop_eye_tag` to drop the tags about hair and eyes. This makes sense if we want to teach the model about the concept of specific characters with fixed hair style and eye color.
 
 ### Multiply generation
 
@@ -425,7 +401,7 @@ The dataset is ready now. Check [EveryDream](https://github.com/victorchall/Ever
 
 ## Using Fan Arts and Regularization Data
 
-Beyond anime screenshot, you may also want to add fan art and arbitrary regularization images into your dataset. Thanks to the hierarchical structure, we don't need to worry too much about the data imbalance. An example folder structure wold be following.
+Beyond anime screenshot, you may also want to add fan art and arbitrary regularization images into your dataset. Thanks to the hierarchical structure, we don't need to worry too much about the data imbalance. An example folder structure would be following.
 
 ```
 ├── ./anime_series_1
@@ -454,7 +430,7 @@ This format is thus also understood by my scripts.
 
 Finally, if you download images and organize them into character directory. You can use `utilities/rename_characters.py` to rename the characters in folder names and in tag files of the above format with the help of a provided csv file ([example](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/csv_examplese/character_mapping_example.csv)).
 ```
-python utilities/rename_chracter.py --src_dir /path/to/src_dir --class_mapping_csv /path/to/character_mapping.csv
+python utilities/rename_character.py --src_dir /path/to/src_dir --class_mapping_csv /path/to/character_mapping.csv
 ```
 
 ## Useful Links
