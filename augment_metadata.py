@@ -20,63 +20,22 @@ def get_files_recursively(folder_path):
     return image_path_list
 
 
-def json_to_description(file_path, args):
-
-    info_dict = {
-        'general': args.general_description,
-    }
-
-    if args.retrieve_description_from_filename:
-        to_prepend = os.path.basename(file_path).split('_')[:2]
-        info_dict['general'] += ' ' + ''.join(to_prepend)
-    if args.no_face:
-        return info_dict
+def get_basic_metadata(file_path, args):
 
     filename_noext = os.path.splitext(file_path)[0]
-    json_file = filename_noext + '.facedata.json'
-    with open(json_file, 'r') as f:
-        facedata = json.load(f)
-        # characters = [char.replace('Korosaki', 'Kurosaki')
-        #               for char in facedata['characters']]
-        # facedata['characters'] = characters
-
-    # filepath is of the form n_faces/face_height_ratio/character/X.png
-    if args.use_character_folder:
-        parentdir, characters = os.path.split(os.path.dirname(file_path))
-        characters = list(set(characters.split('+')))
+    json_file = filename_noext + '.json'
+    if os.path.exists(json_file):
+        with open(json_file, 'r') as f:
+            metadata = json.load(f)
     else:
-        parentdir = os.path.dirname(file_path)
-        characters = facedata['characters']
-    for to_remove in ['unknown', 'ood']:
-        if to_remove in characters:
-            characters.remove(to_remove)
+        metadata = dict()
 
-    if args.use_count_folder:
-        count = os.path.basename(os.path.dirname(parentdir))
-        count = count.split('_')[0]
-    else:
-        count = str(facedata[args.count_description])
+    metadata['general'] = args.general_description
+    if args.retrieve_description_from_filename:
+        to_prepend = os.path.basename(file_path).split('_')[:2]
+        metadata['general'] += ' ' + ''.join(to_prepend)
 
-    mark_face_position = args.always_mark_facepos
-    if count.isnumeric() and int(count) == 1:
-        mark_face_position = True
-    else:
-        # If detection and classification is good
-        if (str(count) == str(facedata[args.count_description])
-                and sorted(characters) == sorted(facedata['characters'])):
-            mark_face_position = True
-            # Use the order in face data that corresponds to face position
-            characters = facedata['characters']
-
-    if count.isnumeric():
-        info_dict['count'] = int(count)
-    else:
-        info_dict['count'] = count
-    info_dict['characters'] = characters
-
-    if mark_face_position:
-        info_dict['facepos'] = facedata['rel_pos']
-    return info_dict
+    return metadata
 
 
 def to_list(line):
@@ -108,7 +67,7 @@ def retrieve_tag_info(basic_info, tags_content, remove_before_girl):
         glist = ['1girl', '2girls', '3girls', '4girls', '5girls', '6+girls']
         for k, tag in enumerate(tags):
             if tag in glist:
-                del(tags[:k])
+                del (tags[:k])
                 break
 
     basic_info['tags'] = tags
@@ -149,18 +108,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_dir", type=str, help="directory to load images")
     parser.add_argument(
-        "--use_character_folder", action="store_true",
-        help="Use character folder structure for characters")
-    parser.add_argument(
-        "--use_count_folder", action="store_true",
-        help="Use count folder structure for number of people etc")
-    parser.add_argument(
-        "--always_mark_facepos", action="store_true",
-        help="Always save face position data if provided")
-    parser.add_argument(
-        "--count_description", default='n_faces',
-        help="The dictionary key to retrieve count information")
-    parser.add_argument(
         "--general_description", default='anishot',
         help="General description of the files")
     parser.add_argument(
@@ -169,33 +116,25 @@ if __name__ == '__main__':
         "--use_tags", action='store_true',
         help="Use tag files to retrieve information")
     parser.add_argument(
-        "--use_tags_for_count", action='store_true',
-        help="Use tag files to count people and add as count")
-    parser.add_argument(
         "--remove_before_girl", action='store_true',
         help="Remove the tags that appear before [k]girl(s)")
-    parser.add_argument(
-        "--no_face", action='store_true',
-        help="Ignore face data for data with no face")
     args = parser.parse_args()
 
     file_paths = get_files_recursively(args.src_dir)
     for file_path in tqdm(file_paths):
-        basic_info = json_to_description(file_path, args)
-        if args.use_tags or args.use_tags_for_count:
+        metadata = get_basic_metadata(file_path, args)
+        if args.use_tags:
             tags_file = file_path + '.tags'
             if os.path.exists(tags_file):
                 with open(tags_file, 'r') as f:
                     lines = f.readlines()
-                if args.use_tags:
-                    basic_info = retrieve_tag_info(
-                        basic_info, lines, args.remove_before_girl)
-                if args.use_tags_for_count:
-                    n_people = get_npeople_from_tags(lines)
-                    basic_info['count'] = n_people
+                metadata = retrieve_tag_info(
+                    metadata, lines, args.remove_before_girl)
+                n_people = get_npeople_from_tags(lines)
+                metadata['n_people'] = n_people
             else:
                 print(f'Warning: tags file {tags_file} not found')
         filename_noext = os.path.splitext(file_path)[0]
         savefile = filename_noext + '.json'
         with open(savefile, 'w') as f:
-            json.dump(basic_info, f)
+            json.dump(metadata, f)

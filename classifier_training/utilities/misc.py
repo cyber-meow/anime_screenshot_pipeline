@@ -15,7 +15,7 @@ def ret_args():
     parser.add_argument('--dataset_path', help='Path for the dataset.')
     parser.add_argument('--dataset_name',
                         help='Name of the dataset.',
-                        default='yama')
+                        default='anime')
     parser.add_argument('--model_name',
                         choices=[
                             'shallow', 'resnet18', 'resnet50', 'resnet152',
