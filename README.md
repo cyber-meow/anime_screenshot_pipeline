@@ -4,8 +4,6 @@ In this repository I detail the workflow that I have come out to semi-automatica
 This is a collection of many resources found on internet (credit to the orignal authors), and some python code written by myself and [ChatGPT](https://chat.openai.com/chat).
 I managed to get this done on my personal laptop with 3070 Ti gpu and Ubuntu 22.04 installed.
 
-![00011-1152591343-6people, KuraueHinata, YukimuraAoi, anishot, KuraueHinata with beautiful purple eyes](https://user-images.githubusercontent.com/24396911/210467331-cc8a65d6-cc6c-41b5-bbf1-8620e56e1dd0.png)
-
 As for my dataset it is organized in the following way.
 
 **Level 1**
