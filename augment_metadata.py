@@ -30,10 +30,13 @@ def get_basic_metadata(file_path, args):
     else:
         metadata = dict()
 
-    metadata['general'] = args.general_description
-    if args.retrieve_description_from_filename:
-        to_prepend = os.path.basename(file_path).split('_')[:2]
-        metadata['general'] += ' ' + ''.join(to_prepend)
+    if args.general_description is not None:
+        metadata['general'] = args.general_description
+    if args.retrieve_description_from_folder:
+        if 'general' not in metadata:
+            metadata['generate_captions.py'] = ''
+        to_prepend = os.path.basename(os.path.dirname(file_path))
+        metadata['general'] += ' ' + ''.join(to_prepend.replace('_', ' '))
 
     return metadata
 
@@ -53,13 +56,17 @@ def retrieve_tag_info(basic_info, tags_content, remove_before_girl):
                 if to_remove in characters:
                     characters.remove(to_remove)
             basic_info['characters'] = characters
-        if line.startswith('copyright: '):
+        elif line.startswith('copyright: '):
             basic_info['copyright'] = to_list(line.lstrip('copyright:'))
-        if line.startswith('artist: '):
+        elif line.startswith('artist: '):
             basic_info['artist'] = to_list(line.lstrip('artist:').strip())
         elif line.startswith('general: '):
             tags = to_list(line.lstrip('general: '))
+        elif line.startswith('rating: '):
+            basic_info['rating'] = line.lstrip('rating:').strip()
         # This is the case when there is a single line of tags
+        elif line.startswith('score: '):
+            continue
         else:
             tags = to_list(line.strip())
 
@@ -108,10 +115,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_dir", type=str, help="directory to load images")
     parser.add_argument(
-        "--general_description", default='anishot',
+        "--general_description", default=None,
         help="General description of the files")
     parser.add_argument(
-        "--retrieve_description_from_filename", action='store_true')
+        "--retrieve_description_from_folder", action='store_true')
     parser.add_argument(
         "--use_tags", action='store_true',
         help="Use tag files to retrieve information")

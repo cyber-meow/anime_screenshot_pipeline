@@ -76,22 +76,41 @@ def dict_to_caption(info_dict, args):
             caption += ' '.join(characters)
     if random.random() < args.use_copyright_prob and 'copyright' in info_dict:
         copyright = info_dict['copyright']
+        copyright = list(filter(
+            lambda item: item != 'unknown', copyright))
         if len(copyright) > 0:
-            caption += ', from ' + ' '.join(copyright)
+            if caption != "":
+                caption += ', '
+            caption += 'from ' + ' '.join(copyright)
     if random.random() < args.use_general_prob and 'general' in info_dict:
-        caption += ', ' + info_dict['general']
+        if caption != "":
+            caption += ', '
+        caption += info_dict['general']
     if random.random() < args.use_artist_prob and 'artist' in info_dict:
         artist = info_dict['artist']
+        artist = list(filter(
+                lambda item: item != 'anonymous', artist))
         if len(artist) > 0:
-            caption += ', style of ' + ' '.join(artist)
+            if caption != "":
+                caption += ', '
+            caption += 'by ' + ' '.join(artist)
+    if random.random() < args.use_rating_prob and 'rating' in info_dict:
+        if info_dict['rating'] == 'explicit':
+            if caption != "":
+                caption += ', '
+            caption += 'explicit'
     if random.random() < args.use_facepos_prob and 'facepos' in info_dict:
         facepos_info = info_dict['facepos']
         if len(facepos_info) > 0:
-            caption += ', ' + parse_facepos(facepos_info)
+            if caption != "":
+                caption += ', '
+            caption += parse_facepos(facepos_info)
     if random.random() < args.use_tags_prob and 'tags' in info_dict:
         tags = process_tags(info_dict['tags'], args)
         if len(tags) > 0:
-            caption += ', ' + ', '.join(tags)
+            if caption != "":
+                caption += ', '
+            caption += ', '.join(tags)
     return caption.replace('_', ' ')
 
 
@@ -125,6 +144,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_general_prob', type=float, default=1)
     parser.add_argument('--use_copyright_prob', type=float, default=0)
     parser.add_argument('--use_artist_prob', type=float, default=1)
+    parser.add_argument('--use_rating_prob', type=float, default=1)
     parser.add_argument('--use_facepos_prob', type=float, default=1)
     parser.add_argument('--use_tags_prob', type=float, default=1)
     parser.add_argument('--max_tag_number', type=int, default=15)
