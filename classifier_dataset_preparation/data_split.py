@@ -7,7 +7,7 @@ def data_split(data_dic_path, split):
     # splits data into training and testing
 
     data_folder = os.path.dirname(os.path.realpath(data_dic_path))
-    df = pd.read_csv(data_dic_path, sep=',', names=['class_id', 'dir'])
+    df = pd.read_csv(data_dic_path, sep=',')
     print('Original df: ', len(df))
 
     samples_per_class_df = df.groupby('class_id', as_index=True).count()
@@ -15,7 +15,7 @@ def data_split(data_dic_path, split):
     df_list_train = []
     df_list_test = []
     for class_id, total_samples_class in enumerate(
-            samples_per_class_df['dir']):
+            samples_per_class_df['file_rel_path']):
         train_samples_class = int(total_samples_class * split[0])
         test_samples_class = total_samples_class - train_samples_class
         assert (train_samples_class +
@@ -38,10 +38,10 @@ def data_split(data_dic_path, split):
     print(df_test.shape)
 
     df_train_name = os.path.join(data_folder, 'train.csv')
-    df_train.to_csv(df_train_name, sep=',', header=False, index=False)
+    df_train.to_csv(df_train_name, sep=',', header=True, index=False)
 
     df_test_name = os.path.join(data_folder, 'test.csv')
-    df_test.to_csv(df_test_name, sep=',', header=False, index=False)
+    df_test.to_csv(df_test_name, sep=',', header=True, index=False)
     print('Finished saving train and test split dictionaries.')
 
 

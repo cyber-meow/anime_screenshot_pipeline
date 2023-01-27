@@ -82,33 +82,17 @@ class CustomDataset(data.Dataset):
                     'bert-base-uncased')
             elif self.tokenizer_method == 'tag':
                 self.tokenizer = CustomTokenizer(
-                    vocab_path=os.path.join(args.dataset_path, 'labels',
-                                            'vocab.pkl'),
+                    vocab_path=os.path.join(args.dataset_path, 'vocab.pkl'),
                     max_text_seq_len=args.max_text_seq_len)
-            self.label_csv = self.set_dir.replace('.csv', '_tags.csv')
             self.df = pd.read_csv(self.label_csv)
         else:
-            self.df = pd.read_csv(self.label_csv,
-                                  sep=',',
-                                  header=None,
-                                  names=['class_id', 'dir'],
-                                  dtype={
-                                      'class_id': 'UInt16',
-                                      'dir': 'object'
-                                  })
+            self.df = pd.read_csv(self.label_csv)
 
         self.targets = self.df['class_id'].to_numpy()
-        self.data = self.df['dir'].to_numpy()
+        self.data = self.df['file_rel_path'].to_numpy()
 
         self.classes = pd.read_csv(os.path.join(self.root,
-                                                'classid_classname.csv'),
-                                   sep=',',
-                                   header=None,
-                                   names=['class_id', 'class_name'],
-                                   dtype={
-                                       'class_id': 'UInt16',
-                                       'class_name': 'object'
-                                   })
+                                                'classid_classname.csv'))
         self.num_classes = len(self.classes)
 
     def __getitem__(self, idx):
@@ -124,7 +108,7 @@ class CustomDataset(data.Dataset):
             img = self.transform(img)
 
         if self.max_text_seq_len:
-            caption = ast.literal_eval(self.df.iloc[idx].tags_cat0)
+            caption = ast.literal_eval(self.df.iloc[idx].tags)
             if self.shuffle:
                 random.shuffle(caption)
             if self.tokenizer_method == 'wp':

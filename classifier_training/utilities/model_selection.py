@@ -39,6 +39,10 @@ def load_model(args, device):
                     expected_missing_keys += [
                         'inter_class_head.4.weight', 'inter_class_head.4.bias'
                     ]
+                if ('class_head.1.weight' in state_dict):
+                    expected_missing_keys += [
+                        'class_head.1.weight', 'class_head.1.bias'
+                    ]
                 if ('model.fc.weight' in state_dict):
                     expected_missing_keys += [
                         'model.fc.weight', 'model.fc.bias'

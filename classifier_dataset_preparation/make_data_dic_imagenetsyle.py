@@ -34,13 +34,21 @@ def make_data_dic(data_folder):
             abs_path, filename = os.path.split(file_path)
             _, class_name = os.path.split(abs_path)
             rel_path = os.path.join(class_name, filename)
-
             if class_name not in class_name_list:
                 idx += 1
                 class_name_list.append(class_name)
                 classid_classname_dic[idx] = class_name
 
-            filename_classid_dic[rel_path] = idx
+            tag_file = file_path + '.tags'
+            if os.path.exists(tag_file):
+                with open(tag_file, 'r') as f:
+                    tags = f.readline()
+                tags = [tag.strip() for tag in tags.split(',')]
+            else:
+                tags = []
+            
+            filename_classid_dic[rel_path] = [idx, tags]
+
 
     no_classes = idx + 1
     print('Total number of classes: ', no_classes)
@@ -50,14 +58,15 @@ def make_data_dic(data_folder):
     # save dataframe to hold the class IDs and the relative paths of the files
     df = pd.DataFrame.from_dict(filename_classid_dic,
                                 orient='index',
-                                columns=['class_id'])
+                                columns=['class_id', 'tags'])
     idx_col = np.arange(0, len(df), 1)
     df['idx_col'] = idx_col
     df['file_rel_path'] = df.index
     df.set_index('idx_col', inplace=True)
+    df = df[['class_id', 'file_rel_path', 'tags']]
     print(df.head())
     df_name = os.path.join(data_folder, 'labels.csv')
-    df.to_csv(df_name, sep=',', header=False, index=False)
+    df.to_csv(df_name, sep=',', header=True, index=False)
 
     df_classid_classname = pd.DataFrame.from_dict(classid_classname_dic,
                                                   orient='index',
@@ -74,7 +83,7 @@ def make_data_dic(data_folder):
                                              'classid_classname.csv')
     df_classid_classname.to_csv(df_classid_classname_name,
                                 sep=',',
-                                header=False,
+                                header=True,
                                 index=False)
 
 
