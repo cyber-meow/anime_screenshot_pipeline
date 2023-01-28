@@ -110,9 +110,13 @@ def get_tags(imgs, model_tag, tags_all, thresh):
 
     for prob in probs:
         tags_current = []
-        for i, p in enumerate(prob[4:]):
-            if p >= thresh:
-                tags_current.append(tags_all[i])
+        effective = np.nonzero(prob[4:] >= thresh)[0]
+        for i in effective:
+            tags_current.append(tags_all[i])
+        # The following for is extremely slow
+        # for i, p in enumerate(prob[4:]):
+        #     if p >= thresh:
+        #         tags_current.append(tags_all[i])
         tags.append(tags_current)
     return tags
 
@@ -223,10 +227,9 @@ def main(args):
     model_cls.load_state_dict(state_dict, strict=False)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model_cls.to(device)
+    model_cls.eval()
 
     file_list = get_files_recursively(args.src_dir)
-
-    model_cls.eval()
 
     file_path_batch = []
     head_image_batch = []
