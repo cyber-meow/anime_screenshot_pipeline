@@ -5,9 +5,9 @@ import csv
 import pickle
 
 import cv2
-from PIL import Image
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 from pathlib import Path
 from tqdm import tqdm
@@ -36,9 +36,21 @@ def get_files_recursively(folder_path):
     return image_path_list
 
 
+def get_head_images(image, facedata, face_crop_aug):
+    h, w = image.shape[:2]
+    faces_bbox = []
+    for rel_pos in facedata['facepos']:
+        left, top, right, bottom = rel_pos
+        faces_bbox.append(
+            [left*w, top*h, right*w, bottom*h])
+    head_images = []
+    for bbox in faces_bbox:
+        head_images.append(get_head_image(image, bbox, face_crop_aug))
+    return head_images
+
+
 def get_characters(
-        image,
-        facedata,
+        head_images,
         model_cls,
         classid_classname_dic,
         args,
@@ -47,28 +59,26 @@ def get_characters(
         tokenizer,
         device):
 
-    h, w = image.shape[:2]
-    faces_bbox = []
-    for rel_pos in facedata['facepos']:
-        left, top, right, bottom = rel_pos
-        faces_bbox.append(
-            [left*w, top*h, right*w, bottom*h])
     characters = []
 
     with torch.no_grad():
-        for bbox in faces_bbox:
-            head_image = get_head_image(image, bbox, args.face_crop_aug)
-            if args.multimodal:
-                tags = get_tags(head_image, model_tag,
-                                tags_all, args.tagger_thresh)
-                caption = tokenizer(tags).to(device)
-                head_image = prepare_image(head_image, args.image_size, device)
-                out_cls = model_cls(head_image, caption).squeeze(0)
-            else:
-                head_image = prepare_image(head_image, args.image_size, device)
-                out_cls = model_cls(head_image).squeeze(0)
-            idx = torch.argmax(out_cls).cpu().item()
-            prob = torch.softmax(out_cls, -1)[idx].item()
+        if args.multimodal:
+            tags_list = get_tags(head_images, model_tag,
+                                 tags_all, args.tagger_thresh)
+            # print(tags_list)
+            captions = torch.vstack([tokenizer(tags) for tags in tags_list])
+            # print(captions)
+            captions = captions.to(device)
+            head_images = prepare_image(head_images, args.image_size, device)
+            out_cls = model_cls(head_images, captions)
+        else:
+            head_images = prepare_image(head_images, args.image_size, device)
+            out_cls = model_cls(head_images)
+        idxs = torch.argmax(out_cls, dim=1).cpu()
+        probs = torch.softmax(out_cls, -1).cpu()
+        for idx, prob in zip(idxs, probs):
+            idx = idx.item()
+            prob = prob[idx]
             if prob > args.cls_thresh:
                 class_name = classid_classname_dic.loc[
                     classid_classname_dic['class_id'] == idx,
@@ -81,21 +91,29 @@ def get_characters(
     return characters
 
 
-def get_tags(img, model_tag, tags_all, thresh):
+def get_tags(imgs, model_tag, tags_all, thresh):
+    imgs_new = []
     # for wd1.4 tagger
-    image_size = 448
-    size = max(img.shape[0:2])
-    interp = cv2.INTER_AREA if size > image_size else cv2.INTER_LANCZOS4
-    img = cv2.resize(img, (image_size, image_size), interpolation=interp)
-    # cv2.imshow("img", img)
-    # cv2.waitKey()
-    # cv2.destroyAllWindows()
-    img = img.astype(np.float32)
-    prob = model_tag(np.array([img]), training=False)[0]
+    for img in imgs:
+        img = img[:, :, ::-1]       # RGB -> BGR
+        image_size = 448
+        size = max(img.shape[0:2])
+        interp = cv2.INTER_AREA if size > image_size else cv2.INTER_LANCZOS4
+        img = cv2.resize(img, (image_size, image_size), interpolation=interp)
+        # cv2.imshow("img", img)
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
+        img = img.astype(np.float32)
+        imgs_new.append(img)
+    probs = model_tag(np.array(imgs_new), training=False)
     tags = []
-    for i, p in enumerate(prob[4:]):
-        if p >= thresh:
-            tags.append(tags_all[i])
+
+    for prob in probs:
+        tags_current = []
+        for i, p in enumerate(prob[4:]):
+            if p >= thresh:
+                tags_current.append(tags_all[i])
+        tags.append(tags_current)
     return tags
 
 
@@ -156,17 +174,20 @@ def get_head_image(image, face_bbox, face_crop_aug=1.5):
     return image
 
 
-def prepare_image(image, image_size, device):
+def prepare_image(images, image_size, device):
     transform = transforms.Compose([
         transforms.Resize((image_size, image_size)),
         transforms.ToTensor(),
         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
     ])
 
-    image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    image = transform(image).to(device).unsqueeze(0)
+    image_tensors = []
+    for image in images:
+        image = Image.fromarray(image)
+        image_tensors.append(transform(image).unsqueeze(0))
 
-    return image
+    image_tensors = torch.cat(image_tensors).to(device)
+    return image_tensors
 
 
 def main(args):
@@ -207,11 +228,21 @@ def main(args):
 
     model_cls.eval()
 
-    print('Processing...')
-    for file_path in tqdm(file_list):
+    file_path_batch = []
+    head_image_batch = []
+    file_character_dict = dict()
 
-        image = cv2.imdecode(np.fromfile(file_path, np.uint8),
-                             cv2.IMREAD_UNCHANGED)
+    print('Processing...')
+    for idx, file_path in enumerate(tqdm(file_list)):
+
+        file_character_dict[file_path] = []
+
+        # image = cv2.imdecode(np.fromfile(file_path, np.uint8),
+        #                      cv2.IMREAD_UNCHANGED)
+        image = Image.open(file_path)
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        image = np.array(image)
         filename_noext = os.path.splitext(file_path)[0]
 
         json_file = filename_noext + '.json'
@@ -219,23 +250,51 @@ def main(args):
             with open(json_file, 'r') as f:
                 metadata = json.load(f)
         except FileNotFoundError:
-            print(f'Warning: {json_file} not found')
-            metadata = dict()
+            print(f'Error: {json_file} not found')
+            exit(1)
 
         if 'characters' in metadata and not args.overwrite:
             print(f'Warning: attribute `characters` found in {json_file}, ' +
                   'skip')
             continue
 
-        characters = get_characters(
-            image, metadata,
-            model_cls,
-            classid_classname_dic,
-            args,
-            model_tag, tags_all, tokenizer, device)
-        metadata['characters'] = characters
-        with open(json_file, "w") as f:
-            json.dump(metadata, f)
+        head_images = get_head_images(image, metadata, args.face_crop_aug)
+        while len(head_images) > 0:
+            file_path_batch.append(file_path)
+            head_image_batch.append(head_images.pop(0))
+            if len(head_image_batch) == args.batch_size:
+                characters = get_characters(
+                    head_image_batch,
+                    model_cls,
+                    classid_classname_dic,
+                    args,
+                    model_tag, tags_all, tokenizer, device)
+                for file_path, character in zip(file_path_batch, characters):
+                    file_character_dict[file_path].append(character)
+                file_path_batch = []
+                head_image_batch = []
+
+        if (idx + 1) % args.save_frequency == 0 or idx == len(file_list)-1:
+            characters = get_characters(
+                head_image_batch,
+                model_cls,
+                classid_classname_dic,
+                args,
+                model_tag, tags_all, tokenizer, device)
+            for file_path, character in zip(file_path_batch, characters):
+                file_character_dict[file_path].append(character)
+            for file_path in file_character_dict:
+                filename_noext = os.path.splitext(file_path)[0]
+                json_file = filename_noext + '.json'
+                with open(json_file, 'r') as f:
+                    metadata = json.load(f)
+                characters = file_character_dict[file_path]
+                metadata['characters'] = characters
+                with open(json_file, "w") as f:
+                    json.dump(metadata, f)
+            file_path_batch = []
+            head_image_batch = []
+            file_character_dict = dict()
 
 
 class VisionTransformer(nn.Module):
@@ -407,6 +466,16 @@ if __name__ == '__main__':
     parser.add_argument(
         '--dataset_path',
         help='Path for the dataset; For classifier id correspondance')
+    parser.add_argument(
+        '--batch_size',
+        type=int,
+        default=8,
+        help='batch size for inference')
+    parser.add_argument(
+        '--save_frequency',
+        type=int,
+        default=100,
+        help='set to n so that metadata are saved every n images')
     parser.add_argument(
         '--multimodal',
         action='store_true',

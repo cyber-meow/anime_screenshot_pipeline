@@ -270,7 +270,6 @@ def validate(args,
             elif args.multimodal and args.exclusion_loss:
                 outputs, exclusion_loss = model(images, text=captions)
             elif args.multimodal:
-                print(captions)
                 outputs = model(images, text=captions)
             elif args.exclusion_loss:
                 outputs, exclusion_loss = model(images)
