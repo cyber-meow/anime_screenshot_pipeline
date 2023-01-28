@@ -57,9 +57,12 @@ def correct_metadata_single(
                 count = int(count)
             metadata['n_people'] = count
     elif folder_type == 'character':
-        if basename == 'character_others':
+        if basename in ['character_others', 'others']:
             return
-        characters = sorted(list(set(basename.split('+'))))
+        if basename == 'ood':
+            characters = []
+        else:
+            characters = sorted(list(set(basename.split('+'))))
         for to_remove in ['unknown', 'ood']:
             if to_remove in characters:
                 characters.remove(to_remove)
