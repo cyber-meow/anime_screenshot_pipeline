@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # This makes the weights larger than 1
     per_image_multiply = per_image_weights / np.min(per_image_weights)
     per_image_multiply_final = np.minimum(
-        np.around(per_image_multiply).astype(int), args.max_multiply)
+        np.around(per_image_multiply, 2), args.max_multiply)
 
     if args.logdir is not None:
         os.makedirs(args.logdir, exist_ok=True)

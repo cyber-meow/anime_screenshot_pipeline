@@ -278,14 +278,15 @@ def main(args):
                 head_image_batch = []
 
         if (idx + 1) % args.save_frequency == 0 or idx == len(file_list)-1:
-            characters = get_characters(
-                head_image_batch,
-                model_cls,
-                classid_classname_dic,
-                args,
-                model_tag, tags_all, tokenizer, device)
-            for file_path, character in zip(file_path_batch, characters):
-                file_character_dict[file_path].append(character)
+            if len(head_image_batch) > 0:
+                characters = get_characters(
+                    head_image_batch,
+                    model_cls,
+                    classid_classname_dic,
+                    args,
+                    model_tag, tags_all, tokenizer, device)
+                for file_path, character in zip(file_path_batch, characters):
+                    file_character_dict[file_path].append(character)
             for file_path in file_character_dict:
                 filename_noext = os.path.splitext(file_path)[0]
                 json_file = filename_noext + '.json'

@@ -85,7 +85,12 @@ def rename_folder_and_tags(folder, class_mapping, drop_unknown_class=False):
     if new_folder_name is None:
         shutil.rmtree(folder)
         return
-    os.rename(folder, new_folder_name)
+    if os.path.exists(new_folder_name):
+        for file in os.listdir(folder):
+            new_file_path = os.path.join(new_folder_name, file)
+            os.rename(os.path.join(folder, file), new_file_path)
+    else:
+        os.rename(folder, new_folder_name)
     for file in get_files_recursively(new_folder_name):
         file_noext = os.path.splitext(file)[0]
         tags_file = file + '.tags'
