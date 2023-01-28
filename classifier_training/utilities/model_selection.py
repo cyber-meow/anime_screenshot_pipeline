@@ -31,7 +31,7 @@ def load_model(args, device):
         else:
             state_dict = torch.load(args.checkpoint_path,
                                     map_location=torch.device('cpu'))
-            #state_dict = torch.load(args.checkpoint_path)
+            # state_dict = torch.load(args.checkpoint_path)
             expected_missing_keys = []
             if args.transfer_learning:
                 # Modifications to load partial state dict
@@ -39,13 +39,17 @@ def load_model(args, device):
                     expected_missing_keys += [
                         'inter_class_head.4.weight', 'inter_class_head.4.bias'
                     ]
+                if ('class_head.1.weight' in state_dict):
+                    expected_missing_keys += [
+                        'class_head.1.weight', 'class_head.1.bias'
+                    ]
                 if ('model.fc.weight' in state_dict):
                     expected_missing_keys += [
                         'model.fc.weight', 'model.fc.bias'
                     ]
                 for key in expected_missing_keys:
                     state_dict.pop(key)
-                    #print(key)
+                    # print(key)
             ret = model.load_state_dict(state_dict, strict=False)
             print('''Missing keys when loading pretrained weights: {}
                     Expected missing keys: {}'''.format(
@@ -111,9 +115,9 @@ class ResNet(nn.Module):
 
         # Initialize/freeze weights
         # originally for pretrained would freeze all layers except last
-        #if args.pretrained:
+        # if args.pretrained:
         #    freeze_layers(self.model)
-        #else:
+        # else:
         if not args.pretrained:
             self.init_weights()
 

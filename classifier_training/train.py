@@ -12,6 +12,9 @@ import utilities as utilities
 
 logger = logging.getLogger(__name__)
 
+# To load tag tokenizer
+from utilities.build_vocab import Vocabulary
+
 
 def environment_loader(args, init=True):
 
@@ -52,8 +55,7 @@ def environment_loader(args, init=True):
             args.vocab_size = tokenizer.vocab_size
         elif args.tokenizer == 'tag':
             tokenizer = utilities.custom_tokenizer.CustomTokenizer(
-                vocab_path=os.path.join(args.dataset_path, 'labels',
-                                        'vocab.pkl'),
+                vocab_path=os.path.join(args.dataset_path, 'vocab.pkl'),
                 max_text_seq_len=args.max_text_seq_len)
             args.vocab_size = tokenizer.vocab_size
         if args.mask_schedule:
@@ -268,6 +270,7 @@ def validate(args,
             elif args.multimodal and args.exclusion_loss:
                 outputs, exclusion_loss = model(images, text=captions)
             elif args.multimodal:
+                print(captions)
                 outputs = model(images, text=captions)
             elif args.exclusion_loss:
                 outputs, exclusion_loss = model(images)

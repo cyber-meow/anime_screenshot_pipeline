@@ -282,7 +282,7 @@ if __name__ == '__main__':
         help='If have more than X characters put X+')
     parser.add_argument(
         '--min_image_per_combination', type=int, default=1,
-        help='Put others instead of character name if nnumber of images '
+        help='Put others instead of character name if number of images '
         + 'of the character combination is smaller then this number')
     parser.add_argument(
         '--face_ratio_folder_range',
