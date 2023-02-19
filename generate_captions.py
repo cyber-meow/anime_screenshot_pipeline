@@ -10,6 +10,7 @@ from pathlib import Path
 def get_files_recursively(folder_path):
     allowed_patterns = [
         '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+        '*.[Gg][Ii][Ff]', '*.[Ww][Ee][Bb][Pp]',
     ]
 
     image_path_list = [
@@ -64,27 +65,31 @@ def dict_to_caption(info_dict, args):
         count = info_dict['n_people']
         suffix = 'person' if count == 1 else 'people'
         caption += f'{count}{suffix}'
-    if (random.random() < args.use_character_prob
-            and 'characters' in info_dict):
-        characters = info_dict['characters']
-        for to_remove in ['unknown', 'ood']:
-            characters = list(filter(
-                lambda item: item != to_remove, characters))
-        if len(characters) > 0:
-            if caption != "":
-                caption += ', '
-            caption += ' '.join(characters)
+    if (random.random() < args.use_character_prob):
+        characters = None
+        if 'character' in info_dict:
+            characters = info_dict['character']
+        elif 'characters' in info_dict:
+            characters = info_dict['characters']
+        if characters is not None:
+            for to_remove in ['unknown', 'ood']:
+                characters = list(filter(
+                    lambda item: item != to_remove, characters))
+            if len(characters) > 0:
+                if caption != "":
+                    caption += '; '
+                caption += '; '.join(characters)
     if random.random() < args.use_copyright_prob and 'copyright' in info_dict:
         copyright = info_dict['copyright']
         copyright = list(filter(
             lambda item: item != 'unknown', copyright))
         if len(copyright) > 0:
             if caption != "":
-                caption += ', '
+                caption += '; '
             caption += 'from ' + ' '.join(copyright)
     if random.random() < args.use_general_prob and 'general' in info_dict:
         if caption != "":
-            caption += ', '
+            caption += '; '
         caption += info_dict['general']
     if random.random() < args.use_artist_prob and 'artist' in info_dict:
         artist = info_dict['artist']
@@ -92,24 +97,24 @@ def dict_to_caption(info_dict, args):
                 lambda item: item != 'anonymous', artist))
         if len(artist) > 0:
             if caption != "":
-                caption += ', '
+                caption += '; '
             caption += 'by ' + ' '.join(artist)
     if random.random() < args.use_rating_prob and 'rating' in info_dict:
         if info_dict['rating'] == 'explicit':
             if caption != "":
-                caption += ', '
+                caption += '; '
             caption += 'explicit'
     if random.random() < args.use_facepos_prob and 'facepos' in info_dict:
         facepos_info = info_dict['facepos']
         if len(facepos_info) > 0:
             if caption != "":
-                caption += ', '
+                caption += '; '
             caption += parse_facepos(facepos_info)
     if random.random() < args.use_tags_prob and 'tags' in info_dict:
         tags = process_tags(info_dict['tags'], args)
         if len(tags) > 0:
             if caption != "":
-                caption += ', '
+                caption += '; '
             caption += ', '.join(tags)
     return caption.replace('_', ' ')
 

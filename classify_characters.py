@@ -25,7 +25,7 @@ from vit_animesion import ViT, ViTConfigExtended, PRETRAINED_CONFIGS
 def get_files_recursively(folder_path):
     allowed_patterns = [
         '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
-        '*.[Gg][Ii][Ff]'
+        '*.[Gg][Ii][Ff]', '*.[Ww][Ee][Bb][Pp]',
     ]
 
     image_path_list = [
@@ -293,7 +293,7 @@ def main(args):
                 with open(json_file, 'r') as f:
                     metadata = json.load(f)
                 characters = file_character_dict[file_path]
-                metadata['characters'] = characters
+                metadata['character'] = characters
                 with open(json_file, "w") as f:
                     json.dump(metadata, f)
             file_path_batch = []
@@ -507,7 +507,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--cls_thresh',
         type=float,
-        default=0.25,
+        default=0.5,
         help="threshold of confidence to classify as character")
     parser.add_argument(
         '--overwrite',
