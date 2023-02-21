@@ -48,18 +48,22 @@ def to_list(line):
 
 
 def retrieve_tag_info(
-        basic_info, tags_content, tag_extension,
+        basic_info,
+        tags_content,
+        tag_extension,
+        keep_charcacter,
         remove_before_girl):
 
     if tag_extension == 'toml':
         for key in tags_content:
             info = tags_content[key]
             if key == 'character':
-                characters = to_list(info)
-                for to_remove in ['unknown', 'ood']:
-                    if to_remove in characters:
-                        characters.remove(to_remove)
-                basic_info['character'] = characters
+                if not keep_charcacter:
+                    characters = to_list(info)
+                    for to_remove in ['unknown', 'ood']:
+                        if to_remove in characters:
+                            characters.remove(to_remove)
+                    basic_info['character'] = characters
             elif key in ['copyright', 'artist', 'tags']:
                 basic_info[key] = to_list(info)
             else:
@@ -69,17 +73,18 @@ def retrieve_tag_info(
         for line in tags_content:
             # If tags contain character information use it instead
             if line.startswith('character: '):
-                characters = to_list(line.lstrip('character:'))
-                for to_remove in ['unknown', 'ood']:
-                    if to_remove in characters:
-                        characters.remove(to_remove)
-                basic_info['character'] = characters
+                if not keep_charcacter:
+                    characters = to_list(line.lstrip('character:'))
+                    for to_remove in ['unknown', 'ood']:
+                        if to_remove in characters:
+                            characters.remove(to_remove)
+                    basic_info['character'] = characters
             elif line.startswith('copyright: '):
                 basic_info['copyright'] = to_list(line.lstrip('copyright:'))
             elif line.startswith('artist: '):
                 basic_info['artist'] = to_list(line.lstrip('artist:').strip())
             elif line.startswith('general: '):
-                tags = to_list(line.lstrip('general: '))
+                basic_info['tags'] = to_list(line.lstrip('general: '))
             elif line.startswith('rating: '):
                 basic_info['rating'] = line.lstrip('rating:').strip()
             # This is the case when there is a single line of tags
@@ -145,6 +150,9 @@ if __name__ == '__main__':
     parser.add_argument(
         "--remove_before_girl", action='store_true',
         help="Remove the tags that appear before [k]girl(s)")
+    parser.add_argument(
+        "--keep_character", action='store_true',
+        help="Do not overwrite character information")
     args = parser.parse_args()
 
     file_paths = get_files_recursively(args.src_dir)
@@ -159,7 +167,9 @@ if __name__ == '__main__':
                     else:
                         tags_data = f.readlines()
                 metadata = retrieve_tag_info(
-                    metadata, tags_data, args.tag_extension,
+                    metadata, tags_data, 
+                    args.tag_extension,
+                    args.keep_character,
                     args.remove_before_girl)
                 if 'tags' in metadata:
                     n_people = get_npeople_from_tags(metadata['tags'])
