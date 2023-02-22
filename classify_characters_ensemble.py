@@ -53,7 +53,7 @@ def get_characters(
         head_images,
         model_cls,
         model_cls2,
-        model_cls_outfit,
+        # model_cls_outfit,
         model_cls_outfit2,
         classid_classname_dic,
         classid_classname_dic_outfit,
@@ -74,9 +74,10 @@ def get_characters(
             # print(captions)
             captions = captions.to(device)
             out_cls = model_cls(images_for_torch, captions)
-            out_cls_outfit = model_cls_outfit(images_for_torch, captions)
+            # out_cls_outfit = model_cls_outfit(images_for_torch, captions)
         else:
-            out_cls_outfit = model_cls_outfit(images_for_torch)
+            out_cls = model_cls(images_for_torch)
+            # out_cls_outfit = model_cls_outfit(images_for_torch)
 
     characters = []
     class_names = sorted(classid_classname_dic['class_name'])
@@ -104,32 +105,21 @@ def get_characters(
 
     outfits = []
     class_names = sorted(classid_classname_dic_outfit['class_name'])
-    idxs = torch.argmax(out_cls_outfit, dim=1).cpu()
-    probs = torch.softmax(out_cls_outfit, -1).cpu()
+    # idxs = torch.argmax(out_cls_outfit, dim=1).cpu()
+    # probs = torch.softmax(out_cls_outfit, -1).cpu()
     probs2 = (model_cls_outfit2(np.array(images_for_tf), training=False
                                 ).numpy().astype(float))
     idxs2 = np.argmax(probs2, axis=1)
-    for idx, prob, idx2, prob2 in zip(idxs, probs, idxs2, probs2):
-        idx = idx.item()
-        prob = prob[idx]
+    for idx2, prob2 in zip(idxs2, probs2):
         prob2 = prob2[idx2]
-        if max(prob, prob2) > args.cls_thresh:
-            if prob > prob2:
-                class_name = classid_classname_dic_outfit.loc[
-                    classid_classname_dic['class_id'] == idx,
-                    'class_name'].item()
-            else:
-                class_name = class_names[idx2]
-            if class_name == 'ood':
-                class_name = 'unknown'
-        else:
-            class_name = 'unknown'
+        if prob2 > args.cls_thresh:
+            class_name = class_names[idx2]
         outfits.append(class_name)
 
     for k in range(len(characters)):
         outfit = outfits[k]
         character = characters[k]
-        if outfit != 'others' and ',' not in character:
+        if outfit != 'others' and ',' not in character and character != 'unknown':
             characters[k] = character + ', ' + outfit
     return characters
 
@@ -240,6 +230,13 @@ def get_head_image(image, face_bbox, face_crop_aug=1.5):
     return image
 
 
+def force_cudnn_initialization():
+    s = 32
+    dev = torch.device('cuda')
+    torch.nn.functional.conv2d(
+        torch.zeros(s, s, s, s, device=dev), torch.zeros(s, s, s, s, device=dev))
+
+
 def main(args, classid_classname_dic, classid_classname_dic_outfit):
 
     num_classes = len(classid_classname_dic)
@@ -277,14 +274,14 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
     model_cls.to(device)
     model_cls.eval()
 
-    print('Loading classifier VIT for outfits...')
-    model_cls_outfit = VisionTransformer(args, num_classes_outfit)
-    state_dict = torch.load(args.cls_outfit_vit_path,
-                            map_location=torch.device('cpu'))
-    model_cls_outfit.load_state_dict(state_dict, strict=False)
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    model_cls_outfit.to(device)
-    model_cls_outfit.eval()
+    # print('Loading classifier VIT for outfits...')
+    # model_cls_outfit = VisionTransformer(args, num_classes_outfit)
+    # state_dict = torch.load(args.cls_outfit_vit_path,
+    #                         map_location=torch.device('cpu'))
+    # model_cls_outfit.load_state_dict(state_dict, strict=False)
+    # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    # model_cls_outfit.to(device)
+    # model_cls_outfit.eval()
 
     print('Loading classifier Swin...')
     model_cls2 = load_model(args.cls_swin_dir)
@@ -298,6 +295,7 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
     head_image_batch = []
     file_character_dict = dict()
 
+    force_cudnn_initialization()
     print('Processing...')
     for idx, file_path in enumerate(tqdm(file_list)):
 
@@ -334,7 +332,7 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
                     head_image_batch,
                     model_cls,
                     model_cls2,
-                    model_cls_outfit,
+                    # model_cls_outfit,
                     model_cls_outfit2,
                     classid_classname_dic,
                     classid_classname_dic_outfit,
@@ -351,6 +349,8 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
                     head_image_batch,
                     model_cls,
                     model_cls2,
+                    # model_cls_outfit,
+                    model_cls_outfit2,
                     classid_classname_dic,
                     classid_classname_dic_outfit,
                     args,
