@@ -59,22 +59,22 @@ def get_characters(head_images, model_cls, class_names, cls_thresh):
         images_new.append(img)
     probs = (model_cls(np.array(images_new), training=False
                        ).numpy().astype(float))
-    # idxs = np.argmax(probs, axis=1)
-    # for idx, prob in zip(idxs, probs):
-    #     prob = np.round(prob[idx].numpy(), 2).astype(float)
-    #     if prob > cls_thresh:
-    #         class_name = class_names[idx]
-    #         # if class_name == 'ood':
-    #         #     class_name = 'unknown'
-    #     else:
-    #         class_name = 'unknown'
-    #     characters.append((class_name, prob))
-    idxs = np.argsort(probs, axis=-1)
-    save_num = 8
+    idxs = np.argmax(probs, axis=1)
     for idx, prob in zip(idxs, probs):
-        characters.append(
-            [(class_names[idx[-k]], prob[idx[-k]])
-             for k in range(1, save_num+1)])
+        prob = prob[idx]
+        if prob > cls_thresh:
+            class_name = class_names[idx]
+            # if class_name == 'ood':
+            #     class_name = 'unknown'
+        else:
+            class_name = 'unknown'
+        characters.append(class_name)
+    # idxs = np.argsort(probs, axis=-1)
+    # save_num = 8
+    # for idx, prob in zip(idxs, probs):
+    #     characters.append(
+    #         [(class_names[idx[-k]], prob[idx[-k]])
+    #          for k in range(1, save_num+1)])
     return characters
 
 
