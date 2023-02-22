@@ -114,12 +114,16 @@ def get_characters(
         prob2 = prob2[idx2]
         if prob2 > args.cls_thresh:
             class_name = class_names[idx2]
+        else:
+            class_name = 'others'
         outfits.append(class_name)
 
     for k in range(len(characters)):
         outfit = outfits[k]
         character = characters[k]
-        if outfit != 'others' and ',' not in character and character != 'unknown':
+        if (outfit != 'others'
+                and ',' not in character
+                and character != 'unknown'):
             characters[k] = character + ', ' + outfit
     return characters
 
@@ -230,17 +234,19 @@ def get_head_image(image, face_bbox, face_crop_aug=1.5):
     return image
 
 
+# From https://stackoverflow.com/questions/66588715/runtimeerror-cudnn-error-cudnn-status-not-initialized-using-pytorch
 def force_cudnn_initialization():
     s = 32
     dev = torch.device('cuda')
     torch.nn.functional.conv2d(
-        torch.zeros(s, s, s, s, device=dev), torch.zeros(s, s, s, s, device=dev))
+        torch.zeros(s, s, s, s, device=dev),
+        torch.zeros(s, s, s, s, device=dev))
 
 
 def main(args, classid_classname_dic, classid_classname_dic_outfit):
 
     num_classes = len(classid_classname_dic)
-    num_classes_outfit = len(classid_classname_dic_outfit)
+    # num_classes_outfit = len(classid_classname_dic_outfit)
 
     if args.multimodal:
         print('Loading tagger...')
