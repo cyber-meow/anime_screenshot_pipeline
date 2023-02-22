@@ -44,6 +44,8 @@ def get_head_images(image, facedata, face_crop_aug):
         faces_bbox.append(
             [left*w, top*h, right*w, bottom*h])
     head_images = []
+    if len(faces_bbox) > 1:
+        face_crop_aug = 1.5
     for bbox in faces_bbox:
         head_images.append(get_head_image(image, bbox, face_crop_aug))
     return head_images
@@ -547,11 +549,11 @@ if __name__ == '__main__':
         help='Path to VIT classifier',
         required=True,
         type=str, default=None)
-    parser.add_argument(
-        '--cls_outfit_vit_path',
-        help='Path to VIT classifier for common outfit',
-        required=True,
-        type=str, default=None)
+    # parser.add_argument(
+    #     '--cls_outfit_vit_path',
+    #     help='Path to VIT classifier for common outfit',
+    #     required=True,
+    #     type=str, default=None)
     parser.add_argument(
         '--cls_swin_dir',
         help='Directory for swin classifier',
