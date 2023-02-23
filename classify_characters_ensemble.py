@@ -325,8 +325,8 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
             print(f'Error: {json_file} not found')
             exit(1)
 
-        if 'characters' in metadata and not args.overwrite:
-            print(f'Warning: attribute `characters` found in {json_file}, ' +
+        if 'character' in metadata and not args.overwrite:
+            print(f'Warning: attribute `character` found in {json_file}, ' +
                   'skip')
             continue
 
