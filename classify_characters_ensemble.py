@@ -245,6 +245,21 @@ def force_cudnn_initialization():
         torch.zeros(s, s, s, s, device=dev))
 
 
+def update_characters(metadata, characters, overwrite):
+    if overwrite or 'character' not in metadata:
+        metadata['character'] = characters
+    else:
+        characters_update = []
+        for character in metadata['character']:
+            if ',' not in character:
+                for character_outfit in characters:
+                    if (',' in character_outfit
+                            and character == character_outfit.split(',')[0]):
+                        character = character_outfit
+            characters_update.append(character)
+        metadata['character'] = characters_update
+
+
 def main(args, classid_classname_dic, classid_classname_dic_outfit):
 
     num_classes = len(classid_classname_dic)
@@ -325,7 +340,9 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
             print(f'Error: {json_file} not found')
             exit(1)
 
-        if 'character' in metadata and not args.overwrite:
+        modify_metadata = args.overwrite or args.add_outfit
+
+        if 'character' in metadata and not modify_metadata:
             print(f'Warning: attribute `character` found in {json_file}, ' +
                   'skip')
             continue
@@ -371,7 +388,7 @@ def main(args, classid_classname_dic, classid_classname_dic_outfit):
                 with open(json_file, 'r') as f:
                     metadata = json.load(f)
                 characters = file_character_dict[file_path]
-                metadata['character'] = characters
+                update_characters(metadata, characters, args.overwrite)
                 with open(json_file, "w") as f:
                     json.dump(metadata, f)
             file_path_batch = []
@@ -606,6 +623,10 @@ if __name__ == '__main__':
         '--overwrite',
         action='store_true',
         help='Overwrite existing character metadata')
+    parser.add_argument(
+        '--add_outfit',
+        action='store_true',
+        help='Only add outfits to characters when character already exists')
     parser.add_argument(
         '--tagger_dir',
         type=str, default='tagger/wd14_tagger_model',
