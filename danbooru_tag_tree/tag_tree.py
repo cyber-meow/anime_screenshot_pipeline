@@ -27,22 +27,24 @@ class TagTree:
             data = json.load(f)
         self.build_from_dict(data)
     
-    def _build_from_dict(self, root, key, data: dict|str):
+    def _build_from_dict(self, root, key, data):
         if data is None:
             return None
         if isinstance(data, str):
             return TagTree.Node(key, True, root, {})
-        self_data = data.pop('self', None)
+        self_data = data.get('self', None)
         
         is_tag = isinstance(self_data, str)
+        if is_tag:
+            data.pop('self')
         new_node = TagTree.Node(
             key, is_tag, root
         )
         
         all_childs = {}
-        if isinstance(self_data, dict):
-            self_node = TagTree.Node(f'{root.name}-self', 'self')
-            # all_childs[key] = self._build_from_dict(root, k, v)
+        # if isinstance(self_data, dict):
+        # self_node = TagTree.Node(f'{root.name}-self', 'self')
+        # all_childs[key] = self._build_from_dict(root, k, v)
         for k, v in data.items():
             if v is None: continue
             child = self._build_from_dict(new_node, k, v)
@@ -111,10 +113,10 @@ class TagTree:
         return all_tag
 
 
-tree = TagTree()
-tree.build_from_json('./tag_tree.json')
-
-tag = ['Attire']
-print(f'query tag/groups: {tag}')
-print(tree.get_tags(tag, reverse_query=True)[:10])
-print(tree.get_groups(tag))
+# tree = TagTree()
+# tree.build_from_json('./tag_tree.json')
+# 
+# tag = ['Attire']
+# print(f'query tag/groups: {tag}')
+# print(tree.get_tags(tag, reverse_query=True))
+# print(tree.get_groups(tag))

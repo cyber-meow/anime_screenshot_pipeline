@@ -6,6 +6,8 @@ import random
 from tqdm import tqdm
 from pathlib import Path
 
+from danbooru_tag_tree.tag_tree import TagTree
+
 
 def get_files_recursively(folder_path):
     allowed_patterns = [
@@ -59,14 +61,14 @@ def parse_facepos(facepos_info):
     return ' '.join(descrs)
 
 
-def dict_to_caption(info_dict, args):
+def dict_to_caption(info_dict, attire_list, args):
     caption = ""
+    characters = None
     if random.random() < args.use_npeople_prob and 'n_people' in info_dict:
         count = info_dict['n_people']
         suffix = 'person' if count == 1 else 'people'
         caption += f'{count}{suffix}'
     if (random.random() < args.use_character_prob):
-        characters = None
         if 'character' in info_dict:
             characters = info_dict['character']
         elif 'characters' in info_dict:
@@ -111,7 +113,19 @@ def dict_to_caption(info_dict, args):
                 caption += '; '
             caption += parse_facepos(facepos_info)
     if random.random() < args.use_tags_prob and 'tags' in info_dict:
-        tags = process_tags(info_dict['tags'], args)
+        has_outfit = False
+        if characters is not None:
+            has_outfit = True
+            for character in characters:
+                if ',' not in character:
+                    has_outfit = False
+        tags, tracen = process_tags(
+            info_dict['tags'], has_outfit, attire_list, args)
+        if tracen and characters is not None and len(characters) == 1:
+            character = characters[0].split(',')[0]
+            character = character + ', ' + 'tracen school uniform'
+            caption = caption.replace(characters[0], character)
+            tags.remove('tracen_school_uniform')
         if len(tags) > 0:
             if caption != "":
                 caption += '; '
@@ -119,17 +133,29 @@ def dict_to_caption(info_dict, args):
     return caption.replace('_', ' ')
 
 
-def process_tags(tags, args):
+def process_tags(tags, has_outfit, attire_list, args):
     new_tags = []
     general_tags = []
+    has_tracen_school_uniform = False
     for tag in tags:
         if 'boy' in tag or 'girl' in tag or 'solo' in tag:
             general_tags.append(tag)
-        elif 'hair' in tag or 'ponytail' in tag or 'twintail' in tag:
+        elif tag == 'tracen_school_uniform':
+            has_tracen_school_uniform = True
+            general_tags.append(tag)
+        elif ('hair' in tag
+                or 'ponytail' in tag
+                or 'twintail' in tag
+                or 'braid' in tag
+                or 'bun' in tag
+                or 'ahoge' in tag):
             if not args.drop_hair_tag:
                 new_tags.append(tag)
-        elif 'eye' in tag:
+        elif 'eyes' in tag:
             if not args.drop_eye_tag:
+                new_tags.append(tag)
+        elif has_outfit and tag.replace('_', ' ') in attire_list:
+            if not args.drop_outfit_tag:
                 new_tags.append(tag)
         else:
             new_tags.append(tag)
@@ -137,7 +163,7 @@ def process_tags(tags, args):
         random.shuffle(new_tags)
     tags = general_tags + new_tags
     tags = tags[:args.max_tag_number]
-    return tags
+    return tags, has_tracen_school_uniform
 
 
 if __name__ == '__main__':
@@ -156,13 +182,21 @@ if __name__ == '__main__':
     parser.add_argument('--shuffle_tags', action='store_true')
     parser.add_argument('--drop_hair_tag', action='store_true')
     parser.add_argument('--drop_eye_tag', action='store_true')
+    parser.add_argument('--drop_outfit_tag', action='store_true')
     args = parser.parse_args()
+
+    if args.drop_outfit_tag:
+        tree = TagTree()
+        tree.build_from_json('danbooru_tag_tree/tag_tree.json')
+        attire_list = tree.get_tags('Attire', reverse_query=True)
+    else:
+        attire_list = []
 
     files = get_files_recursively(args.src_dir)
     for file in tqdm(files):
         filename_noext = os.path.splitext(file)[0]
         with open(filename_noext + '.json', 'r') as f:
             info_dict = json.load(f)
-        caption = dict_to_caption(info_dict, args)
+        caption = dict_to_caption(info_dict, attire_list, args)
         with open(filename_noext + '.txt', 'w') as f:
             f.write(caption)
