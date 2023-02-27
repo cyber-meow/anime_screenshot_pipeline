@@ -1,6 +1,6 @@
 # Anime Screenshot Dataset Pipeline
 
-Google Colab implementation of this repo
+Google Colab implementation of this repo (Maintained by [TheSkinnyRat](https://github.com/TheSkinnyRat/anime_screenshot_pipeline_colab), Thanks a lot!)
 
 | Notebook Name | Link | Repo |
 | --- | --- | --- |
@@ -285,9 +285,10 @@ The training fits into the 8GB vram of my poor 3070 Ti Laptop GPU even at batch 
 
 ### Inference
 
-At this point we finally get a model to classify the characters of the series! To use it run
+At this point we finally get a model to 
+the characters of the series! To use it run
 ```
-python classify_faces.py --dataset_path /path/to/classification_data_dir \
+python classify_characters.py --dataset_path /path/to/classification_data_dir \
 --checkpoint_path ../path/to/checkpoint_dir/trained_checkpoint_name.ckpt \
 --src_dir /path/to/image_dir
 ```
