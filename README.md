@@ -1,12 +1,16 @@
 # Anime Screenshot Dataset Pipeline
 
+Google Colab implementation of this repo (Maintained by [TheSkinnyRat](https://github.com/TheSkinnyRat/anime_screenshot_pipeline_colab), Thanks a lot!)
+
+| Notebook Name | Link | Repo |
+| --- | --- | --- |
+| [Anime Screenshot Pipeline](https://github.com/TheSkinnyRat/anime_screenshot_pipeline_colab/blob/main/anime_screenshot_pipeline.ipynb) | [![](https://img.shields.io/static/v1?message=Open%20in%20Colab&logo=googlecolab&labelColor=5c5c5c&color=0f80c1&label=%20&style=for-the-badge)](https://colab.research.google.com/github/TheSkinnyRat/anime_screenshot_pipeline_colab/blob/main/anime_screenshot_pipeline.ipynb) | [![](https://img.shields.io/static/v1?message=Github&logo=github&labelColor=5c5c5c&color=0f80c1&label=%20&style=for-the-badge)](https://github.com/TheSkinnyRat/anime_screenshot_pipeline_colab) |
+
+---
+
 In this repository I detail the workflow that I have come out to semi-automatically build a dataset from anime for [Stable Diffusion](https://github.com/CompVis/stable-diffusion) fine-tuning.
 This is a collection of many resources found on internet (credit to the orignal authors), and some python code written by myself and [ChatGPT](https://chat.openai.com/chat).
 I managed to get this done on my personal laptop with 3070 Ti gpu and Ubuntu 22.04 installed.
-
-For the sake of illustration, with the workflow I manage to get a model that can generate the following multi-character image (done with some inpainting improve quality).
-
-![00011-1152591343-6people, KuraueHinata, YukimuraAoi, anishot, KuraueHinata with beautiful purple eyes](https://user-images.githubusercontent.com/24396911/210467331-cc8a65d6-cc6c-41b5-bbf1-8620e56e1dd0.png)
 
 As for my dataset it is organized in the following way.
 
@@ -281,9 +285,10 @@ The training fits into the 8GB vram of my poor 3070 Ti Laptop GPU even at batch 
 
 ### Inference
 
-At this point we finally get a model to classify the characters of the series! To use it run
+At this point we finally get a model to 
+the characters of the series! To use it run
 ```
-python classify_faces.py --dataset_path /path/to/classification_data_dir \
+python classify_characters.py --dataset_path /path/to/classification_data_dir \
 --checkpoint_path ../path/to/checkpoint_dir/trained_checkpoint_name.ckpt \
 --src_dir /path/to/image_dir
 ```
