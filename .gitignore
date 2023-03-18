@@ -130,6 +130,7 @@ dmypy.json
 .*.swp
 
 tagger/wd14_tagger_model/
+tagger/wd14_tagger_model_v1/
 data/
 logs/
 *.egg-info

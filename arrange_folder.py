@@ -300,7 +300,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--output_extension', type=str, choices=['.png', '.webp'],
-        default='.webp',
+        default='.png',
         help='Saved image format'
     )
     parser.add_argument(

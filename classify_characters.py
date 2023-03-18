@@ -256,7 +256,7 @@ def main(args):
             print(f'Error: {json_file} not found')
             exit(1)
 
-        if 'characters' in metadata and not args.overwrite:
+        if 'character' in metadata and not args.overwrite:
             print(f'Warning: attribute `characters` found in {json_file}, ' +
                   'skip')
             continue

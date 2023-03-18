@@ -86,6 +86,8 @@ def dict_to_caption(info_dict, attire_list, emb_list, args):
                     lambda item: item != to_remove, characters))
             for k, character in enumerate(characters):
                 if ',' in character:
+                    if len(character.split(',')) > 2:
+                        print(character)
                     char, outfit = character.split(',')
                     if outfit.strip() not in common_outfit_list:
                         outfit = ''.join([char, outfit]).replace(' ', '-')
