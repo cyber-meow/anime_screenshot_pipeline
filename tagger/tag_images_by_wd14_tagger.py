@@ -17,7 +17,8 @@ from huggingface_hub import hf_hub_download
 # from wd14 tagger
 IMAGE_SIZE = 448
 
-WD14_TAGGER_REPO = 'SmilingWolf/wd-v1-4-vit-tagger'
+# WD14_TAGGER_REPO = 'SmilingWolf/wd-v1-4-vit-tagger'
+WD14_TAGGER_REPO = 'SmilingWolf/wd-v1-4-convnext-tagger-v2'
 FILES = ["keras_metadata.pb", "saved_model.pb", "selected_tags.csv"]
 SUB_DIR = "variables"
 SUB_DIR_FILES = ["variables.data-00000-of-00001", "variables.index"]
@@ -70,6 +71,7 @@ def main(args):
 
     tags = [row[1] for row in rows[1:] if row[2]
             == '0']      # categoryが0、つまり通常のタグのみ
+    print(len(tags))
 
     # 推論する
     def run_batch(path_imgs):
@@ -90,7 +92,7 @@ def main(args):
             tag_text = ""
             # numpyとか使うのが良いけど、まあそれほど数も多くないのでループで
             for i, p in enumerate(prob[4:]):
-                if p >= args.thresh:
+                if p >= args.thresh and i < len(tags):
                     tag_text += ", " + tags[i]
 
             if len(tag_text) > 0:
