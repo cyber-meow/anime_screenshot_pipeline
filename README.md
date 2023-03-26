@@ -12,13 +12,13 @@ Google Colab implementation of this repo (Maintained by [TheSkinnyRat](https://g
 If you are using [kohya trainer](https://github.com/kohya-ss/sd-scripts), you can use `flatten_folder.py` from `utilities` to switch between the hierachical format below and the format that is used by kohya trainer. Usage
 
 ```
-python flatten_folder.py -separator ~ --src_dir /path/to/dataset_dir
+python flatten_folder.py --separator ~ --src_dir /path/to/dataset_dir
 ```
 
 If you do not have the used separator (`~` by default) in any folder name you can undo the change by
 
 ```
-python flatten_folder.py -separator ~ --src_dir /path/to/dataset_dir --revert
+python flatten_folder.py --separator ~ --src_dir /path/to/dataset_dir --revert
 ```
 
 ---
