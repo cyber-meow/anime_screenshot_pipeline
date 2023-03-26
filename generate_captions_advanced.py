@@ -61,9 +61,16 @@ def parse_facepos(facepos_info):
     return ' '.join(descrs)
 
 
-def dict_to_caption(info_dict, attire_list, args):
+def dict_to_caption(info_dict, attire_list, emb_list, args):
     caption = ""
     characters = None
+    common_outfit_list = [
+        'tracen school uniform',
+        'tracen swimsuit',
+        'tracen race uniform',
+        'tracen gym uniform',
+        'stage clothes',
+    ]
     if random.random() < args.use_npeople_prob and 'n_people' in info_dict:
         count = info_dict['n_people']
         suffix = 'person' if count == 1 else 'people'
@@ -77,6 +84,18 @@ def dict_to_caption(info_dict, attire_list, args):
             for to_remove in ['unknown', 'ood']:
                 characters = list(filter(
                     lambda item: item != to_remove, characters))
+            for k, character in enumerate(characters):
+                if ',' in character:
+                    if len(character.split(',')) > 2:
+                        print(character)
+                    char, outfit = character.split(',')
+                    if outfit.strip() not in common_outfit_list:
+                        outfit = ''.join([char, outfit]).replace(' ', '-')
+                        if outfit not in emb_list:
+                            emb_list.append(outfit)
+                        characters[k] = char + ', ' + outfit
+                    elif outfit.strip() == 'stage clothes':
+                        characters[k] = char + ', ' + 'stage-clothes'
             if len(characters) > 0:
                 if caption != "":
                     caption += '; '
@@ -157,6 +176,8 @@ def process_tags(tags, has_outfit, attire_list, args):
         elif has_outfit and tag.replace('_', ' ') in attire_list:
             if not args.drop_outfit_tag:
                 new_tags.append(tag)
+        elif 'umamusume' in tag:
+            pass
         else:
             new_tags.append(tag)
     if args.shuffle_tags:
@@ -170,13 +191,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_dir", type=str, help="directory to load images")
-    parser.add_argument('--use_npeople_prob', type=float, default=0)
+    parser.add_argument('--use_npeople_prob', type=float, default=1)
     parser.add_argument('--use_character_prob', type=float, default=1)
     parser.add_argument('--use_general_prob', type=float, default=1)
     parser.add_argument('--use_copyright_prob', type=float, default=0)
     parser.add_argument('--use_artist_prob', type=float, default=1)
     parser.add_argument('--use_rating_prob', type=float, default=1)
-    parser.add_argument('--use_facepos_prob', type=float, default=0)
+    parser.add_argument('--use_facepos_prob', type=float, default=1)
     parser.add_argument('--use_tags_prob', type=float, default=1)
     parser.add_argument('--max_tag_number', type=int, default=15)
     parser.add_argument('--shuffle_tags', action='store_true')
@@ -192,11 +213,15 @@ if __name__ == '__main__':
     else:
         attire_list = []
 
+    emb_list = []
     files = get_files_recursively(args.src_dir)
     for file in tqdm(files):
         filename_noext = os.path.splitext(file)[0]
         with open(filename_noext + '.json', 'r') as f:
             info_dict = json.load(f)
-        caption = dict_to_caption(info_dict, attire_list, args)
+        caption = dict_to_caption(info_dict, attire_list, emb_list, args)
         with open(filename_noext + '.txt', 'w') as f:
             f.write(caption)
+    with open('logs/emb_list.txt', 'w') as f:
+        f.write(', '.join(emb_list) + '\n')
+        f.write('\n'.join(emb_list))

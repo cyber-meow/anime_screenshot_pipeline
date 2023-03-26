@@ -44,6 +44,8 @@ def get_head_images(image, facedata, face_crop_aug):
         faces_bbox.append(
             [left*w, top*h, right*w, bottom*h])
     head_images = []
+    if len(faces_bbox) > 1:
+        face_crop_aug = 1.5
     for bbox in faces_bbox:
         head_images.append(get_head_image(image, bbox, face_crop_aug))
     return head_images
@@ -52,60 +54,84 @@ def get_head_images(image, facedata, face_crop_aug):
 def get_characters(
         head_images,
         model_cls,
+        model_cls2,
+        # model_cls_outfit,
+        model_cls_outfit2,
         classid_classname_dic,
+        classid_classname_dic_outfit,
         args,
         model_tag,
         tags_all,
         tokenizer,
         device):
 
-    characters = []
-
     with torch.no_grad():
+        images_for_tf = prepare_images_tf(head_images, 448)
+        images_for_torch = prepare_images_torch(head_images, 128, device)
         if args.multimodal:
-            tags_list = get_tags(head_images, model_tag,
+            tags_list = get_tags(images_for_tf, model_tag,
                                  tags_all, args.tagger_thresh)
             # print(tags_list)
             captions = torch.vstack([tokenizer(tags) for tags in tags_list])
             # print(captions)
             captions = captions.to(device)
-            head_images = prepare_image(head_images, args.image_size, device)
-            out_cls = model_cls(head_images, captions)
+            out_cls = model_cls(images_for_torch, captions)
+            # out_cls_outfit = model_cls_outfit(images_for_torch, captions)
         else:
-            head_images = prepare_image(head_images, args.image_size, device)
-            out_cls = model_cls(head_images)
-        idxs = torch.argmax(out_cls, dim=1).cpu()
-        probs = torch.softmax(out_cls, -1).cpu()
-        for idx, prob in zip(idxs, probs):
-            idx = idx.item()
-            prob = prob[idx]
-            if prob > args.cls_thresh:
+            out_cls = model_cls(images_for_torch)
+            # out_cls_outfit = model_cls_outfit(images_for_torch)
+
+    characters = []
+    class_names = sorted(classid_classname_dic['class_name'])
+    idxs = torch.argmax(out_cls, dim=1).cpu()
+    probs = torch.softmax(out_cls, -1).cpu()
+    probs2 = (model_cls2(np.array(images_for_tf), training=False
+                         ).numpy().astype(float))
+    idxs2 = np.argmax(probs2, axis=1)
+    for idx, prob, idx2, prob2 in zip(idxs, probs, idxs2, probs2):
+        idx = idx.item()
+        prob = prob[idx]
+        prob2 = prob2[idx2]
+        if max(prob, prob2) > args.cls_thresh:
+            if prob > prob2:
                 class_name = classid_classname_dic.loc[
                     classid_classname_dic['class_id'] == idx,
                     'class_name'].item()
-                if class_name == 'ood':
-                    class_name = 'unknown'
             else:
+                class_name = class_names[idx2]
+            if class_name == 'ood':
                 class_name = 'unknown'
-            characters.append(class_name)
+        else:
+            class_name = 'unknown'
+        characters.append(class_name)
+
+    outfits = []
+    class_names = sorted(classid_classname_dic_outfit['class_name'])
+    # idxs = torch.argmax(out_cls_outfit, dim=1).cpu()
+    # probs = torch.softmax(out_cls_outfit, -1).cpu()
+    probs2 = (model_cls_outfit2(np.array(images_for_tf), training=False
+                                ).numpy().astype(float))
+    idxs2 = np.argmax(probs2, axis=1)
+    for idx2, prob2 in zip(idxs2, probs2):
+        prob2 = prob2[idx2]
+        if prob2 > args.cls_thresh:
+            class_name = class_names[idx2]
+        else:
+            class_name = 'others'
+        outfits.append(class_name)
+
+    for k in range(len(characters)):
+        outfit = outfits[k]
+        character = characters[k]
+        if (outfit != 'others'
+                and ',' not in character
+                and character != 'unknown'):
+            characters[k] = character + ', ' + outfit
     return characters
 
 
 def get_tags(imgs, model_tag, tags_all, thresh):
-    imgs_new = []
-    # for wd1.4 tagger
-    for img in imgs:
-        img = img[:, :, ::-1]       # RGB -> BGR
-        image_size = 448
-        size = max(img.shape[0:2])
-        interp = cv2.INTER_AREA if size > image_size else cv2.INTER_LANCZOS4
-        img = cv2.resize(img, (image_size, image_size), interpolation=interp)
-        # cv2.imshow("img", img)
-        # cv2.waitKey()
-        # cv2.destroyAllWindows()
-        img = img.astype(np.float32)
-        imgs_new.append(img)
-    probs = model_tag(np.array(imgs_new), training=False)
+    probs = model_tag(np.array(imgs), training=False)
     tags = []
 
     for prob in probs:
@@ -119,6 +145,38 @@ def get_tags(imgs, model_tag, tags_all, thresh):
         #         tags_current.append(tags_all[i])
         tags.append(tags_current)
     return tags
+
+
+def prepare_images_torch(images, image_size, device):
+    transform = transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+    ])
+
+    image_tensors = []
+    for image in images:
+        image = Image.fromarray(image)
+        image_tensors.append(transform(image).unsqueeze(0))
+
+    image_tensors = torch.cat(image_tensors).to(device)
+    return image_tensors
+
+
+def prepare_images_tf(images, image_size):
+    images_new = []
+    for img in images:
+        img = img[:, :, ::-1]       # RGB -> BGR
+        image_size = 448
+        size = max(img.shape[0:2])
+        interp = cv2.INTER_AREA if size > image_size else cv2.INTER_LANCZOS4
+        img = cv2.resize(img, (image_size, image_size), interpolation=interp)
+        # cv2.imshow("img", img)
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
+        img = img.astype(np.float32)
+        images_new.append(img)
+    return images_new
 
 
 # Written by chatgpt
@@ -178,23 +236,34 @@ def get_head_image(image, face_bbox, face_crop_aug=1.5):
     return image
 
 
-def prepare_image(images, image_size, device):
-    transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
-    ])
-
-    image_tensors = []
-    for image in images:
-        image = Image.fromarray(image)
-        image_tensors.append(transform(image).unsqueeze(0))
-
-    image_tensors = torch.cat(image_tensors).to(device)
-    return image_tensors
+# From https://stackoverflow.com/questions/66588715/runtimeerror-cudnn-error-cudnn-status-not-initialized-using-pytorch
+def force_cudnn_initialization():
+    s = 32
+    dev = torch.device('cuda')
+    torch.nn.functional.conv2d(
+        torch.zeros(s, s, s, s, device=dev),
+        torch.zeros(s, s, s, s, device=dev))
 
 
-def main(args):
+def update_characters(metadata, characters, overwrite):
+    if overwrite or 'character' not in metadata:
+        metadata['character'] = characters
+    else:
+        characters_update = []
+        for character in metadata['character']:
+            if ',' not in character:
+                for character_outfit in characters:
+                    if (',' in character_outfit
+                            and character == character_outfit.split(',')[0]):
+                        character = character_outfit
+            characters_update.append(character)
+        metadata['character'] = characters_update
+
+
+def main(args, classid_classname_dic, classid_classname_dic_outfit):
+
+    num_classes = len(classid_classname_dic)
+    # num_classes_outfit = len(classid_classname_dic_outfit)
 
     if args.multimodal:
         print('Loading tagger...')
@@ -219,15 +288,29 @@ def main(args):
         tags_all = model_tag = tokenizer = None
         args.vocab_size = False
 
-    print('Loading classifier...')
-
-    model_cls = VisionTransformer(args)
-    state_dict = torch.load(args.checkpoint_path,
+    print('Loading classifier VIT...')
+    model_cls = VisionTransformer(args, num_classes)
+    state_dict = torch.load(args.cls_vit_path,
                             map_location=torch.device('cpu'))
     model_cls.load_state_dict(state_dict, strict=False)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model_cls.to(device)
     model_cls.eval()
+
+    # print('Loading classifier VIT for outfits...')
+    # model_cls_outfit = VisionTransformer(args, num_classes_outfit)
+    # state_dict = torch.load(args.cls_outfit_vit_path,
+    #                         map_location=torch.device('cpu'))
+    # model_cls_outfit.load_state_dict(state_dict, strict=False)
+    # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    # model_cls_outfit.to(device)
+    # model_cls_outfit.eval()
+
+    print('Loading classifier Swin...')
+    model_cls2 = load_model(args.cls_swin_dir)
+
+    print('Loading classifier Swin for outfits...')
+    model_cls_outfit2 = load_model(args.cls_outfit_swin_dir)
 
     file_list = get_files_recursively(args.src_dir)
 
@@ -235,6 +318,7 @@ def main(args):
     head_image_batch = []
     file_character_dict = dict()
 
+    force_cudnn_initialization()
     print('Processing...')
     for idx, file_path in enumerate(tqdm(file_list)):
 
@@ -256,12 +340,15 @@ def main(args):
             print(f'Error: {json_file} not found')
             exit(1)
 
-        if 'character' in metadata and not args.overwrite:
-            print(f'Warning: attribute `characters` found in {json_file}, ' +
+        modify_metadata = args.overwrite or args.add_outfit
+
+        if 'character' in metadata and not modify_metadata:
+            print(f'Warning: attribute `character` found in {json_file}, ' +
                   'skip')
             continue
 
         head_images = get_head_images(image, metadata, args.face_crop_aug)
+
         while len(head_images) > 0:
             file_path_batch.append(file_path)
             head_image_batch.append(head_images.pop(0))
@@ -269,7 +356,11 @@ def main(args):
                 characters = get_characters(
                     head_image_batch,
                     model_cls,
+                    model_cls2,
+                    # model_cls_outfit,
+                    model_cls_outfit2,
                     classid_classname_dic,
+                    classid_classname_dic_outfit,
                     args,
                     model_tag, tags_all, tokenizer, device)
                 for file_path, character in zip(file_path_batch, characters):
@@ -282,7 +373,11 @@ def main(args):
                 characters = get_characters(
                     head_image_batch,
                     model_cls,
+                    model_cls2,
+                    # model_cls_outfit,
+                    model_cls_outfit2,
                     classid_classname_dic,
+                    classid_classname_dic_outfit,
                     args,
                     model_tag, tags_all, tokenizer, device)
                 for file_path, character in zip(file_path_batch, characters):
@@ -293,7 +388,7 @@ def main(args):
                 with open(json_file, 'r') as f:
                     metadata = json.load(f)
                 characters = file_character_dict[file_path]
-                metadata['character'] = characters
+                update_characters(metadata, characters, args.overwrite)
                 with open(json_file, "w") as f:
                     json.dump(metadata, f)
             file_path_batch = []
@@ -303,13 +398,13 @@ def main(args):
 
 class VisionTransformer(nn.Module):
 
-    def __init__(self, args):
+    def __init__(self, args, num_classes):
         super(VisionTransformer, self).__init__()
 
         def_config = PRETRAINED_CONFIGS['{}'.format(args.model_name)]['config']
         self.configuration = ViTConfigExtended(**def_config)
-        self.configuration.num_classes = args.num_classes
-        self.configuration.image_size = args.image_size
+        self.configuration.num_classes = num_classes
+        self.configuration.image_size = 128
         self.configuration.max_text_seq_len = args.max_text_seq_len
         if args.vocab_size:
             self.configuration.vocab_size = args.vocab_size
@@ -466,10 +561,30 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--src_dir', required=True,
                         help='Source directory of images')
-    parser.add_argument('--checkpoint_path', type=str, default=None)
     parser.add_argument(
-        '--dataset_path',
-        help='Path for the dataset; For classifier id correspondance')
+        '--cls_vit_path',
+        help='Path to VIT classifier',
+        required=True,
+        type=str, default=None)
+    # parser.add_argument(
+    #     '--cls_outfit_vit_path',
+    #     help='Path to VIT classifier for common outfit',
+    #     required=True,
+    #     type=str, default=None)
+    parser.add_argument(
+        '--cls_swin_dir',
+        help='Directory for swin classifier',
+        type=str, default=None)
+    parser.add_argument(
+        '--cls_outfit_swin_dir',
+        help='Directory for swin classifier for common outfit',
+        type=str, default=None)
+    parser.add_argument(
+        '--classid_classname_path',
+        help='Path for the classifier id correspondance')
+    parser.add_argument(
+        '--classid_classname_path_outfit',
+        help='Path for the classifier id correspondance for outfits')
     parser.add_argument(
         '--batch_size',
         type=int,
@@ -490,11 +605,6 @@ if __name__ == '__main__':
         default=1.5,
         help='Ratio between size of the cropped image and that of the face')
     parser.add_argument(
-        '--image_size',
-        default=128,
-        type=int,
-        help='Image (square) resolution size')
-    parser.add_argument(
         '--max_text_seq_len',
         default=16,
         required=False,
@@ -514,6 +624,10 @@ if __name__ == '__main__':
         action='store_true',
         help='Overwrite existing character metadata')
     parser.add_argument(
+        '--add_outfit',
+        action='store_true',
+        help='Only add outfits to characters when character already exists')
+    parser.add_argument(
         '--tagger_dir',
         type=str, default='tagger/wd14_tagger_model',
         help='directory to store wd14 tagger model')
@@ -524,16 +638,23 @@ if __name__ == '__main__':
         help="threshold of confidence to add a tag")
     args = parser.parse_args()
 
-    classid_classname_dic = pd.read_csv(os.path.join(args.dataset_path,
-                                                     'classid_classname.csv'),
+    classid_classname_dic = pd.read_csv(args.classid_classname_path,
                                         sep=',',
                                         header=0,
                                         names=['class_id', 'class_name'],
                                         dtype={
-        'class_id': 'UInt16',
-        'class_name': 'object'
-    })
-    args.num_classes = len(classid_classname_dic)
+                                            'class_id': 'UInt16',
+                                            'class_name': 'object'
+                                        })
+    classid_classname_dic_outfit = pd.read_csv(
+        args.classid_classname_path_outfit,
+        sep=',',
+        header=0,
+        names=['class_id', 'class_name'],
+        dtype={
+            'class_id': 'UInt16',
+            'class_name': 'object'
+        })
 
     if args.multimodal:
         args.model_name = 'B_16'
@@ -544,4 +665,4 @@ if __name__ == '__main__':
     args.ret_attn_scores = False
     args.pretrained = False
 
-    main(args)
+    main(args, classid_classname_dic, classid_classname_dic_outfit)

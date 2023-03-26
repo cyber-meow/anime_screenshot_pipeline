@@ -39,7 +39,8 @@ def rename_folder(folder_name, class_mapping, drop_unknown_class=False):
             new_class = class_mapping[old_class]
         else:
             new_class = old_class
-            unknown_class = True
+            if new_class not in class_mapping.values():
+                unknown_class = True
         new_classes.append(new_class)
     if unknown_class and drop_unknown_class:
         return None

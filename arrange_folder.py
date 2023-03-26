@@ -2,6 +2,7 @@ import argparse
 import cv2
 import os
 import json
+import toml
 import shutil
 
 from tqdm import tqdm
@@ -12,7 +13,10 @@ import numpy as np
 
 def get_files_recursively(folder_path):
     allowed_patterns = [
-        '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+        '*.[Pp][Nn][Gg]',
+        '*.[Jj][Pp][Gg]',
+        '*.[Jj][Pp][Ee][Gg]',
+        '*.[Ww][Ee][Bb][Pp]',
     ]
 
     image_path_list = [
@@ -43,23 +47,40 @@ def get_folder_name(folder_type, info_dict, args):
         suffix = 'face' if count == 1 else 'faces'
         return f'{count}_{suffix}'
     elif folder_type == 'n_characters':
-        characters = sorted(list(set(info_dict['characters'])))
+        if 'character' in info_dict:
+            characters = info_dict['character']
+        else:
+            characters = info_dict['characters']
+        if len(characters) > 0 and type(characters[0]) is list:
+            characters = [character[0] for character in characters]
+        characters = sorted(list(set(characters)))
         for to_remove in ['unknown', 'ood']:
             characters = list(filter(
                 lambda item: item != to_remove, characters))
         n_character = len(characters)
         if n_character >= args.max_character_number:
-            return f'{args.max_character_number}+characters'
+            return f'{args.max_character_number}+_characters'
         suffix = 'character' if n_character == 1 else 'characters'
         return f'{n_character}_{suffix}'
     elif folder_type == 'character':
-        characters = sorted(list(set(info_dict['characters'])))
+        if 'character' in info_dict:
+            characters = info_dict['character']
+        else:
+            characters = info_dict['characters']
+        if len(characters) > 0 and type(characters[0]) is list:
+            characters = [character[0] for character in characters]
+        characters = sorted(list(set(characters)))
         for to_remove in ['unknown', 'ood']:
             characters = list(filter(
                 lambda item: item != to_remove, characters))
         if len(characters) == 0:
             return 'character_others'
-        return '+'.join(sorted(characters))
+        character_folder = '+'.join(sorted(characters))
+        # Cannot have folder of too long name
+        if len(character_folder) >= 100:
+            return 'character_others'
+        else:
+            return character_folder.replace('.', '')
     elif folder_type == 'fh_ratio':
         fh_ratio = min(int(info_dict['fh_ratio'] * 100), 99)
         folder_range = args.face_ratio_folder_range
@@ -68,7 +89,7 @@ def get_folder_name(folder_type, info_dict, args):
         return f'face_height_ratio_{lb}-{ub}'
 
 
-def get_dst_dir(path, args):
+def get_dst_dir(path, info_dict, args):
 
     if args.keep_src_structure:
         dst_dir = os.path.dirname(path).replace(
@@ -77,10 +98,6 @@ def get_dst_dir(path, args):
         dst_dir = args.dst_dir
     if args.format == '':
         return dst_dir, None
-
-    path_noext = os.path.splitext(path)[0]
-    with open(f'{path_noext}.json', 'r') as f:
-        info_dict = json.load(f)
 
     folder_types = args.format.split('/')
     character_folder = None
@@ -100,7 +117,7 @@ def count_n_images(filenames):
         # Get the file extension
         extension = os.path.splitext(filename)[1]
         # Check if the extension is one of the common image file extensions
-        if extension.lower() in [".png", ".jpg", ".jpeg", ".gif"]:
+        if extension.lower() in [".png", ".jpg", ".jpeg", ".webp"]:
             # If it is, increment the count
             count += 1
     return count
@@ -111,18 +128,15 @@ def move_aux_files(old_path, new_path, move_file):
     old_path_noext = os.path.splitext(old_path)[0]
     new_path_noext = os.path.splitext(new_path)[0]
 
-    original_aux_files = [
-        old_path + '.tags',
-        old_path_noext + '.facedata.json',  # for legacy
-        old_path_noext + '.json',
-        old_path_noext + '.txt',
-    ]
-    new_aux_files = [
-        new_path + '.tags',
-        new_path_noext + '.facedata.json',
-        new_path_noext + '.json',
-        new_path_noext + '.txt',
-    ]
+    extensions = ['.tags', '.toml', '.json', '.facedata.json', '.txt']
+
+    original_aux_files = (
+        [old_path + ext for ext in extensions]
+        + [old_path_noext + ext for ext in extensions])
+
+    new_aux_files = (
+        [new_path + ext for ext in extensions]
+        + [new_path_noext + ext for ext in extensions])
 
     for original_file, new_file in zip(original_aux_files, new_aux_files):
         if os.path.exists(original_file):
@@ -157,11 +171,11 @@ def remove_empty_folders(path_abs):
 def resize_image(image, max_size):
 
     height, width = image.shape[:2]
-    if max_size > max(height, width):
+    if max_size > min(height, width):
         return image
 
     # Calculate the scaling factor
-    scaling_factor = max_size / max(height, width)
+    scaling_factor = max_size / min(height, width)
 
     # Resize the image
     return cv2.resize(
@@ -172,7 +186,6 @@ def resize_image(image, max_size):
 def main(args):
 
     print('processing.')
-    output_extension = '.png'
 
     paths = get_files_recursively(args.src_dir)
     character_combination_dict = dict()
@@ -181,21 +194,31 @@ def main(args):
 
         path_noext = os.path.splitext(path)[0]
 
-        json_file = f'{path_noext}.json'
+        meta_file = f'{path}{args.meta_format}'
+        if not os.path.exists(meta_file):
+            path_noext = os.path.splitext(path)[0]
+            meta_file = f'{path_noext}{args.meta_format}'
         try:
-            with open(json_file, 'r') as f:
-                metadata = json.load(f)
+            with open(meta_file, 'r') as f:
+                if args.meta_format == '.json':
+                    metadata = json.load(f)
+                else:
+                    metadata = toml.load(f)['meta']
         except FileNotFoundError:
-            print(f'Warning: {json_file} not found, skip')
+            print(f'Warning: {meta_file} not found, skip')
             continue
-        if 'n_faces' not in metadata:
-            print(f'Warning: `n_faces` not found in {json_file}')
-        n_faces = metadata['n_faces']
-        if (n_faces < args.min_face_number
-                or n_faces > args.max_face_number):
-            continue
+        # if 'n_faces' not in metadata:
+        #     print(f'Warning: `n_faces` not found in {json_file}')
+        if args.min_face_number is not None:
+            n_faces = metadata['n_faces']
+            if n_faces < args.min_face_number:
+                continue
+        if args.max_face_number is not None:
+            n_faces = metadata['n_faces']
+            if n_faces > args.max_face_number:
+                continue
 
-        dst_dir, character_folder = get_dst_dir(path, args)
+        dst_dir, character_folder = get_dst_dir(path, metadata, args)
         os.makedirs(dst_dir, exist_ok=True)
         new_path_noext = os.path.join(
             dst_dir, os.path.basename(path_noext))
@@ -221,9 +244,13 @@ def main(args):
                 image = image[:, :, :3].copy()
             if args.max_image_size is not None:
                 image = resize_image(image, args.max_image_size)
-            output_extension = '.png'
-            new_path = new_path_noext + output_extension
-            _, buf = cv2.imencode(output_extension, image)
+            if args.output_extension == '.png':
+                _, buf = cv2.imencode(args.output_extension, image)
+            elif args.output_extension == '.webp':
+                _, buf = cv2.imencode(
+                    args.output_extension, image,
+                    [cv2.IMWRITE_WEBP_QUALITY, 95])
+            new_path = new_path_noext + args.output_extension
             with open(new_path, 'wb') as f:
                 buf.tofile(f)
 
@@ -237,7 +264,7 @@ def main(args):
     if args.min_image_per_combination > 1:
         merge_folder(
             character_combination_dict, args.min_image_per_combination)
-        remove_empty_folders(args.dst_dir)
+    remove_empty_folders(args.dst_dir)
 
 
 if __name__ == '__main__':
@@ -255,17 +282,27 @@ if __name__ == '__main__':
         help='Move the orignal image instead of saving a new one')
     parser.add_argument(
         '--max_image_size', type=int, default=None,
-        help='Maximum size of the resulting image')
+        help='Maximum size of the resulting image (for the shorter edge)')
     parser.add_argument(
         '--min_face_number',
         type=int,
-        default=1,
+        default=None,
         help='The minimum number of faces an image should contain')
     parser.add_argument(
         '--max_face_number',
         type=int,
-        default=10,
+        default=None,
         help='The maximum number of faces an image can contain')
+    parser.add_argument(
+        '--meta_format', type=str, choices=['.json', '.toml'],
+        default='.json',
+        help='Meta data format'
+    )
+    parser.add_argument(
+        '--output_extension', type=str, choices=['.png', '.webp'],
+        default='.png',
+        help='Saved image format'
+    )
     parser.add_argument(
         '--keep_src_structure',
         action='store_true',

@@ -3,6 +3,7 @@ import sys
 import glob
 import pandas as pd
 import numpy as np
+import time
 from PIL import Image
 
 
@@ -11,7 +12,7 @@ def make_data_dic(data_folder):
     # makes an imagefolder (imagenet style) with images of class in
     # a certain folder into a txt dictionary with the first column being
     # the file dir (relative) and the second into the class
-    types = ('*.jpg', '*.jpeg', '*.png')  # the tuple of file types
+    types = ('*.jpg', '*.jpeg', '*.png', '*.webp')  # the tuple of file types
     files_all = []
     for file_type in types:
         # files_all is the list of files
@@ -49,7 +50,6 @@ def make_data_dic(data_folder):
             
             filename_classid_dic[rel_path] = [idx, tags]
 
-
     no_classes = idx + 1
     print('Total number of classes: ', no_classes)
     print('Total images files post-filtering (RGB only): ',
@@ -85,6 +85,10 @@ def make_data_dic(data_folder):
                                 sep=',',
                                 header=True,
                                 index=False)
+    classname_file = os.path.join(data_folder, 'classnames.txt')
+    with open(classname_file, 'w') as f:
+        f.write('\n'.join(sorted(class_name_list)))
+    time.sleep(1)
 
 
 def main():

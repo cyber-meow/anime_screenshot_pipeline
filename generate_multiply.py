@@ -4,6 +4,7 @@ import csv
 import logging
 import fnmatch
 import numpy as np
+import time
 
 from datetime import datetime
 from tqdm import tqdm
@@ -13,6 +14,7 @@ from pathlib import Path
 def get_files_recursively(folder_path):
     allowed_patterns = [
         '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+        '*.[Gg][Ii][Ff]', '*.[Ww][Ee][Bb][Pp]',
     ]
 
     image_path_list = [
@@ -46,7 +48,7 @@ class WeightTree(object):
             path = os.path.join(self.dirname, path)
             if os.path.isfile(path):
                 extension = os.path.splitext(path)[1]
-                if extension.lower() in ['.jpg', '.jpeg', '.png']:
+                if extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
                     if progress_bar is not None:
                         progress_bar.update(1)
                     self.n_images += 1
@@ -156,6 +158,11 @@ if __name__ == '__main__':
             logging.info(f'number of images: {n_images}')
             logging.info(f'original multipy: {per_image_multiply[k]}')
             logging.info(f'final multipy: {multiply}\n')
+
+    logging.info(f'Number of images: {n_images_totol}')
+    logging.info(f'Virtual dataset size: {n_images_virtual_total}')
+
+    time.sleep(1)
 
     print(f'Number of images: {n_images_totol}')
     print(f'Virtual dataset size: {n_images_virtual_total}')

@@ -9,6 +9,7 @@ from pathlib import Path
 def get_files_recursively(folder_path):
     allowed_patterns = [
         '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+        '*.[Gg][Ii][Ff]', '*.[Ww][Ee][Bb][Pp]',
     ]
 
     image_path_list = [
@@ -66,9 +67,9 @@ def correct_metadata_single(
         for to_remove in ['unknown', 'ood']:
             if to_remove in characters:
                 characters.remove(to_remove)
-        if 'characters' in metadata:
+        if 'character' in metadata:
             characters_in_meta = sorted(
-                list(set(metadata['characters'])))
+                list(set(metadata['character'])))
             for to_remove in ['unknown', 'ood']:
                 if to_remove in characters_in_meta:
                     characters_in_meta.remove(to_remove)
@@ -81,7 +82,7 @@ def correct_metadata_single(
             for character in characters:
                 assert character in character_list, \
                     f'Invalid character {character} for {basename}'
-        metadata['characters'] = characters
+        metadata['character'] = characters
     else:
         print(f'Warning: invalid folder type {folder_type}')
 
