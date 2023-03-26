@@ -8,6 +8,21 @@ Google Colab implementation of this repo (Maintained by [TheSkinnyRat](https://g
 
 ---
 
+**2023.03.26 Update**
+If you are using [kohya trainer](https://github.com/kohya-ss/sd-scripts), you can use `flatten_folder.py` from `utilities` to switch between the hierachical format below and the format that is used by kohya trainer. Usage
+
+```
+python flatten_folder.py -separator ~ --src_dir /path/to/dataset_dir
+```
+
+If you do not have the used separator (`~` by default) in any folder name you can undo the change by
+
+```
+python flatten_folder.py -separator ~ --src_dir /path/to/dataset_dir --revert
+```
+
+---
+
 In this repository I detail the workflow that I have come out to semi-automatically build a dataset from anime for [Stable Diffusion](https://github.com/CompVis/stable-diffusion) fine-tuning.
 This is a collection of many resources found on internet (credit to the orignal authors), and some python code written by myself and [ChatGPT](https://chat.openai.com/chat).
 I managed to get this done on my personal laptop with 3070 Ti gpu and Ubuntu 22.04 installed.
