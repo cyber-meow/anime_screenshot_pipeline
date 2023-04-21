@@ -28,7 +28,7 @@ CSV_FILE = FILES[-1]
 def get_files_recursively(folder_path):
     allowed_patterns = [
         '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
-        '*.[Gg][Ii][Ff]'
+        '*.[Gg][Ii][Ff]', '*.[Ww][Ee][Bb][Pp]'
     ]
 
     image_path_list = [
