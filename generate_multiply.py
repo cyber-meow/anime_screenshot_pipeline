@@ -105,7 +105,7 @@ if __name__ == '__main__':
         '--max_multiply', type=int, default=100,
         help='maximum multiply of each image')
     parser.add_argument(
-        '--min_multiply', type=int, default=1,
+        '--min_multiply', type=float, default=1,
         help='minimum multiply of each image')
     parser.add_argument(
         '--weight_csv', default=None,
