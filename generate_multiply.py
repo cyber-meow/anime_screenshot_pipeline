@@ -105,6 +105,9 @@ if __name__ == '__main__':
         '--max_multiply', type=int, default=100,
         help='maximum multiply of each image')
     parser.add_argument(
+        '--min_multiply', type=int, default=1,
+        help='minimum multiply of each image')
+    parser.add_argument(
         '--weight_csv', default=None,
         help='If provided use the provided csv to modify weights')
     args = parser.parse_args()
@@ -130,6 +133,7 @@ if __name__ == '__main__':
     per_image_weights = probs/n_images_array
     # This makes the weights larger than 1
     per_image_multiply = per_image_weights / np.min(per_image_weights)
+    per_image_multiply = per_image_multiply * args.min_multiply
     per_image_multiply_final = np.minimum(
         np.around(per_image_multiply, 2), args.max_multiply)
 
