@@ -1,7 +1,5 @@
 import argparse
-import glob
 import os
-import json
 import random
 
 from PIL import Image
@@ -11,9 +9,24 @@ import torch
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 from blip.blip import blip_decoder
+from pathlib import Path
 # from Salesforce_BLIP.models.blip import blip_decoder
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+def get_files_recursively(folder_path):
+    allowed_patterns = [
+        '*.[Pp][Nn][Gg]', '*.[Jj][Pp][Gg]', '*.[Jj][Pp][Ee][Gg]',
+        '*.[Gg][Ii][Ff]', '*.[Ww][Ee][Bb][Pp]'
+    ]
+
+    image_path_list = [
+        str(path) for pattern in allowed_patterns
+        for path in Path(folder_path).rglob(pattern)
+    ]
+
+    return image_path_list
 
 
 def main(args):
@@ -31,8 +44,7 @@ def main(args):
     os.chdir('finetune')
 
   print(f"load images from {args.train_data_dir}")
-  image_paths = glob.glob(os.path.join(args.train_data_dir, "*.jpg")) + \
-      glob.glob(os.path.join(args.train_data_dir, "*.png")) + glob.glob(os.path.join(args.train_data_dir, "*.webp"))
+  image_paths = get_files_recursively(args.train_data_dir)
   print(f"found {len(image_paths)} images.")
 
   print(f"loading BLIP caption: {args.caption_weights}")
