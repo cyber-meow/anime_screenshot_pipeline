@@ -36,28 +36,24 @@ def parse_facepos(facepos_info):
         else:
             left, top, right, bottom = facepos
         cx = (left + right) / 2
-        cy = (top + bottom) / 2
-        if cx < 0.2:
-            posh = 'fhll'
-        elif cx < 0.4:
-            posh = 'fhml'
-        elif cx < 0.6:
-            posh = 'fhmd'
-        elif cx < 0.8:
-            posh = 'fhmr'
+        # cy = (top + bottom) / 2
+        if cx < 0.38:
+            posh = 'at left'
+        elif cx < 0.62:
+            posh = 'in the middle'
         else:
-            posh = 'fhri'
-        if cy < 0.2:
-            posv = 'fvtp'
-        elif cy < 0.4:
-            posv = 'fvmt'
-        elif cy < 0.6:
-            posv = 'fvmd'
-        elif cy < 0.8:
-            posv = 'fvmb'
-        else:
-            posv = 'fvbt'
-        descrs.append(f'{posh} {posv}')
+            posh = 'at right'
+        # if cy < 0.2:
+        #     posv = 'fvtp'
+        # elif cy < 0.4:
+        #     posv = 'fvmt'
+        # elif cy < 0.6:
+        #     posv = 'fvmd'
+        # elif cy < 0.8:
+        #     posv = 'fvmb'
+        # else:
+        #     posv = 'fvbt'
+        descrs.append(f'{posh}')
     return ' '.join(descrs)
 
 

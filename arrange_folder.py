@@ -17,6 +17,7 @@ def get_files_recursively(folder_path):
         '*.[Jj][Pp][Gg]',
         '*.[Jj][Pp][Ee][Gg]',
         '*.[Ww][Ee][Bb][Pp]',
+        '*.[Gg][Ii][Ff]',
     ]
 
     image_path_list = [
@@ -247,9 +248,12 @@ def main(args):
             if args.output_extension == '.png':
                 _, buf = cv2.imencode(args.output_extension, image)
             elif args.output_extension == '.webp':
-                _, buf = cv2.imencode(
-                    args.output_extension, image,
-                    [cv2.IMWRITE_WEBP_QUALITY, 95])
+                try:
+                    _, buf = cv2.imencode(
+                        args.output_extension, image,
+                        [cv2.IMWRITE_WEBP_QUALITY, 95])
+                except cv2.error as e:
+                    print(f'Error reading the image {path}: {e}')
             new_path = new_path_noext + args.output_extension
             with open(new_path, 'wb') as f:
                 buf.tofile(f)
