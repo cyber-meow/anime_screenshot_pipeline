@@ -129,7 +129,7 @@ def move_aux_files(old_path, new_path, move_file):
     old_path_noext = os.path.splitext(old_path)[0]
     new_path_noext = os.path.splitext(new_path)[0]
 
-    extensions = ['.tags', '.toml', '.json', '.facedata.json', '.txt']
+    extensions = ['.tags', '.toml', '.json', '.facedata.json', '.txt', '.subjects']
 
     original_aux_files = (
         [old_path + ext for ext in extensions]

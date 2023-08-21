@@ -20,7 +20,7 @@ def get_files_recursively(folder_path):
     return image_path_list
 
 
-def correct_metadata(path, path_format, character_list):
+def correct_metadata(path, path_format, character_list, use_subject_file):
     json_file = os.path.splitext(path)[0] + '.json'
     if not os.path.exists(json_file):
         print(f'Warning: {json_file} unfound, skip')
@@ -35,6 +35,20 @@ def correct_metadata(path, path_format, character_list):
                                 basename, character_list)
     with open(json_file, 'w') as f:
         json.dump(metadata, f)
+
+    subject_file = os.path.splitext(path)[0] + '.subjects'
+
+    if use_subject_file and os.path.exists(subject_file):
+        with open(subject_file, 'r') as f:
+            characters_from_subject = list(
+                map(lambda x: x.strip(), f.read().strip().split(';')))
+            if characters_from_subject == [""]:
+                characters_from_subject = []
+        with open(json_file, 'r') as f:
+            metadata = json.load(f)
+        metadata['character'] = characters_from_subject
+        with open(json_file, 'w') as f:
+            json.dump(metadata, f)
 
 
 def correct_metadata_single(
@@ -101,6 +115,9 @@ if __name__ == '__main__':
         "--character_list", type=str, default=None,
         help="Txt file containing character names separated "
         + "by comma or new line")
+    parser.add_argument(
+        "--use_subject_file", action="store_true",
+        help="Use the subject file (if available) to replace character names in the json file")
     args = parser.parse_args()
 
     if args.character_list is not None:
@@ -116,4 +133,5 @@ if __name__ == '__main__':
     paths = get_files_recursively(args.src_dir)
 
     for path in tqdm(paths):
-        correct_metadata(path, args.format, character_list)
+        correct_metadata(path, args.format, character_list,
+                         args.use_subject_file)

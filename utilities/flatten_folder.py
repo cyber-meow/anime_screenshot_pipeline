@@ -21,7 +21,7 @@ def get_new_path(src_dir, path, separator):
     repeat = 1
     if os.path.exists(multiply_file):
         with open(multiply_file, 'r') as f:
-            repeat = int(float(f.readline().strip()))
+            repeat = round(float(f.readline().strip()))
     subpath = path.replace(src_dir, '').lstrip('/')
     new_subpath = subpath.replace('/', separator)
     return os.path.join(src_dir, f'{repeat}_{new_subpath}')

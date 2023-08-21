@@ -59,6 +59,7 @@ def parse_facepos(facepos_info):
 
 def dict_to_caption(info_dict, attire_list, args):
     caption = ""
+    sep_string = args.separator + " "
     characters = None
     if random.random() < args.use_npeople_prob and 'n_people' in info_dict:
         count = info_dict['n_people']
@@ -75,19 +76,19 @@ def dict_to_caption(info_dict, attire_list, args):
                     lambda item: item != to_remove, characters))
             if len(characters) > 0:
                 if caption != "":
-                    caption += '; '
-                caption += '; '.join(characters)
+                    caption += sep_string
+                caption += sep_string.join(characters)
     if random.random() < args.use_copyright_prob and 'copyright' in info_dict:
         copyright = info_dict['copyright']
         copyright = list(filter(
             lambda item: item != 'unknown', copyright))
         if len(copyright) > 0:
             if caption != "":
-                caption += '; '
+                caption += sep_string
             caption += 'from ' + ' '.join(copyright)
     if random.random() < args.use_general_prob and 'general' in info_dict:
         if caption != "":
-            caption += '; '
+            caption += sep_string
         caption += info_dict['general']
     if random.random() < args.use_artist_prob and 'artist' in info_dict:
         artist = info_dict['artist']
@@ -95,18 +96,18 @@ def dict_to_caption(info_dict, attire_list, args):
                 lambda item: item != 'anonymous', artist))
         if len(artist) > 0:
             if caption != "":
-                caption += '; '
+                caption += sep_string
             caption += 'by ' + ' '.join(artist)
     if random.random() < args.use_rating_prob and 'rating' in info_dict:
         if info_dict['rating'] == 'explicit':
             if caption != "":
-                caption += '; '
+                caption += sep_string
             caption += 'explicit'
     if random.random() < args.use_facepos_prob and 'facepos' in info_dict:
         facepos_info = info_dict['facepos']
         if len(facepos_info) > 0:
             if caption != "":
-                caption += '; '
+                caption += sep_string
             caption += parse_facepos(facepos_info)
     if random.random() < args.use_tags_prob and 'tags' in info_dict:
         has_outfit = False
@@ -124,7 +125,7 @@ def dict_to_caption(info_dict, attire_list, args):
             tags.remove('tracen_school_uniform')
         if len(tags) > 0:
             if caption != "":
-                caption += '; '
+                caption += sep_string
             caption += ', '.join(tags)
     return caption.replace('_', ' ')
 
@@ -166,6 +167,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_dir", type=str, help="directory to load images")
+    parser.add_argument("--separator", type=str, default=',')
+    parser.add_argument("--output_ext", type=str, default='.txt')
     parser.add_argument('--use_npeople_prob', type=float, default=0)
     parser.add_argument('--use_character_prob', type=float, default=1)
     parser.add_argument('--use_general_prob', type=float, default=1)
@@ -194,5 +197,5 @@ if __name__ == '__main__':
         with open(filename_noext + '.json', 'r') as f:
             info_dict = json.load(f)
         caption = dict_to_caption(info_dict, attire_list, args)
-        with open(filename_noext + '.txt', 'w') as f:
+        with open(filename_noext + args.output_ext, 'w') as f:
             f.write(caption)
