@@ -183,7 +183,9 @@ if __name__ == "__main__":
                         help="directory to save output files")
     parser.add_argument("--prefix", default='', help="output file prefix")
     parser.add_argument("--ep_init",
-                        default=1, help="episode number to start with")
+                        type=int,
+                        default=1,
+                        help="episode number to start with")
     parser.add_argument(
         "--thresh",
         type=float,
@@ -197,4 +199,4 @@ if __name__ == "__main__":
     # Process the files
     process_files(args.src_dir, args.dst_dir, args.prefix,
                   args.ep_init, thresh=args.thresh,
-                  remove_similar=not args.no_remove_similar)
+                  to_remove_similar=not args.no_remove_similar)
