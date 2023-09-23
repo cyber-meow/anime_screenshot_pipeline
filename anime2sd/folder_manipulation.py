@@ -3,6 +3,7 @@ import cv2
 import json
 import random
 import logging
+import shutil
 from pathlib import Path
 from tqdm import tqdm
 
@@ -64,7 +65,8 @@ def save_characters_to_meta(crop_dir):
                 with open(meta_file_path, 'r') as meta_file:
                     meta_data = json.load(meta_file)
             else:
-                meta_data = {}
+                raise ValueError(
+                    'All the cropped files should have corresponding metadata')
 
             # Update the characters field
             meta_data['characters'] = [char_name]
@@ -83,7 +85,13 @@ def save_characters_to_meta(crop_dir):
                     with open(original_meta_path, 'r') as orig_meta_file:
                         orig_meta_data = json.load(orig_meta_file)
                 else:
-                    orig_meta_data = {}
+                    orig_meta_data = {
+                        'path': original_path,
+                        'filename': os.path.basename(original_path),
+                        'group_id': os.path.dirname(
+                            original_path
+                        ).replace(os.path.sep, '_'),
+                    }
 
                 # Initialize characters list
                 # if the path hasn't been encountered in this run
@@ -119,15 +127,21 @@ def resize_image(image, max_size):
         interpolation=cv2.INTER_AREA)
 
 
-def save_image(img, path, ext):
+def save_image_and_meta(img, img_path, save_dir, ext):
     """
     Save the image based on the provided extension.
     Adjusts the path to match the extension if necessary.
+    Also copies the corresponding metadata file to the save directory.
     """
-    # Adjust the path to match the provided extension
-    base_path = os.path.splitext(path)[0]
-    adjusted_path = base_path + ext
+    # Extract the filename from the original image path
+    filename = os.path.basename(img_path)
+    base_filename = os.path.splitext(filename)[0]
 
+    # Adjust the filename to match the provided extension
+    adjusted_filename = base_filename + ext
+    adjusted_path = os.path.join(save_dir, adjusted_filename)
+
+    # Save the image
     if ext == '.webp':
         try:
             _, buf = cv2.imencode(ext, img, [cv2.IMWRITE_WEBP_QUALITY, 95])
@@ -140,6 +154,12 @@ def save_image(img, path, ext):
     else:
         # For other formats, we can use imwrite directly
         cv2.imwrite(adjusted_path, img)
+
+    # Copy the corresponding metadata file
+    meta_filename = f".{base_filename}_meta.json"
+    meta_path = os.path.join(os.path.dirname(img_path), meta_filename)
+    if os.path.exists(meta_path):
+        shutil.copy(meta_path, os.path.join(save_dir, meta_filename))
 
 
 def resize_character_images(crop_dir, full_dir, dst_dir,
@@ -168,15 +188,14 @@ def resize_character_images(crop_dir, full_dir, dst_dir,
                     continue
 
                 resized_img = resize_image(cropped_img, max_size)
-                save_path = os.path.join(dst_dir, 'cropped', img_file)
-                save_image(resized_img, save_path, ext)
+                save_dir = os.path.join(dst_dir, 'cropped')
+                save_image_and_meta(resized_img, img_path, save_dir, ext)
 
     logging.log(f'Processing images from {full_dir} ...')
     # Process images in full_dir
     nocharacter_frames = []
-    for img_file in tqdm(get_files_recursively(full_dir)):
-        img_path = os.path.join(full_dir, img_file)
-        base_name = os.path.basename(original_path).split('.')[0]
+    for img_path in tqdm(get_files_recursively(full_dir)):
+        base_name = os.path.basename(img_path).split('.')[0]
         meta_path = os.path.join(
             full_dir, f".{base_name}_meta.json")
 
@@ -187,9 +206,8 @@ def resize_character_images(crop_dir, full_dir, dst_dir,
             if 'characters' in meta_data and meta_data['characters']:
                 full_img = cv2.imread(img_path)
                 resized_img = resize_image(full_img, max_size)
-                save_path = os.path.join(dst_dir, 'full',
-                                         os.path.basename(img_file))
-                save_image(resized_img, save_path, ext)
+                save_dir = os.path.join(dst_dir, 'full')
+                save_image_and_meta(resized_img, img_path, save_dir, ext)
         else:
             nocharacter_frames.append(img_path)
 
@@ -199,8 +217,8 @@ def resize_character_images(crop_dir, full_dir, dst_dir,
             nocharacter_frames, n_nocharacter_frames)
     else:
         selected_frames = nocharacter_frames
-    for frame in selected_frames:
-        img = cv2.imread(frame)
+    for img_path in selected_frames:
+        img = cv2.imread(img_path)
         resized_img = resize_image(img, max_size)
-        save_path = os.path.join(dst_dir, 'full', os.path.basename(frame))
-        save_image(resized_img, save_path, ext)
+        save_dir = os.path.join(dst_dir, 'full')
+        save_image_and_meta(resized_img, img_path, save_dir, ext)

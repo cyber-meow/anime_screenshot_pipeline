@@ -31,13 +31,14 @@ def crop_characters(args, src_dir):
         PersonSplitAction(keep_original=False, level='n'),
         FaceCountAction(1, level='n'),
         HeadCountAction(1, level='n'),
-        MinSizeFilterAction(args.crop_min_size),
+        MinSizeFilterAction(args.min_crop_size),
         # Not used here because it can be problematic for multi-character scene
         # Some not moving while other moving
         # FilterSimilarAction('all'),
     )
 
-    dst_dir = os.path.join(os.path.dirname(src_dir), 'cropped')
+    dst_dir = os.path.join(args.dst_dir, 'intermediate',
+                           'screenshots', 'cropped')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Cropping individual characters to {dst_dir} ...')
     source.export(SaveExporter(dst_dir, no_meta=False))
@@ -47,7 +48,8 @@ def crop_characters(args, src_dir):
 
 def classify_characters(args, src_dir):
 
-    dst_dir = os.path.join(os.path.dirname(src_dir), 'classified')
+    dst_dir = os.path.join(args.dst_dir, 'intermediate',
+                           'screenshots', 'classified')
     os.makedirs(dst_dir, exist_ok=True)
     if src_dir == dst_dir:
         move = True
@@ -146,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--end_stage", default="4",
                         help="Stage or alias to end at")
     parser.add_argument(
-        "--save_intermediate", default="1",
+        "--save_intermediate", action='store_true',
         help="Whether to save intermediate result or not "
         + "(results after stage 1 are always saved)")
 
@@ -200,4 +202,5 @@ if __name__ == "__main__":
 
     # Loop through the stages and execute them
     for stage_num in range(int(start_stage), int(end_stage) + 1):
+        logging.info(f'Start stage {stage_num}')
         src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir)
