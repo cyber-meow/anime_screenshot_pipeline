@@ -102,9 +102,16 @@ def rename_folder_and_tags(folder, class_mapping, drop_unknown_class=False):
             modify_caption_file(caption_file, class_mapping)
 
 
+def get_all_subdirectories(root_dir):
+    subfolders = []
+    for root, dirs, files in os.walk(root_dir):
+        subfolders.append(root)
+    return subfolders
+
+
 def main(src_dir, class_mapping_csv, drop_unknown_class):
     class_mapping = read_class_mapping(class_mapping_csv)
-    for folder in tqdm(os.listdir(src_dir)):
+    for folder in tqdm(get_all_subdirectories(src_dir)):
         rename_folder_and_tags(os.path.join(
             src_dir, folder), class_mapping, drop_unknown_class)
 

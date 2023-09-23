@@ -134,6 +134,7 @@ def process_tags(tags, has_outfit, attire_list, args):
     new_tags = []
     general_tags = []
     has_tracen_school_uniform = False
+    blacklist = ['parody']
     for tag in tags:
         if 'boy' in tag or 'girl' in tag or 'solo' in tag:
             general_tags.append(tag)
@@ -145,6 +146,7 @@ def process_tags(tags, has_outfit, attire_list, args):
                 or 'twintail' in tag
                 or 'braid' in tag
                 or 'bun' in tag
+                or 'bangs' in tag
                 or 'ahoge' in tag):
             if not args.drop_hair_tag:
                 new_tags.append(tag)
@@ -154,7 +156,7 @@ def process_tags(tags, has_outfit, attire_list, args):
         elif has_outfit and tag.replace('_', ' ') in attire_list:
             if not args.drop_outfit_tag:
                 new_tags.append(tag)
-        else:
+        elif tag not in blacklist:
             new_tags.append(tag)
     if args.shuffle_tags:
         random.shuffle(new_tags)
