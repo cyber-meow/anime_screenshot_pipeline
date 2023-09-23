@@ -1,5 +1,4 @@
 import os
-import glob
 import shutil
 import random
 import string
@@ -7,6 +6,7 @@ import logging
 from tqdm import tqdm
 from natsort import natsorted
 from hbutils.string import plural_word
+from pathlib import Path
 
 import numpy as np
 from sklearn.cluster import OPTICS
@@ -20,7 +20,32 @@ def random_string(length=6):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 
-def save_to_dir(image_files, dst_dir, labels, class_names=None, move=False):
+def remove_empty_folders(path_abs):
+    walk = list(os.walk(path_abs))
+    for path, _, _ in walk[::-1]:
+        if len(os.listdir(path)) == 0:
+            os.rmdir(path)
+
+
+def get_files_recursively(folder_path):
+    allowed_patterns = [
+        '*.[Pp][Nn][Gg]',
+        '*.[Jj][Pp][Gg]',
+        '*.[Jj][Pp][Ee][Gg]',
+        '*.[Ww][Ee][Bb][Pp]',
+        '*.[Gg][Ii][Ff]',
+    ]
+
+    image_path_list = [
+        str(path) for pattern in allowed_patterns
+        for path in Path(folder_path).rglob(pattern)
+    ]
+
+    return image_path_list
+
+
+def save_to_dir(image_files, images, dst_dir, labels,
+                class_names=None, move=False):
 
     unique_labels = sorted(set(labels))
     for label in unique_labels:
@@ -36,7 +61,8 @@ def save_to_dir(image_files, dst_dir, labels, class_names=None, move=False):
         logging.info(
             f'class {folder_name} has {plural_word(total, "image")} in total.')
 
-        for imgfile in image_files[labels == label]:
+        for imgfile, img in zip(
+                image_files[labels == label], images[labels == label]):
             if move:
                 shutil.move(imgfile, os.path.join(
                     dst_dir, folder_name, os.path.basename(imgfile)))
@@ -48,14 +74,26 @@ def save_to_dir(image_files, dst_dir, labels, class_names=None, move=False):
             base_name = os.path.basename(imgfile).replace('.png', '')
             meta_file = os.path.join(
                 os.path.dirname(imgfile), f".{base_name}_meta.json")
+            meta_file_dst = os.path.join(dst_dir, folder_name,
+                                         os.path.basename(meta_file))
 
             if os.path.exists(meta_file):
                 if move:
-                    shutil.move(meta_file, os.path.join(
-                        dst_dir, folder_name, os.path.basename(meta_file)))
+                    shutil.move(meta_file, meta_file_dst)
                 else:
-                    shutil.copyfile(meta_file, os.path.join(
-                        dst_dir, folder_name, os.path.basename(meta_file)))
+                    shutil.copyfile(meta_file, meta_file_dst)
+
+            cache_file = os.path.join(
+                os.path.dirname(imgfile), f".{base_name}_ccip.npy")
+            cache_file_dst = os.path.join(dst_dir, folder_name,
+                                          os.path.basename(cache_file))
+            if os.path.exists(cache_file):
+                if move:
+                    shutil.move(cache_file, cache_file_dst)
+                else:
+                    shutil.copyfile(cache_file, cache_file_dst)
+            else:
+                np.save(cache_file_dst, img)
 
 
 def parse_ref_dir(ref_dir):
@@ -219,6 +257,10 @@ def classify_characters(
                 # For reference images only one is similar is enough
                 if ref_r_sames[best_id] > 0:
                     cls_labels[i] = best_id
+                else:
+                    best_id = np.argmin(cluster_avg_dists)
+                    if r_sames[best_id] > same_threshold:
+                        cls_labels[i] = best_id
             else:
                 best_id = np.argmin(cluster_avg_dists)
                 if r_sames[best_id] > same_threshold:
@@ -247,7 +289,6 @@ def extract_from_noise(images, labels,
         desc='Matching for noises')
     labels[labels == -1] = noise_new_labels
     images_noise = images[labels == -1]
-    print(noise_new_labels)
 
     logging.info('Noise extracting complete.')
     label_cnt = {i: (labels == i).sum()
@@ -325,25 +366,38 @@ def cluster_characters(images,
     return labels, batch_diff, batch_same
 
 
+def load_image_features(src_dir):
+    image_files = np.array(
+        natsorted(get_files_recursively(src_dir)))
+    logging.info(
+        f'Extracting feature of {plural_word(len(image_files), "images")} ...')
+    images = []
+    for imgfile in tqdm(image_files, desc='Extract dataset features'):
+        base_name = os.path.basename(imgfile).replace('.png', '')
+        cache_file = os.path.join(
+            os.path.dirname(imgfile), f".{base_name}_ccip.npy")
+        if os.path.exists(cache_file):
+            images.append(np.load(cache_file))
+        else:
+            images.append(ccip_extract_feature(imgfile))
+    images = np.array(images)
+    return image_files, images
+
+
 def cluster_from_directory(src_dir, dst_dir,
                            merge_threshold: float = 0.85,
                            clu_min_samples: int = 5,
                            to_extract_from_noise: bool = True,
                            to_merge_clusters: bool = True,
                            move: bool = False):
-    image_files = np.array(
-        natsorted(glob.glob(os.path.join(src_dir, '*.png'))))
 
-    logging.info(
-        f'Extracting feature of {plural_word(len(image_files), "images")} ...')
-    images = np.array(
-        [ccip_extract_feature(img) for img in tqdm(
-            image_files, desc='Extract features')])
+    image_files, images = load_image_features(src_dir)
     labels, _, _ = cluster_characters(
         images, merge_threshold,
         clu_min_samples, to_extract_from_noise, to_merge_clusters)
 
-    save_to_dir(image_files, dst_dir, labels, move=move)
+    save_to_dir(image_files, images, dst_dir, labels, move=move)
+    remove_empty_folders(src_dir)
 
 
 def classify_from_directory(src_dir, dst_dir, ref_dir,
@@ -351,12 +405,8 @@ def classify_from_directory(src_dir, dst_dir, ref_dir,
                             to_extract_from_noise: bool = True,
                             move: bool = False):
 
-    image_files = np.array(
-        natsorted(glob.glob(os.path.join(src_dir, '*.png'))))
-    logging.info(
-        f'Extracting feature of {plural_word(len(image_files), "images")} ...')
-    images = np.array([ccip_extract_feature(img) for img in tqdm(
-        image_files, desc='Extract dataset features')])
+    image_files, images = load_image_features(src_dir)
+
     clu_ids, batch_diff, batch_same = cluster_characters(
         images, clu_min_samples=clu_min_samples,
         to_merge_clusters=False, to_extract_from_noise=False)
@@ -380,4 +430,5 @@ def classify_from_directory(src_dir, dst_dir, ref_dir,
         same_threshold=0.1,
         cluster_ids=clu_ids,
         ref_images=ref_images, desc='Classifying images')
-    save_to_dir(image_files, dst_dir, labels, class_names, move=move)
+    save_to_dir(image_files, images, dst_dir, labels, class_names, move=move)
+    remove_empty_folders(src_dir)

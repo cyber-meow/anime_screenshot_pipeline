@@ -1,7 +1,7 @@
 import os
-import argparse
-import shlex
 import re
+import shlex
+import logging
 from tqdm import tqdm
 
 import numpy as np
@@ -101,7 +101,7 @@ def mark_duplicate(subdataset, similarity_matrix, thresh=0.985):
 
 
 def remove_similar(dataset, model, thresh=0.985, max_compare_size=10000):
-    print('compute embeddings...')
+    logging.info('Compute embeddings ...')
     embeddings = dataset.compute_embeddings(model)
 
     samples_to_remove = set()
@@ -114,14 +114,14 @@ def remove_similar(dataset, model, thresh=0.985, max_compare_size=10000):
             dataset[k:end], similarity_matrix, thresh)
         samples_to_remove = samples_to_remove | samples_to_remove_sub
         samples_to_keep = samples_to_keep | samples_to_keep_sub
-    print('removing images...')
+    logging.info('Removing similar images ...')
     for sample_id in tqdm(samples_to_remove):
         os.remove(dataset[sample_id].filepath)
     dataset.delete_samples(list(samples_to_remove))
 
 
-def process_files(src_dir, dst_dir, prefix, ep_init=1,
-                  to_remove_similar=True, thresh=0.985):
+def extract_and_remove_similar(src_dir, dst_dir, prefix, ep_init=1,
+                               to_remove_similar=True, thresh=0.985):
     # Supported video file extensions
     video_extensions = ['.mp4', '.mkv', '.avi', '.flv', '.mov', '.wmv']
 
@@ -151,52 +151,24 @@ def process_files(src_dir, dst_dir, prefix, ep_init=1,
             "'mpdecimate=hi=64*200:lo=64*50:"\
             "frac=0.33,setpts=N/FRAME_RATE/TB' "\
             f"-qscale:v 1 -qmin 1 -c:a copy {shlex.quote(file_pattern)}"
-        print(ffmpeg_command)
+        logging.info(ffmpeg_command)
         os.system(ffmpeg_command)
 
         if to_remove_similar:
-            print("removing duplicates for '{filename_without_ext}':")
-            print("preparing dataset...")
+            logging.info("Removing duplicates for '{filename_without_ext}':")
+            logging.info("Preparing dataset ...")
             dataset = fo.Dataset.from_dir(dst_ep_dir,
                                           dataset_type=fo.types.ImageDirectory)
             remove_similar(dataset, model, thresh=thresh)
 
     # Go through all files again to remove duplicates from op and ed
     if to_remove_similar:
-        print("removing op duplicates:")
-        print("preparing dataset...")
+        logging.info("Removing op duplicates:")
+        logging.info("Preparing dataset...")
         dataset = create_dataset_from_subdirs(dst_dir, portion='first')
         remove_similar(dataset, model, thresh=thresh)
 
-        print("removing ed duplicates:")
-        print("preparing dataset...")
+        logging.info("Removing ed duplicates:")
+        logging.info("Preparing dataset ...")
         dataset = create_dataset_from_subdirs(dst_dir, portion='last')
         remove_similar(dataset, model, thresh=thresh)
-
-
-if __name__ == "__main__":
-    # Parse command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--src_dir", default='.',
-                        help="directory containing source files")
-    parser.add_argument("--dst_dir", default='.',
-                        help="directory to save output files")
-    parser.add_argument("--prefix", default='', help="output file prefix")
-    parser.add_argument("--ep_init",
-                        type=int,
-                        default=1,
-                        help="episode number to start with")
-    parser.add_argument(
-        "--thresh",
-        type=float,
-        default=0.985,
-        help="cosine similarity threshold for image duplicate detection")
-    parser.add_argument("--no-remove-similar",
-                        action="store_true",
-                        help="flag to not remove similar images")
-    args = parser.parse_args()
-
-    # Process the files
-    process_files(args.src_dir, args.dst_dir, args.prefix,
-                  args.ep_init, thresh=args.thresh,
-                  to_remove_similar=not args.no_remove_similar)
