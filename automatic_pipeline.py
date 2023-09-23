@@ -1,4 +1,5 @@
 import os
+import shutil
 import logging
 import argparse
 
@@ -10,10 +11,11 @@ from waifuc.action import FilterSimilarAction
 
 from anime2sd import extract_and_remove_similar
 from anime2sd import cluster_from_directory, classify_from_directory
+from anime2sd import save_characters_to_meta, resize_character_images
 
 
 def extract_frames(args, src_dir):
-    dst_dir = os.path.join(args.dst_dir, 'intermediate', 'raw')
+    dst_dir = os.path.join(args.dst_dir, 'intermediate', 'screenshots', 'raw')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Extracting frames to {dst_dir} ...')
     extract_and_remove_similar(src_dir, dst_dir, args.prefix,
@@ -30,13 +32,15 @@ def crop_characters(args, src_dir):
         FaceCountAction(1, level='n'),
         HeadCountAction(1, level='n'),
         MinSizeFilterAction(args.crop_min_size),
-        FilterSimilarAction('all'),
+        # Not used here because it can be problematic for multi-character scene
+        # Some not moving while other moving
+        # FilterSimilarAction('all'),
     )
 
     dst_dir = os.path.join(os.path.dirname(src_dir), 'cropped')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Cropping individual characters to {dst_dir} ...')
-    source.export(SaveExporter(src_dir, no_meta=False))
+    source.export(SaveExporter(dst_dir, no_meta=False))
 
     return dst_dir
 
@@ -64,13 +68,40 @@ def classify_characters(args, src_dir):
             args.character_ref_dir,
             clu_min_samples=args.cluster_min_samples,
             move=move)
+    return os.path.dirname(dst_dir)
 
 
-def construct_dataset(args):
-    pass
+def construct_dataset(args, src_dir):
+    class_dir = os.path.join(src_dir, 'classified')
+    full_dir = os.path.join(src_dir, 'raw')
+    tmp_dir = os.path.join(src_dir, 'tmp')
+    final_dst_dir = os.path.join(args.dst_dir, 'training', 'screenshots')
+    if args.filter_again:
+        dst_dir = tmp_dir
+    else:
+        dst_dir = final_dst_dir
+    logging.info(f'Preparing dataset images to {final_dst_dir} ...')
+    save_characters_to_meta(class_dir)
+    resize_character_images(class_dir, full_dir, dst_dir,
+                            args.max_size, args.image_save_ext,
+                            args.n_anime_reg)
+    if args.filter_again:
+        for folder in ['cropped', 'full']:
+            source = LocalSource(os.path.join(tmp_dir, folder))
+            source = source.attach(
+                FilterSimilarAction('all'),
+            )
+            dst_dir = os.path.join(final_dst_dir, folder)
+            os.makedirs(dst_dir, exist_ok=True)
+            source.export(SaveExporter(dst_dir, no_meta=False))
+        shutil.rmtree(tmp_dir)
+    if not args.save_intermediate:
+        shutil.rmtree(class_dir)
+        shutil.rmtree(full_dir)
 
 
 def tag_images(args):
+    # possibility to save .tags and .subjects files here
     pass
 
 
@@ -112,7 +143,7 @@ if __name__ == "__main__":
                         help="directory to save output files")
     parser.add_argument("--start_stage", default="1",
                         help="Stage or alias to start from")
-    parser.add_argument("--end_stage", default="1",
+    parser.add_argument("--end_stage", default="4",
                         help="Stage or alias to end at")
     parser.add_argument(
         "--save_intermediate", default="1",
@@ -142,6 +173,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cluster_min_samples", type=int, default=5,
         help="minimum cluster samples in character clusterining")
+
+    # Arguments for dataset construction
+    parser.add_argument("--filter_again", action="store_true",
+                        help="use lpips to filter repeated images here")
+    parser.add_argument("--max_size", type=int, default=768,
+                        help="max image size that shorter edge aligns to")
+    parser.add_argument("--image_save_ext", default='.webp',
+                        help="dataset image extensino")
+    parser.add_argument("--n_anime_reg", type=int, default=500,
+                        help="number of images with no characters to kepp")
 
     args = parser.parse_args()
 
