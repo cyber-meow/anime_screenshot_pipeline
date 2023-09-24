@@ -12,6 +12,31 @@ from sklearn.metrics.pairwise import cosine_similarity
 from anime2sd.basics import get_related_paths
 
 
+def load_image_dataset(dataset_dir):
+    """
+    Load all images from a directory to create a dataset
+    Note that the original dataset does not support .webp
+    """
+    dataset = fo.Dataset()
+
+    # List of common image file extensions
+    image_extensions = ['.jpg', '.jpeg', '.png',
+                        '.bmp', '.gif', '.webp', '.tiff', '.tif']
+
+    # Iterate over all files in the dataset directory
+    for root, _, filenames in os.walk(dataset_dir):
+        for filename in filenames:
+            # Check if the file is an image by its extension
+            if any(filename.lower().endswith(ext) for ext in image_extensions):
+                filepath = os.path.join(root, filename)
+
+                # Create a sample and add it to the dataset
+                sample = fo.Sample(filepath=filepath)
+                dataset.add_sample(sample)
+
+    return dataset
+
+
 def create_dataset_from_subdirs(dataset_dir, portion="first"):
     """
     Create a FiftyOne dataset from a directory of images.
@@ -36,8 +61,9 @@ def create_dataset_from_subdirs(dataset_dir, portion="first"):
         subdir_path = os.path.join(dataset_dir, subdir)
         if os.path.isdir(subdir_path):
             # Extract numbers from the filenames and sort them
-            image_files = [f for f in os.listdir(
-                subdir_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            image_files = [
+                    f for f in os.listdir(subdir_path)
+                    if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
             image_numbers = [int(number_extractor.search(f).group(1))
                              for f in image_files]
             sorted_files = [x for _, x in sorted(
@@ -129,8 +155,7 @@ def remove_similar(dataset, model, thresh=0.985, max_compare_size=10000):
 
 def remove_similar_from_dir(dirpath, model,
                             thresh=0.985, max_cmopare_size=10000):
-    dataset = fo.Dataset.from_dir(
-        dirpath, dataset_type=fo.types.ImageDirectory)
+    dataset = load_image_dataset(dirpath)
     remove_similar(
         dataset, model, thresh=thresh, max_compare_size=max_cmopare_size)
 

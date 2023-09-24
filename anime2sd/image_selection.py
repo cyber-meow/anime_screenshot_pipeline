@@ -37,6 +37,7 @@ def rearrange_related_files(classified_dir):
     all_files = construct_file_list(classified_dir)
     image_files = get_images_recursively(classified_dir)
 
+    logging.info('Arranging related files ...')
     for img_path in tqdm(image_files, desc="Rearranging related files"):
         related_paths = get_related_paths(img_path)
         for related_path in related_paths:
@@ -63,12 +64,10 @@ def save_characters_to_meta(classified_dir):
 
     encountered_paths = set()  # To keep track of paths encountered in this run
 
-    logging.info('Save characters to metadata ...')
+    logging.info('Saving characters to metadata ...')
     # Iterate over each folder in the classified directory
     for folder_name in tqdm(os.listdir(classified_dir)):
         char_name = '_'.join(folder_name.split('_')[1:])
-        if char_name.startswith('noise'):
-            continue
         folder_path = os.path.join(classified_dir, folder_name)
 
         # Ensure it's a directory
@@ -98,7 +97,10 @@ def save_characters_to_meta(classified_dir):
                     'All the cropped files should have corresponding metadata')
 
             # Update the characters field
-            meta_data['characters'] = [char_name]
+            if char_name.startswith('noise'):
+                meta_data['characters'] = []
+            else:
+                meta_data['characters'] = [char_name]
 
             # Check for the 'path' field and update it
             if 'path' in meta_data:
