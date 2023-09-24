@@ -9,6 +9,8 @@ import fiftyone as fo
 import fiftyone.zoo as foz
 from sklearn.metrics.pairwise import cosine_similarity
 
+from anime2sd.basics import get_related_paths
+
 
 def create_dataset_from_subdirs(dataset_dir, portion="first"):
     """
@@ -116,11 +118,26 @@ def remove_similar(dataset, model, thresh=0.985, max_compare_size=10000):
         samples_to_keep = samples_to_keep | samples_to_keep_sub
     logging.info('Removing similar images ...')
     for sample_id in tqdm(samples_to_remove):
-        os.remove(dataset[sample_id].filepath)
+        img_path = dataset[sample_id].filepath
+        os.remove(img_path)
+        related_paths = get_related_paths(img_path)
+        for related_path in related_paths:
+            if os.path.exists(related_path):
+                os.remove(related_path)
     dataset.delete_samples(list(samples_to_remove))
 
 
-def extract_and_remove_similar(src_dir, dst_dir, prefix, ep_init=1,
+def remove_similar_from_dir(dirpath, model,
+                            thresh=0.985, max_cmopare_size=10000):
+    dataset = fo.Dataset.from_dir(
+        dirpath, dataset_type=fo.types.ImageDirectory)
+    remove_similar(
+        dataset, model, thresh=thresh, max_compare_size=max_cmopare_size)
+
+
+def extract_and_remove_similar(src_dir, dst_dir, prefix,
+                               ep_init=1,
+                               model_name=None,
                                to_remove_similar=True, thresh=0.985):
     # Supported video file extensions
     video_extensions = ['.mp4', '.mkv', '.avi', '.flv', '.mov', '.wmv']
@@ -131,8 +148,10 @@ def extract_and_remove_similar(src_dir, dst_dir, prefix, ep_init=1,
              for root, dirs, files in os.walk(src_dir)
              for file in files if os.path.splitext(file)[1]
              in video_extensions]
+    if model_name is None:
+        model_name = 'mobilenet-v2-imagenet-torch'
     if to_remove_similar:
-        model = foz.load_zoo_model("mobilenet-v2-imagenet-torch")
+        model = foz.load_zoo_model(model_name)
 
     # Loop through each file
     for i, file in enumerate(sorted(files)):

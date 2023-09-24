@@ -3,23 +3,28 @@ import shutil
 import logging
 import argparse
 
+import fiftyone.zoo as foz
+
 from waifuc.source import LocalSource
 from waifuc.export import SaveExporter
 from waifuc.action import PersonSplitAction, FaceCountAction, HeadCountAction
 from waifuc.action import MinSizeFilterAction, NoMonochromeAction
-from waifuc.action import FilterSimilarAction
 
-from anime2sd import extract_and_remove_similar
+from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import cluster_from_directory, classify_from_directory
-from anime2sd import save_characters_to_meta, resize_character_images
+from anime2sd import rearrange_related_files, save_characters_to_meta
+from anime2sd import resize_character_images
 
 
 def extract_frames(args, src_dir):
-    dst_dir = os.path.join(args.dst_dir, 'intermediate', 'screenshots', 'raw')
+    dst_dir = os.path.join(
+        args.dst_dir, 'intermediate', args.image_type, 'raw')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Extracting frames to {dst_dir} ...')
     extract_and_remove_similar(src_dir, dst_dir, args.prefix,
-                               args.ep_init, thresh=args.similar_thresh,
+                               ep_init=args.ep_init,
+                               model_name=args.detect_duplicate_model,
+                               thresh=args.similar_thresh,
                                to_remove_similar=not args.no_remove_similar)
 
 
@@ -37,8 +42,8 @@ def crop_characters(args, src_dir):
         # FilterSimilarAction('all'),
     )
 
-    dst_dir = os.path.join(args.dst_dir, 'intermediate',
-                           'screenshots', 'cropped')
+    dst_dir = os.path.join(
+        args.dst_dir, 'intermediate', args.image_type, 'cropped')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Cropping individual characters to {dst_dir} ...')
     source.export(SaveExporter(dst_dir, no_meta=False))
@@ -49,8 +54,8 @@ def crop_characters(args, src_dir):
 def classify_characters(args, src_dir):
     # TODO: add cluster filter mechanism (min image size, max k)
 
-    dst_dir = os.path.join(args.dst_dir, 'intermediate',
-                           'screenshots', 'classified')
+    dst_dir = os.path.join(
+        args.dst_dir, 'intermediate', args.image_type, 'classified')
     os.makedirs(dst_dir, exist_ok=True)
     if src_dir == dst_dir:
         move = True
@@ -74,34 +79,33 @@ def classify_characters(args, src_dir):
     return os.path.dirname(dst_dir)
 
 
-def construct_dataset(args, src_dir):
-    # TODO: add something to relocate json and npy file just in case
-    class_dir = os.path.join(src_dir, 'classified')
+def select_images_for_dataset(args, src_dir):
+    classified_dir = os.path.join(src_dir, 'classified')
     full_dir = os.path.join(src_dir, 'raw')
-    tmp_dir = os.path.join(src_dir, 'tmp')
-    final_dst_dir = os.path.join(args.dst_dir, 'training', 'screenshots')
+    dst_dir = os.path.join(args.dst_dir, 'training', args.image_type)
+
+    logging.info(f'Preparing dataset images to {dst_dir} ...')
+    # rearrange json and ccip in case of manual inspection
+    rearrange_related_files(classified_dir)
+    # update metadata using folder name
+    save_characters_to_meta(classified_dir)
+    # select images, resize, and save to training
+    resize_character_images(classified_dir, full_dir, dst_dir,
+                            max_size=args.max_size,
+                            ext=args.image_save_ext,
+                            image_type=args.image_type,
+                            n_nocharacter_frames=args.n_anime_reg,
+                            to_resize=not args.no_resize)
+
     if args.filter_again:
-        dst_dir = tmp_dir
-    else:
-        dst_dir = final_dst_dir
-    logging.info(f'Preparing dataset images to {final_dst_dir} ...')
-    save_characters_to_meta(class_dir)
-    resize_character_images(class_dir, full_dir, dst_dir,
-                            args.max_size, args.image_save_ext,
-                            args.n_anime_reg)
-    # The following gets killed on my laptop
-    if args.filter_again:
-        for folder in ['cropped', 'full']:
-            source = LocalSource(os.path.join(tmp_dir, folder))
-            source = source.attach(
-                FilterSimilarAction('all'),
-            )
-            dst_dir = os.path.join(final_dst_dir, folder)
-            os.makedirs(dst_dir, exist_ok=True)
-            source.export(SaveExporter(dst_dir, no_meta=False))
-        shutil.rmtree(tmp_dir)
+        logging.info(f'Removing duplicates from {dst_dir} ...')
+        model = foz.load_zoo_model(args.detect_duplicate_model)
+        for folder in ['cropped', 'full', 'no_characters']:
+            remove_similar_from_dir(os.path.join(dst_dir, folder),
+                                    model=model,
+                                    thresh=args.similar_thresh)
     if not args.save_intermediate:
-        shutil.rmtree(class_dir)
+        shutil.rmtree(classified_dir)
         shutil.rmtree(full_dir)
 
 
@@ -124,7 +128,7 @@ STAGE_FUNCTIONS = {
     1: extract_frames,
     2: crop_characters,
     3: classify_characters,
-    4: construct_dataset,
+    4: select_images_for_dataset,
     5: tag_images,
     6: generate_captions,
     7: rearrange_and_balance,
@@ -133,9 +137,13 @@ STAGE_FUNCTIONS = {
 
 # Mapping stage numbers to their aliases
 STAGE_ALIASES = {
-    1: "extract",
-    2: "process",
-    3: "analyze"
+    1: ['extract'],
+    2: ['crop'],
+    3: ['classify'],
+    4: ['select'],
+    5: ['tag'],
+    6: ['caption'],
+    7: ['arrange'],
 }
 
 
@@ -152,6 +160,9 @@ if __name__ == "__main__":
     parser.add_argument("--end_stage", default="4",
                         help="Stage or alias to end at")
     parser.add_argument(
+        "--image_type", default="screenshots",
+        help="Image type that we are dealing with, used for folder name")
+    parser.add_argument(
         "--save_intermediate", action='store_true',
         help="Whether to save intermediate result or not "
         + "(results after stage 1 are always saved)")
@@ -162,8 +173,11 @@ if __name__ == "__main__":
                         help="episode number to start with")
 
     # Arguments for duplicate detection
-    parser.add_argument("--no-remove-similar", action="store_true",
-                        help="flag to not remove similar images")
+    parser.add_argument("--no_remove_similar", action="store_true",
+                        help="do not remove similar images")
+    parser.add_argument("--detect_duplicate_model",
+                        default='mobilenet-v2-imagenet-torch',
+                        help="model used for duplicate detection")
     parser.add_argument(
         "--similar_thresh", type=float, default=0.985,
         help="cosine similarity threshold for image duplicate detection")
@@ -184,6 +198,8 @@ if __name__ == "__main__":
         help="directory conaining reference character images")
 
     # Arguments for dataset construction
+    parser.add_argument("--no_resize", action="store_true",
+                        help="do not perform image resizing")
     parser.add_argument("--filter_again", action="store_true",
                         help="use lpips to filter repeated images here")
     parser.add_argument("--max_size", type=int, default=768,

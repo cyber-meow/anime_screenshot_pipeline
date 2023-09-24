@@ -42,3 +42,9 @@ def get_corr_ccip_names(img_path):
     ccip_filename = f".{base_filename}_ccip.npy"
     ccip_path = os.path.join(os.path.dirname(img_path), ccip_filename)
     return ccip_path, ccip_filename
+
+
+def get_related_paths(img_path):
+    meta_path, _ = get_corr_meta_names(img_path)
+    ccip_path, _ = get_corr_ccip_names(img_path)
+    return [meta_path, ccip_path]

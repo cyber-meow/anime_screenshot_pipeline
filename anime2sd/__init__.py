@@ -1,3 +1,3 @@
-from .extract_and_remove_similar import extract_and_remove_similar
+from .extract_and_remove_similar import extract_and_remove_similar, remove_similar_from_dir
 from .character_utils import cluster_from_directory, classify_from_directory
-from .folder_manipulation import save_characters_to_meta, resize_character_images
+from .image_selection import rearrange_related_files, save_characters_to_meta, resize_character_images

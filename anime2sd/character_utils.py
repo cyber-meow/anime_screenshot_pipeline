@@ -45,17 +45,17 @@ def save_to_dir(image_files, images, dst_dir, labels,
         logging.info(
             f'class {folder_name} has {plural_word(total, "image")} in total.')
 
-        for imgfile, img in zip(
+        for img_path, img in zip(
                 image_files[labels == label], images[labels == label]):
+            img_path_dst = os.path.join(
+                dst_dir, folder_name, os.path.basename(img_path))
             if move:
-                shutil.move(imgfile, os.path.join(
-                    dst_dir, folder_name, os.path.basename(imgfile)))
+                shutil.move(img_path, img_path_dst)
             else:
-                shutil.copyfile(imgfile, os.path.join(
-                    dst_dir, folder_name, os.path.basename(imgfile)))
+                shutil.copy(img_path, img_path_dst)
 
             # Handle metadata files
-            meta_path, meta_filename = get_corr_meta_names(imgfile)
+            meta_path, meta_filename = get_corr_meta_names(img_path)
             meta_path_dst = os.path.join(dst_dir, folder_name, meta_filename)
 
             if os.path.exists(meta_path):
@@ -67,13 +67,13 @@ def save_to_dir(image_files, images, dst_dir, labels,
                 raise ValueError(
                     'All the cropped files should have corresponding metadata')
 
-            ccip_path, ccip_filename = get_corr_ccip_names(imgfile)
+            ccip_path, ccip_filename = get_corr_ccip_names(img_path)
             ccip_path_dst = os.path.join(dst_dir, folder_name, ccip_filename)
             if os.path.exists(ccip_path):
                 if move:
                     shutil.move(ccip_path, ccip_path_dst)
                 else:
-                    shutil.copyfile(ccip_path, ccip_path_dst)
+                    shutil.copy(ccip_path, ccip_path_dst)
             else:
                 np.save(ccip_path_dst, img)
 
@@ -355,12 +355,12 @@ def load_image_features(src_dir):
     logging.info(
         f'Extracting feature of {plural_word(len(image_files), "images")} ...')
     images = []
-    for imgfile in tqdm(image_files, desc='Extract dataset features'):
-        ccip_path, _ = get_corr_ccip_names(imgfile)
+    for img_path in tqdm(image_files, desc='Extract dataset features'):
+        ccip_path, _ = get_corr_ccip_names(img_path)
         if os.path.exists(ccip_path):
             images.append(np.load(ccip_path))
         else:
-            images.append(ccip_extract_feature(imgfile))
+            images.append(ccip_extract_feature(img_path))
     images = np.array(images)
     return image_files, images
 

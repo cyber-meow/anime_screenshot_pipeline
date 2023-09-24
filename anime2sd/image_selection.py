@@ -3,29 +3,73 @@ import cv2
 import json
 import random
 import logging
+import shutil
 from tqdm import tqdm
 
 from anime2sd.basics import get_images_recursively
 from anime2sd.basics import get_corr_meta_names, default_metadata
+from anime2sd.basics import get_related_paths
 
 
-def save_characters_to_meta(crop_dir):
+def construct_file_list(classified_dir):
+    """
+    Construct a list of all files in the directory and checks for duplicates.
+
+    :param classified_dir: The directory to search.
+    :return: A list of all file paths in the directory.
+    """
+    all_files = {}
+    for root, _, filenames in os.walk(classified_dir):
+        for filename in filenames:
+            path = os.path.join(root, filename)
+            if filename in all_files:
+                raise ValueError(f"Duplicate filename found: {filename}")
+            all_files[filename] = path
+    return all_files
+
+
+def rearrange_related_files(classified_dir):
+    """
+    Rearrange related files in the classified directory.
+
+    :param classified_dir: The directory containing classified images.
+    """
+    all_files = construct_file_list(classified_dir)
+    image_files = get_images_recursively(classified_dir)
+
+    for img_path in tqdm(image_files, desc="Rearranging related files"):
+        related_paths = get_related_paths(img_path)
+        for related_path in related_paths:
+            # If the related file does not exist in the expected location
+            if not os.path.exists(related_path):
+                # Search for the file in the all_files dictionary
+                found_path = all_files.get(os.path.basename(related_path))
+                if found_path is None:
+                    raise ValueError(
+                        f"No related file found for {related_path}")
+                # Move the found file to the expected location
+                shutil.move(found_path, related_path)
+                logging.info(
+                    f"Moved related file from {found_path} to {related_path}")
+
+
+def save_characters_to_meta(classified_dir):
     """
     Save character information to metadata files in the crop directory.
 
     Parameters:
-    - crop_dir: Directory containing classified character folders.
+    - classified_dir: Directory containing classified character folders.
     """
 
     encountered_paths = set()  # To keep track of paths encountered in this run
 
     logging.info('Save characters to metadata ...')
-    # Iterate over each folder in the crop directory
-    for folder_name in tqdm(os.listdir(crop_dir)):
+    # Iterate over each folder in the classified directory
+    for folder_name in tqdm(os.listdir(classified_dir)):
         char_name = '_'.join(folder_name.split('_')[1:])
         if char_name.startswith('noise'):
             continue
-        folder_path = os.path.join(crop_dir, folder_name)
+        folder_path = os.path.join(classified_dir, folder_name)
 
         # Ensure it's a directory
         if not os.path.isdir(folder_path):
@@ -103,7 +147,7 @@ def resize_image(image, max_size):
         interpolation=cv2.INTER_AREA)
 
 
-def save_image_and_meta(img, img_path, save_dir, ext):
+def save_image_and_meta(img, img_path, save_dir, ext, image_type):
     """
     Save the image based on the provided extension.
     Adjusts the path to match the extension if necessary.
@@ -137,6 +181,7 @@ def save_image_and_meta(img, img_path, save_dir, ext):
         with open(meta_path, 'r') as meta_file:
             meta_data = json.load(meta_file)
         meta_data['filename'] = meta_data['filename'].replace('.png', ext)
+        meta_data['type'] = image_type
 
         # Save the updated metadata with new extension
         with open(os.path.join(save_dir, meta_filename), 'w') as meta_file:
@@ -145,15 +190,32 @@ def save_image_and_meta(img, img_path, save_dir, ext):
         raise ValueError('All metadata must exist before resizing to dst')
 
 
-def resize_character_images(crop_dir, full_dir, dst_dir,
-                            max_size, ext, n_nocharacter_frames):
-    # Ensure destination directories exist
-    os.makedirs(os.path.join(dst_dir, 'cropped'), exist_ok=True)
-    os.makedirs(os.path.join(dst_dir, 'full'), exist_ok=True)
+def copy_image_and_meta(img_path, save_dir, image_type):
+    shutil.copy(img_path, os.path.join(save_dir, os.path.basename(img_path)))
+    # Copy the corresponding metadata file
+    meta_path, meta_filename = get_corr_meta_names(img_path)
+    if os.path.exists(meta_path):
+        with open(meta_path, 'r') as meta_file:
+            meta_data = json.load(meta_file)
+        meta_data['type'] = image_type
 
-    logging.info(f'Processing images from {crop_dir} ...')
-    # Process images in crop_dir
-    for img_path in tqdm(get_images_recursively(crop_dir)):
+        # Save the updated metadata with new extension
+        with open(os.path.join(save_dir, meta_filename), 'w') as meta_file:
+            json.dump(meta_data, meta_file, indent=4)
+    else:
+        raise ValueError('All metadata must exist before resizing to dst')
+
+
+def resize_character_images(classified_dir, full_dir, dst_dir,
+                            max_size, ext, image_type,
+                            n_nocharacter_frames, to_resize=True):
+
+    # Process images in classified_dir
+    logging.info(f'Processing images from {classified_dir} ...')
+    save_dir = os.path.join(dst_dir, 'cropped')
+    os.makedirs(save_dir, exist_ok=True)
+
+    for img_path in tqdm(get_images_recursively(classified_dir)):
         meta_path, _ = get_corr_meta_names(img_path)
 
         if os.path.exists(meta_path):
@@ -168,15 +230,20 @@ def resize_character_images(crop_dir, full_dir, dst_dir,
                 if cropped_img.size > 0.5 * original_img.size:
                     continue
 
-                resized_img = resize_image(cropped_img, max_size)
-                save_dir = os.path.join(dst_dir, 'cropped')
-                save_image_and_meta(resized_img, img_path, save_dir, ext)
+                if to_resize:
+                    resized_img = resize_image(cropped_img, max_size)
+                    save_image_and_meta(
+                        resized_img, img_path, save_dir, ext, image_type)
+                else:
+                    copy_image_and_meta(img_path, save_dir, image_type)
         else:
             raise ValueError(
                 'All the cropped files should have corresponding metadata')
 
-    logging.info(f'Processing images from {full_dir} ...')
     # Process images in full_dir
+    logging.info(f'Processing images from {full_dir} ...')
+    save_dir = os.path.join(dst_dir, 'full')
+    os.makedirs(save_dir, exist_ok=True)
     nocharacter_frames = []
     for img_path in tqdm(get_images_recursively(full_dir)):
         meta_path, _ = get_corr_meta_names(img_path)
@@ -186,10 +253,14 @@ def resize_character_images(crop_dir, full_dir, dst_dir,
                 meta_data = json.load(meta_file)
 
             if 'characters' in meta_data and meta_data['characters']:
-                full_img = cv2.imread(img_path)
-                resized_img = resize_image(full_img, max_size)
-                save_dir = os.path.join(dst_dir, 'full')
-                # save_image_and_meta(resized_img, img_path, save_dir, ext)
+
+                if to_resize:
+                    full_img = cv2.imread(img_path)
+                    resized_img = resize_image(full_img, max_size)
+                    save_image_and_meta(
+                        resized_img, img_path, save_dir, ext, image_type)
+                else:
+                    copy_image_and_meta(img_path, save_dir, image_type)
             else:
                 nocharacter_frames.append(img_path)
         else:
@@ -198,15 +269,24 @@ def resize_character_images(crop_dir, full_dir, dst_dir,
                 json.dump(meta_data, meta_file, indent=4)
             nocharacter_frames.append(img_path)
 
+    # Process no character images
     # Randomly select n_nocharacter_frames and save
+    save_dir = os.path.join(dst_dir, 'no_characters')
+    os.makedirs(save_dir, exist_ok=True)
+
     if n_nocharacter_frames < len(nocharacter_frames):
         selected_frames = random.sample(
             nocharacter_frames, n_nocharacter_frames)
     else:
         selected_frames = nocharacter_frames
+
     logging.info(f'Copying {len(selected_frames)} no character images ...')
+
     for img_path in tqdm(selected_frames):
-        img = cv2.imread(img_path)
-        resized_img = resize_image(img, max_size)
-        save_dir = os.path.join(dst_dir, 'full')
-        save_image_and_meta(resized_img, img_path, save_dir, ext)
+        if to_resize:
+            img = cv2.imread(img_path)
+            resized_img = resize_image(img, max_size)
+            save_image_and_meta(resized_img, img_path,
+                                save_dir, ext, image_type)
+        else:
+            copy_image_and_meta(img_path, save_dir, image_type)
