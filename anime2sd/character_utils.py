@@ -6,13 +6,14 @@ import logging
 from tqdm import tqdm
 from natsort import natsorted
 from hbutils.string import plural_word
-from pathlib import Path
 
 import numpy as np
 from sklearn.cluster import OPTICS
 
 from imgutils.metrics import ccip_extract_feature, ccip_default_threshold
 from imgutils.metrics import ccip_difference, ccip_batch_differences
+from anime2sd.basics import get_images_recursively
+from anime2sd.basics import get_corr_meta_names, get_corr_ccip_names
 
 
 def random_string(length=6):
@@ -25,23 +26,6 @@ def remove_empty_folders(path_abs):
     for path, _, _ in walk[::-1]:
         if len(os.listdir(path)) == 0:
             os.rmdir(path)
-
-
-def get_files_recursively(folder_path):
-    allowed_patterns = [
-        '*.[Pp][Nn][Gg]',
-        '*.[Jj][Pp][Gg]',
-        '*.[Jj][Pp][Ee][Gg]',
-        '*.[Ww][Ee][Bb][Pp]',
-        '*.[Gg][Ii][Ff]',
-    ]
-
-    image_path_list = [
-        str(path) for pattern in allowed_patterns
-        for path in Path(folder_path).rglob(pattern)
-    ]
-
-    return image_path_list
 
 
 def save_to_dir(image_files, images, dst_dir, labels,
@@ -71,29 +55,27 @@ def save_to_dir(image_files, images, dst_dir, labels,
                     dst_dir, folder_name, os.path.basename(imgfile)))
 
             # Handle metadata files
-            base_name = os.path.basename(imgfile).replace('.png', '')
-            meta_file = os.path.join(
-                os.path.dirname(imgfile), f".{base_name}_meta.json")
-            meta_file_dst = os.path.join(dst_dir, folder_name,
-                                         os.path.basename(meta_file))
+            meta_path, meta_filename = get_corr_meta_names(imgfile)
+            meta_path_dst = os.path.join(dst_dir, folder_name, meta_filename)
 
-            if os.path.exists(meta_file):
+            if os.path.exists(meta_path):
                 if move:
-                    shutil.move(meta_file, meta_file_dst)
+                    shutil.move(meta_path, meta_path_dst)
                 else:
-                    shutil.copyfile(meta_file, meta_file_dst)
-
-            cache_file = os.path.join(
-                os.path.dirname(imgfile), f".{base_name}_ccip.npy")
-            cache_file_dst = os.path.join(dst_dir, folder_name,
-                                          os.path.basename(cache_file))
-            if os.path.exists(cache_file):
-                if move:
-                    shutil.move(cache_file, cache_file_dst)
-                else:
-                    shutil.copyfile(cache_file, cache_file_dst)
+                    shutil.copyfile(meta_path, meta_path_dst)
             else:
-                np.save(cache_file_dst, img)
+                raise ValueError(
+                    'All the cropped files should have corresponding metadata')
+
+            ccip_path, ccip_filename = get_corr_ccip_names(imgfile)
+            ccip_path_dst = os.path.join(dst_dir, folder_name, ccip_filename)
+            if os.path.exists(ccip_path):
+                if move:
+                    shutil.move(ccip_path, ccip_path_dst)
+                else:
+                    shutil.copyfile(ccip_path, ccip_path_dst)
+            else:
+                np.save(ccip_path_dst, img)
 
 
 def parse_ref_dir(ref_dir):
@@ -247,6 +229,7 @@ def classify_characters(
                 for label in range(0, max_cluster_label + 1)
             ])
             batch_same_i = batch_same[i]
+            # May get nan here for some empty slice
             r_sames = np.array([
                 batch_same_i[cluster_labels == label].mean()
                 for label in range(0, max_cluster_label + 1)
@@ -368,16 +351,14 @@ def cluster_characters(images,
 
 def load_image_features(src_dir):
     image_files = np.array(
-        natsorted(get_files_recursively(src_dir)))
+        natsorted(get_images_recursively(src_dir)))
     logging.info(
         f'Extracting feature of {plural_word(len(image_files), "images")} ...')
     images = []
     for imgfile in tqdm(image_files, desc='Extract dataset features'):
-        base_name = os.path.basename(imgfile).replace('.png', '')
-        cache_file = os.path.join(
-            os.path.dirname(imgfile), f".{base_name}_ccip.npy")
-        if os.path.exists(cache_file):
-            images.append(np.load(cache_file))
+        ccip_path, _ = get_corr_ccip_names(imgfile)
+        if os.path.exists(ccip_path):
+            images.append(np.load(ccip_path))
         else:
             images.append(ccip_extract_feature(imgfile))
     images = np.array(images)

@@ -47,6 +47,7 @@ def crop_characters(args, src_dir):
 
 
 def classify_characters(args, src_dir):
+    # TODO: add cluster filter mechanism (min image size, max k)
 
     dst_dir = os.path.join(args.dst_dir, 'intermediate',
                            'screenshots', 'classified')
@@ -74,6 +75,7 @@ def classify_characters(args, src_dir):
 
 
 def construct_dataset(args, src_dir):
+    # TODO: add something to relocate json and npy file just in case
     class_dir = os.path.join(src_dir, 'classified')
     full_dir = os.path.join(src_dir, 'raw')
     tmp_dir = os.path.join(src_dir, 'tmp')
@@ -87,6 +89,7 @@ def construct_dataset(args, src_dir):
     resize_character_images(class_dir, full_dir, dst_dir,
                             args.max_size, args.image_save_ext,
                             args.n_anime_reg)
+    # The following gets killed on my laptop
     if args.filter_again:
         for folder in ['cropped', 'full']:
             source = LocalSource(os.path.join(tmp_dir, folder))
@@ -104,6 +107,7 @@ def construct_dataset(args, src_dir):
 
 def tag_images(args):
     # possibility to save .tags and .subjects files here
+    # pruned tags is also to be implemented here
     pass
 
 
@@ -175,6 +179,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cluster_min_samples", type=int, default=5,
         help="minimum cluster samples in character clusterining")
+    parser.add_argument(
+        "--character_ref_dir", default=None,
+        help="directory conaining reference character images")
 
     # Arguments for dataset construction
     parser.add_argument("--filter_again", action="store_true",
@@ -200,7 +207,9 @@ if __name__ == "__main__":
 
     src_dir = args.src_dir
 
+    logging.getLogger().setLevel(logging.INFO)
+
     # Loop through the stages and execute them
     for stage_num in range(int(start_stage), int(end_stage) + 1):
-        logging.info(f'Start stage {stage_num}')
+        logging.info(f'-------------Start stage {stage_num}-------------')
         src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir)
