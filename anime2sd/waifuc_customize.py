@@ -20,22 +20,26 @@ class TagPruningAction(ProcessAction):
     def __init__(self,
                  blacklisted_tags,
                  overlap_tags_dict,
-                 pruned_type='character'):
+                 pruned_type='character',
+                 tags_attribute='processed_tags'):
         assert pruned_type in ['none', 'minimal', 'character']
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
         self.pruned_type = pruned_type
+        self.tags_attribute = tags_attribute
 
     def process(self, item: ImageItem) -> ImageItem:
         if self.pruned_type == 'none':
             return item
-        if 'processed_tags' in item.meta:
-            tags = item.meta['processed_tags']
+        if self.tags_attribute in item.meta:
+            tags = item.meta[self.tags_attribute]
+        # fallback behavior
         elif 'tags' in item.meta:
             tags = item.meta['tags']
         else:
             logging.warning(
-                f"Tag metadata unfound for {item.meta['current_path']}, skip")
+                f"{self.tags_attribute} unfound ",
+                f"for {item.meta['current_path']}, skip")
             return item
         tags = remove_blacklisted_tags(tags, self.blacklisted_tags)
         tags = remove_overlap_tags(tags, self.overlap_tags_dict)
@@ -48,19 +52,24 @@ class TagPruningAction(ProcessAction):
 
 class TagSortingAction(ProcessAction):
 
-    def __init__(self, sort_mode='score', max_tag_number=None):
+    def __init__(self, sort_mode='score',
+                 max_tag_number=None,
+                 tags_attribute='processed_tags'):
         assert sort_mode in ['original', 'shuffle', 'score']
         self.sort_mode = sort_mode
         self.max_tag_number = max_tag_number
+        self.tags_attribute = tags_attribute
 
     def process(self, item: ImageItem) -> ImageItem:
-        if 'processed_tags' in item.meta:
-            tags = item.meta['processed_tags']
+        if self.tags_attribute in item.meta:
+            tags = item.meta[self.tags_attribute]
+        # fallback behavior
         elif 'tags' in item.meta:
             tags = item.meta['tags']
         else:
             logging.warning(
-                f"Tag metadata unfound for {item.meta['current_path']}, skip")
+                f"{self.tags_attribute} unfound ",
+                f"for {item.meta['current_path']}, skip")
             return item
         tags = sort_tags(tags, self.sort_mode)
         if self.max_tag_number is not None and len(tags) > self.max_tag_number:
@@ -70,14 +79,19 @@ class TagSortingAction(ProcessAction):
 
 class TagRemovingUnderscoreAction(ProcessAction):
 
+    def __init__(self, tags_attribute='processed_tags'):
+        self.tags_attribute = tags_attribute
+
     def process(self, item: ImageItem) -> ImageItem:
-        if 'processed_tags' in item.meta:
-            tags = item.meta['processed_tags']
+        if self.tags_attribute in item.meta:
+            tags = item.meta[self.tags_attribute]
+        # fallback behavior
         elif 'tags' in item.meta:
             tags = item.meta['tags']
         else:
             logging.warning(
-                f"Tag metadata unfound for {item.meta['current_path']}, skip")
+                f"{self.tags_attribute} unfound ",
+                f"for {item.meta['current_path']}, skip")
             return item
         tags = [self.remove_underscore(tag) for tag in tags]
         result = ImageItem(item.image, {**item.meta, 'processed_tags': tags})
@@ -154,11 +168,8 @@ class LocalSource(BaseDataSource):
                 if os.path.exists(aux_file_path):
                     with open(aux_file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        if ',' in content:
-                            items = content.split(',')
-                            meta[attribute] = [item.strip() for item in items]
-                        else:
-                            meta[attribute] = content
+                        items = content.split(',')
+                        meta[attribute] = [item.strip() for item in items]
 
             yield ImageItem(origin_item.image, meta)
 

@@ -80,7 +80,7 @@ def remove_blacklisted_tags(tags, blacklisted_tags):
                 tag.replace(' ', '_') not in blacklisted_tags and
                 tag.replace('_', ' ') not in blacklisted_tags]
     else:
-        raise ValueError(f"Unsuppored types {type(tags)}")
+        raise ValueError(f"Unsuppored types {type(tags)} for {tags}")
 
 
 def is_basic_character_tag(tag):
@@ -109,7 +109,7 @@ def is_basic_character_tag(tag):
     ]
 
     tag = tag.replace('_', ' ')
-    result = tag.endswith(suffixes)
+    result = any(tag.endswith(suffix) for suffix in suffixes)
     return result
 
 
@@ -128,7 +128,7 @@ def remove_basic_character_tags(tags):
     elif isinstance(tags, list):
         return [tag for tag in tags if not is_basic_character_tag(tag)]
     else:
-        raise ValueError(f"Unsuppored types {type(tags)}")
+        raise ValueError(f"Unsuppored types {type(tags)} for {tags}")
 
 
 def remove_overlap_tags(tags, overlap_tags_dict):
@@ -165,7 +165,7 @@ def remove_overlap_tags(tags, overlap_tags_dict):
 
         # Checking superword condition separately
         for tag_another in tags:
-            if tag in tag_another:
+            if tag in tag_another and tag != tag_another:
                 to_remove = True
                 break
 
@@ -175,6 +175,6 @@ def remove_overlap_tags(tags, overlap_tags_dict):
     # If the input was a dictionary
     # return as a dictionary with the same values
     if return_as_dict:
-        tags = {tag: original_tags[tag] for tag in result_tags}
+        result_tags = {tag: original_tags[tag] for tag in result_tags}
 
-    return tags
+    return result_tags

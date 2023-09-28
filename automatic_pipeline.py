@@ -120,6 +120,10 @@ def tag_and_caption(args, src_dir):
     with open(args.blacklist_tags_file, 'r') as f:
         blacklisted_tags = {line.strip() for line in f}
     overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
+    if args.process_from_original_tags or args.overwrite_tags:
+        tags_attribute = 'tags'
+    else:
+        tags_attribute = 'processed_tags'
     source = LocalSource(src_dir, load_aux=args.load_aux)
     source = source.attach(
         TaggingAction(
@@ -130,7 +134,8 @@ def tag_and_caption(args, src_dir):
         TagPruningAction(
             blacklisted_tags,
             overlap_tags_dict,
-            pruned_type=args.pruned_type),
+            pruned_type=args.pruned_type,
+            tags_attribute=tags_attribute),
         TagSortingAction(
             args.sort_mode,
             max_tag_number=args.max_tag_number),
@@ -216,6 +221,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cluster_min_samples", type=int, default=5,
         help="minimum cluster samples in character clusterining")
+    # Important
     parser.add_argument(
         "--character_ref_dir", default=None,
         help="directory conaining reference character images")
@@ -255,6 +261,10 @@ if __name__ == "__main__":
 
     # Arguments for tag processing
     parser.add_argument(
+        '--process_from_original_tags', action="store_true",
+        help="process tags from original tags instead of processed tags"
+    )
+    parser.add_argument(
         '--sort_mode', type=str, default='score',
         choices=['score', 'shuffle', 'original'],
         help=("Mode to sort the tags. "
@@ -286,6 +296,9 @@ if __name__ == "__main__":
         "--separator", type=str, default=',',
         help="Character used to separate items in captions")
     parser.add_argument(
+        "--caption_no_underscore", action="store_true",
+        help="Do not include any underscore in captions")
+    parser.add_argument(
         "--use_npeople_prob", type=float, default=0,
         help="Probability to include number of people in captions")
     parser.add_argument(
@@ -306,9 +319,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--use_tags_prob", type=float, default=1,
         help="Probability to include tag info in captions")
-    parser.add_argument(
-        "--caption_no_underscore", action="store_true",
-        help="Do not include any underscore in captions")
 
     args = parser.parse_args()
 

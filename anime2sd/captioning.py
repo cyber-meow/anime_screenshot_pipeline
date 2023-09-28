@@ -57,7 +57,7 @@ def to_text_rating(to_add, sep_string):
         return None
 
 
-def to_text_tags(to_add, sep_sttring):
+def to_text_tags(to_add, sep_string):
     # Case of {tag: score}
     if isinstance(to_add, dict):
         to_add = to_add.keys()
@@ -93,7 +93,7 @@ def dict_to_caption(info_dict, args):
             _CAPTIONING_METHODS[attribute], sep_string)
     if 'processed_tags' in info_dict:
         caption = caption_add_content(
-            caption, info_dict, 'proceseed_tags', args.use_tags_prob,
+            caption, info_dict, 'processed_tags', args.use_tags_prob,
             to_text_tags, sep_string)
     elif 'tags' in info_dict:
         caption = caption_add_content(
