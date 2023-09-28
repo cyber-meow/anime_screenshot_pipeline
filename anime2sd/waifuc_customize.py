@@ -1,15 +1,93 @@
 import os
-import random
 import re
-from typing import Iterator
+import logging
+from typing import Iterator, Optional
 from PIL import UnidentifiedImageError
+from tqdm import tqdm
 
-from waifuc.source.base import RootDataSource
+from waifuc.source.base import BaseDataSource
 from waifuc.export.base import LocalDirectoryExporter
 from waifuc.action.base import ProcessAction
 from waifuc.model import ImageItem
 
-from anime2sd import dict_to_caption
+from anime2sd.captioning import dict_to_caption
+from anime2sd.tagging import remove_blacklisted_tags, remove_overlap_tags
+from anime2sd.tagging import remove_basic_character_tags, sort_tags
+
+
+class TagPruningAction(ProcessAction):
+
+    def __init__(self,
+                 blacklisted_tags,
+                 overlap_tags_dict,
+                 pruned_type='character'):
+        assert pruned_type in ['none', 'minimal', 'character']
+        self.blacklisted_tags = blacklisted_tags
+        self.overlap_tags_dict = overlap_tags_dict
+        self.pruned_type = pruned_type
+
+    def process(self, item: ImageItem) -> ImageItem:
+        if self.pruned_type == 'none':
+            return item
+        if 'processed_tags' in item.meta:
+            tags = item.meta['processed_tags']
+        elif 'tags' in item.meta:
+            tags = item.meta['tags']
+        else:
+            logging.warning(
+                f"Tag metadata unfound for {item.meta['current_path']}, skip")
+            return item
+        tags = remove_blacklisted_tags(tags, self.blacklisted_tags)
+        tags = remove_overlap_tags(tags, self.overlap_tags_dict)
+        if self.pruned_type == 'character':
+            # Only pruned character related tags for character images
+            if 'characters' in item.meta and item.meta['characters']:
+                tags = remove_basic_character_tags(tags)
+        return ImageItem(item.image, {**item.meta, 'processed_tags': tags})
+
+
+class TagSortingAction(ProcessAction):
+
+    def __init__(self, sort_mode='score', max_tag_number=None):
+        assert sort_mode in ['original', 'shuffle', 'score']
+        self.sort_mode = sort_mode
+        self.max_tag_number = max_tag_number
+
+    def process(self, item: ImageItem) -> ImageItem:
+        if 'processed_tags' in item.meta:
+            tags = item.meta['processed_tags']
+        elif 'tags' in item.meta:
+            tags = item.meta['tags']
+        else:
+            logging.warning(
+                f"Tag metadata unfound for {item.meta['current_path']}, skip")
+            return item
+        tags = sort_tags(tags, self.sort_mode)
+        if self.max_tag_number is not None and len(tags) > self.max_tag_number:
+            tags = tags[:self.max_tag_number]
+        return ImageItem(item.image, {**item.meta, 'processed_tags': tags})
+
+
+class TagRemovingUnderscoreAction(ProcessAction):
+
+    def process(self, item: ImageItem) -> ImageItem:
+        if 'processed_tags' in item.meta:
+            tags = item.meta['processed_tags']
+        elif 'tags' in item.meta:
+            tags = item.meta['tags']
+        else:
+            logging.warning(
+                f"Tag metadata unfound for {item.meta['current_path']}, skip")
+            return item
+        tags = [self.remove_underscore(tag) for tag in tags]
+        result = ImageItem(item.image, {**item.meta, 'processed_tags': tags})
+        return result
+
+    @staticmethod
+    def remove_underscore(tag):
+        if tag == '^_^':
+            return tag
+        return tag.replace('_', ' ')
 
 
 class CaptioningAction(ProcessAction):
@@ -23,32 +101,35 @@ class CaptioningAction(ProcessAction):
         return ImageItem(item.image, {**item.meta, 'caption': caption})
 
 
-class LocalSource(RootDataSource):
+class LocalSource(BaseDataSource):
 
-    def __init__(
-            self, directory: str,
-            recursive: bool = True, shuffle: bool = False,
-            resume_from_subject_and_tags: bool = True):
+    def __init__(self, directory: str,
+                 recursive: bool = True,
+                 load_aux: Optional[list] = None,
+                 progress_bar: bool = True):
         self.directory = directory
         self.recursive = recursive
-        self.shuffle = shuffle
+        self.load_aux = load_aux or []
+        self.progress_bar = progress_bar
+        self.total_images = (
+            self._count_total_images() if progress_bar else None)
+
+    def _count_total_images(self):
+        return sum(1 for _ in self._iter_files())
 
     def _iter_files(self):
+        image_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}
         if self.recursive:
             for directory, _, files in os.walk(self.directory):
                 group_name = re.sub(r'[\W_]+', '_', directory).strip('_')
                 for file in files:
-                    yield os.path.join(directory, file), group_name
+                    if os.path.splitext(file)[1].lower() in image_extensions:
+                        yield os.path.join(directory, file), group_name
         else:
             group_name = re.sub(r'[\W_]+', '_', self.directory).strip('_')
             for file in os.listdir(self.directory):
-                yield os.path.join(self.directory, file), group_name
-
-    def _actual_iter_files(self):
-        lst = list(self._iter_files())
-        if self.shuffle:
-            random.shuffle(lst)
-        yield from lst
+                if os.path.splitext(file)[1].lower() in image_extensions:
+                    yield os.path.join(self.directory, file), group_name
 
     def _iter(self) -> Iterator[ImageItem]:
         for file, group_name in self._iter_files():
@@ -64,7 +145,32 @@ class LocalSource(RootDataSource):
                 'filename': os.path.basename(file),
             }
             meta['current_path'] = os.path.abspath(file)
+
+            # Load auxiliary data
+            file_basename = os.path.splitext(meta['filename'])[0]
+            for attribute in self.load_aux:
+                aux_file_path = os.path.join(
+                    os.path.dirname(file), file_basename + f'.{attribute}')
+                if os.path.exists(aux_file_path):
+                    with open(aux_file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        if ',' in content:
+                            items = content.split(',')
+                            meta[attribute] = [item.strip() for item in items]
+                        else:
+                            meta[attribute] = content
+
             yield ImageItem(origin_item.image, meta)
+
+    def _iter_from(self) -> Iterator[ImageItem]:
+        desc = self.__class__.__name__
+        iterator = self._iter()
+        if self.progress_bar and self.total_images is not None:
+            iterator = tqdm(iterator, total=self.total_images, desc=desc)
+        else:
+            iterator = tqdm(iterator, desc=desc)
+        for item in iterator:
+            yield item
 
 
 class SaveExporter(LocalDirectoryExporter):

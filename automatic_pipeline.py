@@ -13,7 +13,11 @@ from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import cluster_from_directory, classify_from_directory
 from anime2sd import rearrange_related_files, save_characters_to_meta
 from anime2sd import resize_character_images
+from anime2sd import parse_overlap_tags
+
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
+from anime2sd.waifuc_customize import TagPruningAction, TagSortingAction
+from anime2sd.waifuc_customize import TagRemovingUnderscoreAction
 from anime2sd.waifuc_customize import CaptioningAction
 
 
@@ -113,14 +117,24 @@ def select_images_for_dataset(args, src_dir):
 
 
 def tag_and_caption(args, src_dir):
-    # pruned tags is also to be implemented here
-    source = LocalSource(src_dir)
+    with open(args.blacklist_tags_file, 'r') as f:
+        blacklisted_tags = {line.strip() for line in f}
+    overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
+    source = LocalSource(src_dir, load_aux=args.load_aux)
     source = source.attach(
         TaggingAction(
             force=args.overwrite_tags,
             method=args.tagging_method,
             general_threshold=args.tag_threshold,
             character_threshold=1.01),
+        TagPruningAction(
+            blacklisted_tags,
+            overlap_tags_dict,
+            pruned_type=args.pruned_type),
+        TagSortingAction(
+            args.sort_mode,
+            max_tag_number=args.max_tag_number),
+        TagRemovingUnderscoreAction(),
         CaptioningAction(args),
     )
 
@@ -151,7 +165,7 @@ STAGE_ALIASES = {
     2: ['crop'],
     3: ['classify'],
     4: ['select'],
-    5: ['tag', 'caption'],
+    5: ['tag', 'caption', 'tag_and_caption'],
     6: ['arrange'],
 }
 
@@ -218,8 +232,20 @@ if __name__ == "__main__":
     parser.add_argument("--n_anime_reg", type=int, default=500,
                         help="number of images with no characters to keep")
 
+    # Loading and saving of metadata for tagging and captioning stage
+    parser.add_argument('--load_aux', type=str, nargs='*',
+                        default=['processed_tags', 'characters'],
+                        help="List of auxiliary attributes to load. "
+                        "Default is processed_tags and characters. "
+                        "E.g., --load_aux attr1 attr2 attr3")
+    parser.add_argument('--save_aux', type=str, nargs='*',
+                        default=['processed_tags', 'characters'],
+                        help="List of auxiliary attributes to save. "
+                        "Default is processed_tags and characters. "
+                        "E.g., --save_aux attr1 attr2 attr3")
+
     # Arguments for tagging
-    parser.add_argument('--overwrite_tags', type=bool, default=True,
+    parser.add_argument('--overwrite_tags', action="store_true",
                         help="Whether to overwrite existing tags.")
     parser.add_argument('--tagging_method', type=str,
                         default='wd14_convnextv2',
@@ -228,15 +254,32 @@ if __name__ == "__main__":
                         help="Threshold for tagging.")
 
     # Arguments for tag processing
-    parser.add_argument('--max_tag_number', type=int, default=15,
-                        help="Max number of tags to include in caption.")
-
-    # Arguments for file saving after tagging
-    parser.add_argument('--save_aux', type=str, nargs='*',
-                        default=['processed_tags', 'characters'],
-                        help="List of auxiliary attributes to save. "
-                        "Default is processed_tags and characters. "
-                        "E.g., --save_aux attr1 attr2 attr3")
+    parser.add_argument(
+        '--sort_mode', type=str, default='score',
+        choices=['score', 'shuffle', 'original'],
+        help=("Mode to sort the tags. "
+              "Options are 'score', 'shuffle', 'original'.")
+    )
+    parser.add_argument(
+        '--pruned_type', type=str, default='character',
+        choices=['character', 'minimal', 'none'],
+        help=("Type of tags to be pruned. "
+              "Options are 'character', 'minimal', 'none'.")
+    )
+    parser.add_argument(
+        '--max_tag_number', type=int, default=15,
+        help="Max number of tags to include in caption."
+    )
+    parser.add_argument(
+        '--blacklist_tags_file', type=str,
+        default='tag_filtering/blacklist.txt',
+        help="Path to the file containing blacklisted tags."
+    )
+    parser.add_argument(
+        '--overlap_tags_file', type=str,
+        default='tag_filtering/overlap_tags.json',
+        help="Path to the file containing overlap tag information."
+    )
 
     # Arguments for captioning
     parser.add_argument(

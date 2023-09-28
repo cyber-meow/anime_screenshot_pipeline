@@ -98,6 +98,7 @@ def save_characters_to_meta(classified_dir):
 
             # Update the characters field
             if char_name.startswith('noise'):
+                # This ensures that we overwrite old information
                 meta_data['characters'] = []
             else:
                 meta_data['characters'] = [char_name]
@@ -122,7 +123,9 @@ def save_characters_to_meta(classified_dir):
                     encountered_paths.add(original_path)
 
                 # Append the character name if it's not already in the list
-                if char_name not in orig_meta_data['characters']:
+                # and is not noise
+                if (char_name not in orig_meta_data['characters']
+                        and not char_name.startswith('noise')):
                     orig_meta_data['characters'].append(char_name)
 
                 # Save the updated original metadata
