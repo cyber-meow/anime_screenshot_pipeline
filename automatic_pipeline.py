@@ -5,15 +5,16 @@ import argparse
 
 import fiftyone.zoo as foz
 
-from waifuc.source import LocalSource
-from waifuc.export import SaveExporter
 from waifuc.action import PersonSplitAction, FaceCountAction, HeadCountAction
 from waifuc.action import MinSizeFilterAction, NoMonochromeAction
+from waifuc.action import TaggingAction
 
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import cluster_from_directory, classify_from_directory
 from anime2sd import rearrange_related_files, save_characters_to_meta
 from anime2sd import resize_character_images
+from anime2sd.waifuc_customize import LocalSource, SaveExporter
+from anime2sd.waifuc_customize import CaptioningAction
 
 
 def extract_frames(args, src_dir):
@@ -46,12 +47,14 @@ def crop_characters(args, src_dir):
         args.dst_dir, 'intermediate', args.image_type, 'cropped')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Cropping individual characters to {dst_dir} ...')
-    source.export(SaveExporter(dst_dir, no_meta=False))
+    source.export(
+        SaveExporter(dst_dir, no_meta=False, save_caption=False))
 
     return dst_dir
 
 
 def classify_characters(args, src_dir):
+    # TODO: multi-stage classification
     # TODO: add cluster filter mechanism (min image size, max k)
 
     dst_dir = os.path.join(
@@ -109,14 +112,22 @@ def select_images_for_dataset(args, src_dir):
         shutil.rmtree(full_dir)
 
 
-def tag_images(args):
-    # possibility to save .tags and .subjects files here
+def tag_and_caption(args, src_dir):
     # pruned tags is also to be implemented here
-    pass
+    source = LocalSource(src_dir)
+    source = source.attach(
+        TaggingAction(
+            force=args.overwrite_tags,
+            method=args.tagging_method,
+            general_threshold=args.tag_threshold,
+            character_threshold=1.01),
+        CaptioningAction(args),
+    )
 
-
-def generate_captions(tags):
-    pass
+    logging.info('Tagging and captioning ...')
+    source.export(SaveExporter(
+        src_dir, no_meta=False,
+        save_caption=True, save_aux=args.save_aux, in_place=True))
 
 
 def rearrange_and_balance(args):
@@ -129,9 +140,8 @@ STAGE_FUNCTIONS = {
     2: crop_characters,
     3: classify_characters,
     4: select_images_for_dataset,
-    5: tag_images,
-    6: generate_captions,
-    7: rearrange_and_balance,
+    5: tag_and_caption,
+    6: rearrange_and_balance,
 }
 
 
@@ -141,9 +151,8 @@ STAGE_ALIASES = {
     2: ['crop'],
     3: ['classify'],
     4: ['select'],
-    5: ['tag'],
-    6: ['caption'],
-    7: ['arrange'],
+    5: ['tag', 'caption'],
+    6: ['arrange'],
 }
 
 
@@ -163,7 +172,7 @@ if __name__ == "__main__":
         "--image_type", default="screenshots",
         help="Image type that we are dealing with, used for folder name")
     parser.add_argument(
-        "--save_intermediate", action='store_true',
+        "--save_intermediate", action="store_true",
         help="Whether to save intermediate result or not "
         + "(results after stage 1 are always saved)")
 
@@ -207,7 +216,56 @@ if __name__ == "__main__":
     parser.add_argument("--image_save_ext", default='.webp',
                         help="dataset image extensino")
     parser.add_argument("--n_anime_reg", type=int, default=500,
-                        help="number of images with no characters to kepp")
+                        help="number of images with no characters to keep")
+
+    # Arguments for tagging
+    parser.add_argument('--overwrite_tags', type=bool, default=True,
+                        help="Whether to overwrite existing tags.")
+    parser.add_argument('--tagging_method', type=str,
+                        default='wd14_convnextv2',
+                        help="Method used for tagging.")
+    parser.add_argument('--tag_threshold', type=float, default=0.35,
+                        help="Threshold for tagging.")
+
+    # Arguments for tag processing
+    parser.add_argument('--max_tag_number', type=int, default=15,
+                        help="Max number of tags to include in caption.")
+
+    # Arguments for file saving after tagging
+    parser.add_argument('--save_aux', type=str, nargs='*',
+                        default=['processed_tags', 'characters'],
+                        help="List of auxiliary attributes to save. "
+                        "Default is processed_tags and characters. "
+                        "E.g., --save_aux attr1 attr2 attr3")
+
+    # Arguments for captioning
+    parser.add_argument(
+        "--separator", type=str, default=',',
+        help="Character used to separate items in captions")
+    parser.add_argument(
+        "--use_npeople_prob", type=float, default=0,
+        help="Probability to include number of people in captions")
+    parser.add_argument(
+        "--use_character_prob", type=float, default=1,
+        help="Probability to include character info in captions")
+    parser.add_argument(
+        "--use_copyright_prob", type=float, default=0,
+        help="Probability to include copyright info in captions")
+    parser.add_argument(
+        "--use_image_type_prob", type=float, default=1,
+        help="Probability to include image type info in captions")
+    parser.add_argument(
+        "--use_artist_prob", type=float, default=0,
+        help="Probability to include artist info in captions")
+    parser.add_argument(
+        "--use_rating_prob", type=float, default=1,
+        help="Probability to include rating info in captions")
+    parser.add_argument(
+        "--use_tags_prob", type=float, default=1,
+        help="Probability to include tag info in captions")
+    parser.add_argument(
+        "--caption_no_underscore", action="store_true",
+        help="Do not include any underscore in captions")
 
     args = parser.parse_args()
 
