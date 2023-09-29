@@ -2,13 +2,13 @@
 
 ## Table of Contents
 
-1. [Frame Extraction and Similar Image Removal](#Stage-1:-Frame-Extraction-and-Similar-Image-Removal)
-1. [Character Detection and Cropping](#Stage-2:-Character-Detection-and-Cropping)
-1. [Character Clustering / Classification](#Stage-3:-Character-Clustering-or-Classification)
-1. [Image Selection and Resizing](#Stage-4:-Image-Selection-and-Resizing)
-1. [Tagging and Captioning](#Stage-5:-Tagging-and-Captioning)
-1. [Folder Arrangement](#Stage-6:-Folder-Arrangement)
-1. [Dataset Balancing](#Stage-7:-Dataset-Balancing)
+1. [Frame Extraction and Similar Image Removal](#stage-1-frame-extraction-and-similar-image-removal)
+1. [Character Detection and Cropping](#stage-2-character-detection-and-cropping)
+1. [Character Clustering / Classification](#stage-3-character-clustering-or-classification)
+1. [Image Selection and Resizing](#stage-4-image-selection-and-resizing)
+1. [Tagging and Captioning](#stage-5-tagging-and-captioning)
+1. [Folder Arrangement](#stage-6-folder-arrangement)
+1. [Dataset Balancing](#stage-7-dataset-balancing)
 
 I will also provide below approximate running time on my own laptop with a RTX 3070 Ti.
 
