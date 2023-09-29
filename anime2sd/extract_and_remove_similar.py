@@ -64,8 +64,7 @@ def create_dataset_from_subdirs(dataset_dir, portion="first"):
             image_files = [
                     f for f in os.listdir(subdir_path)
                     if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
-            image_numbers = [int(number_extractor.search(f).group(1))
-                             for f in image_files]
+            image_numbers = [f.split('_')[-1] for f in image_files]
             sorted_files = [x for _, x in sorted(
                 zip(image_numbers, image_files))]
 

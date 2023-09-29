@@ -31,8 +31,6 @@ def setup_logging(log_dir, log_prefix):
     :param log_prefix: Prefix for the log file name.
     :return: None
     """
-    # Ensure the log directory exists
-    os.makedirs(log_dir, exist_ok=True)
 
     # Create logger
     logger = logging.getLogger()
@@ -42,22 +40,25 @@ def setup_logging(log_dir, log_prefix):
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     logger.addHandler(ch)
-
-    # Create file handler and set level to info
-    current_time = datetime.now()
-    str_current_time = str(current_time)
-    log_file = os.path.join(log_dir, f"{log_prefix}_{str_current_time}.log")
-    fh = logging.FileHandler(log_file)
-    fh.setLevel(logging.INFO)
-    logger.addHandler(fh)
-
-    # Add formatter to ch and fh
+    
+    # Add formatter to ch
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
-    fh.setFormatter(formatter)
+
+    # Create file handler and set level to info
+    if log_dir not in ['None', 'none']:
+        os.makedirs(log_dir, exist_ok=True)
+        current_time = datetime.now()
+        str_current_time = str(current_time)
+        log_file = os.path.join(
+            log_dir, f"{log_prefix}_{str_current_time}.log")
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(logging.INFO)
+        logger.addHandler(fh)
+        fh.setFormatter(formatter)
 
 
-def extract_frames(args, src_dir):
+def extract_frames(args, src_dir, is_start_stage):
     dst_dir = os.path.join(
         args.dst_dir, 'intermediate', args.image_type, 'raw')
     os.makedirs(dst_dir, exist_ok=True)
@@ -69,7 +70,7 @@ def extract_frames(args, src_dir):
                                to_remove_similar=not args.no_remove_similar)
 
 
-def crop_characters(args, src_dir):
+def crop_characters(args, src_dir, is_start_stage):
 
     source = LocalSource(src_dir)
     source = source.attach(
@@ -93,7 +94,7 @@ def crop_characters(args, src_dir):
     return dst_dir
 
 
-def classify_characters(args, src_dir):
+def classify_characters(args, src_dir, is_start_stage):
     # TODO: multi-stage classification
     # TODO: add cluster filter mechanism (min image size, max k)
 
@@ -122,7 +123,7 @@ def classify_characters(args, src_dir):
     return os.path.dirname(dst_dir)
 
 
-def select_images_for_dataset(args, src_dir):
+def select_images_for_dataset(args, src_dir, is_start_stage):
 
     classified_dir = os.path.join(src_dir, 'classified')
     full_dir = os.path.join(src_dir, 'raw')
@@ -153,7 +154,7 @@ def select_images_for_dataset(args, src_dir):
     return dst_dir
 
 
-def tag_and_caption(args, src_dir):
+def tag_and_caption(args, src_dir, is_start_stage):
 
     with open(args.blacklist_tags_file, 'r') as f:
         blacklisted_tags = {line.strip() for line in f}
@@ -188,17 +189,31 @@ def tag_and_caption(args, src_dir):
     return src_dir
 
 
-def rearrange(args, src_dir):
+def rearrange(args, src_dir, is_start_stage):
     logging.info(f'Rearranging {src_dir} ...')
+    if args.is_start_stage:
+        logging.info(f'Load metadata from auxiliary data ...')
+        source = LocalSource(src_dir, load_aux=args.load_aux)
+        source.export(SaveExporter(
+            src_dir, no_meta=False,
+            save_caption=True,
+            save_aux=args.save_aux, in_place=True))
     arrange_folder(
         src_dir, src_dir, args.arrange_format,
         args.max_character_number, args.min_images_per_combination)
     return src_dir
 
 
-def balance(args, src_dir):
+def balance(args, src_dir, is_start_stage):
     training_dir = os.path.join(args.dst_dir, 'training')
     logging.info(f'Computing repeat for {training_dir} ...')
+    if args.is_start_stage:
+        logging.info(f'Load metadata from auxiliary data ...')
+        source = LocalSource(src_dir, load_aux=args.load_aux)
+        source.export(SaveExporter(
+            src_dir, no_meta=False,
+            save_caption=True,
+            save_aux=args.save_aux, in_place=True))
     if args.weight_csv is not None:
         weight_mapping = read_weight_mapping(args.weight_csv)
     else:
@@ -422,11 +437,15 @@ if __name__ == "__main__":
         if args.end_stage in STAGE_ALIASES[stage_number]:
             end_stage = stage_number
 
+    start_stage = int(start_stage)
+    end_stage = int(end_stage)
+
     src_dir = args.src_dir
 
     setup_logging(args.log_dir, args.log_prefix)
 
     # Loop through the stages and execute them
-    for stage_num in range(int(start_stage), int(end_stage) + 1):
+    for stage_num in range(start_stage, end_stage + 1):
         logging.info(f'-------------Start stage {stage_num}-------------')
-        src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir)
+        is_start_stage = stage_num == start_stage 
+        src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir, is_start_stage)
