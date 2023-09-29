@@ -6,7 +6,8 @@ from datetime import datetime
 
 import fiftyone.zoo as foz
 
-from waifuc.action import PersonSplitAction, FaceCountAction, HeadCountAction
+from waifuc.action import PersonSplitAction
+# from waifuc.action import FaceCountAction, HeadCountAction
 from waifuc.action import MinSizeFilterAction, NoMonochromeAction
 from waifuc.action import TaggingAction
 
@@ -40,7 +41,7 @@ def setup_logging(log_dir, log_prefix):
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     logger.addHandler(ch)
-    
+
     # Add formatter to ch
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
@@ -63,7 +64,7 @@ def extract_frames(args, src_dir, is_start_stage):
         args.dst_dir, 'intermediate', args.image_type, 'raw')
     os.makedirs(dst_dir, exist_ok=True)
     logging.info(f'Extracting frames to {dst_dir} ...')
-    extract_and_remove_similar(src_dir, dst_dir, args.prefix,
+    extract_and_remove_similar(src_dir, dst_dir, args.image_prefix,
                                ep_init=args.ep_init,
                                model_name=args.detect_duplicate_model,
                                thresh=args.similar_thresh,
@@ -76,8 +77,10 @@ def crop_characters(args, src_dir, is_start_stage):
     source = source.attach(
         NoMonochromeAction(),
         PersonSplitAction(keep_original=False, level='n'),
-        FaceCountAction(1, level='n'),
-        HeadCountAction(1, level='n'),
+        # TODO: investigate the problem
+        # This seems to filter out some character with more special appearance
+        # FaceCountAction(1, level='n'),
+        # HeadCountAction(1, level='n'),
         MinSizeFilterAction(args.min_crop_size),
         # Not used here because it can be problematic for multi-character scene
         # Some not moving while other moving
@@ -191,8 +194,8 @@ def tag_and_caption(args, src_dir, is_start_stage):
 
 def rearrange(args, src_dir, is_start_stage):
     logging.info(f'Rearranging {src_dir} ...')
-    if args.is_start_stage:
-        logging.info(f'Load metadata from auxiliary data ...')
+    if is_start_stage:
+        logging.info('Load metadata from auxiliary data ...')
         source = LocalSource(src_dir, load_aux=args.load_aux)
         source.export(SaveExporter(
             src_dir, no_meta=False,
@@ -207,8 +210,8 @@ def rearrange(args, src_dir, is_start_stage):
 def balance(args, src_dir, is_start_stage):
     training_dir = os.path.join(args.dst_dir, 'training')
     logging.info(f'Computing repeat for {training_dir} ...')
-    if args.is_start_stage:
-        logging.info(f'Load metadata from auxiliary data ...')
+    if is_start_stage:
+        logging.info('Load metadata from auxiliary data ...')
         source = LocalSource(src_dir, load_aux=args.load_aux)
         source.export(SaveExporter(
             src_dir, no_meta=False,
@@ -277,7 +280,8 @@ if __name__ == "__main__":
         + "(results after stage 1 are always saved)")
 
     # Arguments for video extraction
-    parser.add_argument("--prefix", default='', help="Output file prefix")
+    parser.add_argument("--image_prefix", default='',
+                        help="Output image prefix")
     parser.add_argument("--ep_init", type=int, default=1,
                         help="Episode number to start with")
 
@@ -321,14 +325,14 @@ if __name__ == "__main__":
 
     # Loading and saving of metadata for tagging and captioning stage
     parser.add_argument('--load_aux', type=str, nargs='*',
-                        default=['processed_tags', 'characters'],
+                        # default=['processed_tags', 'characters'],
                         help="List of auxiliary attributes to load. "
-                        "Default is processed_tags and characters. "
+                        # "Default is processed_tags and characters. "
                         "E.g., --load_aux attr1 attr2 attr3")
     parser.add_argument('--save_aux', type=str, nargs='*',
-                        default=['processed_tags', 'characters'],
+                        # default=['processed_tags', 'characters'],
                         help="List of auxiliary attributes to save. "
-                        "Default is processed_tags and characters. "
+                        # "Default is processed_tags and characters. "
                         "E.g., --save_aux attr1 attr2 attr3")
 
     # Arguments for tagging
@@ -358,7 +362,7 @@ if __name__ == "__main__":
               "Options are 'character', 'minimal', 'none'.")
     )
     parser.add_argument(
-        '--max_tag_number', type=int, default=15,
+        '--max_tag_number', type=int, default=30,
         help="Max number of tags to include in caption."
     )
     parser.add_argument(
@@ -447,5 +451,5 @@ if __name__ == "__main__":
     # Loop through the stages and execute them
     for stage_num in range(start_stage, end_stage + 1):
         logging.info(f'-------------Start stage {stage_num}-------------')
-        is_start_stage = stage_num == start_stage 
+        is_start_stage = stage_num == start_stage
         src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir, is_start_stage)

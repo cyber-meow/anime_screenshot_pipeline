@@ -46,12 +46,18 @@ def rearrange_related_files(classified_dir):
                 # Search for the file in the all_files dictionary
                 found_path = all_files.get(os.path.basename(related_path))
                 if found_path is None:
-                    raise ValueError(
+                    logging.warning(
                         f"No related file found for {related_path}")
-                # Move the found file to the expected location
-                shutil.move(found_path, related_path)
-                logging.info(
-                    f"Moved related file from {found_path} to {related_path}")
+                    if related_path.endswith('json'):
+                        meta_data = default_metadata(img_path)
+                        with open(related_path, 'w') as f:
+                            json.dump(meta_data, f)
+                else:
+                    # Move the found file to the expected location
+                    shutil.move(found_path, related_path)
+                    logging.info(
+                        f"Moved related file from {found_path} "
+                        f"to {related_path}")
 
 
 def save_characters_to_meta(classified_dir):
@@ -83,9 +89,9 @@ def save_characters_to_meta(classified_dir):
                     '.png', '.jpg', '.jpeg', '.webp', '.gif']:
                 continue
 
+            img_path = os.path.join(folder_path, img_file)
             # Construct the path to the corresponding metadata file
-            meta_file_path, _ = get_corr_meta_names(
-                os.path.join(folder_path, img_file))
+            meta_file_path, _ = get_corr_meta_names(img_path)
 
             # If the metadata file exists, load it
             # otherwise initialize an empty dictionary
@@ -93,8 +99,10 @@ def save_characters_to_meta(classified_dir):
                 with open(meta_file_path, 'r') as meta_file:
                     meta_data = json.load(meta_file)
             else:
-                raise ValueError(
-                    'All the cropped files should have corresponding metadata')
+                meta_data = default_metadata(img_path)
+                logging.warning(
+                    f'Cropped file {img_path} does not have '
+                    + 'corresponding metadata')
 
             # Update the characters field
             if char_name.startswith('noise'):

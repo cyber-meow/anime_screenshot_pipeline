@@ -129,8 +129,8 @@ dmypy.json
 .pyre/
 .*.swp
 
-scripts/tagger/wd14_tagger_model/
-scripts/tagger/wd14_tagger_model_v1/
+scripts_v1/tagger/wd14_tagger_model/
+scripts_v1/tagger/wd14_tagger_model_v1/
 data/
 logs/
 *.egg-info

@@ -1,5 +1,4 @@
 import os
-import re
 import shlex
 import logging
 from tqdm import tqdm
@@ -37,6 +36,10 @@ def load_image_dataset(dataset_dir):
     return dataset
 
 
+def get_image_number(filename):
+    return int(os.path.splitext(filename)[0].split('_')[-1])
+
+
 def create_dataset_from_subdirs(dataset_dir, portion="first"):
     """
     Create a FiftyOne dataset from a directory of images.
@@ -53,18 +56,15 @@ def create_dataset_from_subdirs(dataset_dir, portion="first"):
     # Create an empty dataset
     dataset = fo.Dataset()
 
-    # Regular expression to extract the number from the filename
-    number_extractor = re.compile(r'_(\d+)')
-
     # Iterate over each subdirectory
     for subdir in os.listdir(dataset_dir):
         subdir_path = os.path.join(dataset_dir, subdir)
         if os.path.isdir(subdir_path):
             # Extract numbers from the filenames and sort them
             image_files = [
-                    f for f in os.listdir(subdir_path)
-                    if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
-            image_numbers = [f.split('_')[-1] for f in image_files]
+                f for f in os.listdir(subdir_path)
+                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
+            image_numbers = [get_image_number(f) for f in image_files]
             sorted_files = [x for _, x in sorted(
                 zip(image_numbers, image_files))]
 
@@ -75,12 +75,12 @@ def create_dataset_from_subdirs(dataset_dir, portion="first"):
             # Depending on the portion, select the files
             if portion == "first":
                 selected_files = [
-                    f for f in sorted_files if int(number_extractor.search(
-                        f).group(1)) <= threshold]
+                    f for f in sorted_files
+                    if get_image_number(f) <= threshold]
             elif portion == "last":
                 selected_files = [
-                    f for f in sorted_files if int(number_extractor.search(
-                        f).group(1)) > 2 * threshold]
+                    f for f in sorted_files
+                    if get_image_number(f) > 2 * threshold]
             else:
                 raise ValueError("portion must be either 'first' or 'last'")
 

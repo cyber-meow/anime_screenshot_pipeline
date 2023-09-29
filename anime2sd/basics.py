@@ -21,6 +21,7 @@ def get_images_recursively(folder_path):
 
 def default_metadata(img_path):
     meta_data = {'path': img_path,
+                 'current_path': img_path,
                  'filename': os.path.basename(img_path),
                  'group_id': os.path.dirname(
                      img_path

@@ -6,6 +6,8 @@ The old scripts and readme have been moved into [scripts_v1](scripts_v1)
 
 Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version. I may add a script for batch renaming for compatibility later.
 
+**Ensure that you run this script on gpu to have reasonable processing time.**
+
 ## Basic Usage
 
 The script `automatic_pipeline.py` allows you to construct a text-to-image training set from anime with minimum effort. All you have to do is
@@ -18,20 +20,22 @@ python automatic_pipeline.py \
     --dst_dir /path/to/dataset_dir \
     --character_ref_dir /path/to/ref_image_dir \
     --image_type screenshots \
+    --image_prefix my_favorite_anime \
     --log_prefix my_favorite_anime
 ```
 
 
-The process is split into 7 stages as detailed in [Pipeline.md](docs/Pipeline.md). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
+The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
 
 
-- `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline.md](docs/Pipeline.md)). In the case where `start_stage` is set to 1, this should be a folder containing a the videos to extract frames from.
+- `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline Explained](docs/Pipeline.md)). In the case where `start_stage` is set to 1, this should be a folder containing a the videos to extract frames from.
 - `--dst_dir`: Place to construct dataset.
 - `--character_ref_dir`: Optional. A folder containing some example images for characters you want to train for. There are two ways to organize
     - With sub-folders: You can put character images in different sub-folders. Sub-folder names are then used as character names.
     - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
 
 :bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.
+:bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 4 to 7. See [Pipeline Explained](docs/Pipeline.md) for details.
 
 There are a lot of possible command line arguments that allow you to configure the entire process. See all of them with
 ```bash
