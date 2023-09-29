@@ -2,6 +2,7 @@ import os
 import shutil
 import logging
 import argparse
+from datetime import datetime
 
 import fiftyone.zoo as foz
 
@@ -13,12 +14,47 @@ from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import cluster_from_directory, classify_from_directory
 from anime2sd import rearrange_related_files, save_characters_to_meta
 from anime2sd import resize_character_images
-from anime2sd import parse_overlap_tags
+from anime2sd import parse_overlap_tags, read_weight_mapping
+from anime2sd import arrange_folder, get_repeat
 
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import TagPruningAction, TagSortingAction
 from anime2sd.waifuc_customize import TagRemovingUnderscoreAction
 from anime2sd.waifuc_customize import CaptioningAction
+
+
+def setup_logging(log_dir, log_prefix):
+    """
+    Set up logging to file and stdout with specified directory and prefix.
+
+    :param log_dir: Directory to save the log file.
+    :param log_prefix: Prefix for the log file name.
+    :return: None
+    """
+    # Ensure the log directory exists
+    os.makedirs(log_dir, exist_ok=True)
+
+    # Create logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    # Create console handler and set level to info
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+
+    # Create file handler and set level to info
+    current_time = datetime.now()
+    str_current_time = str(current_time)
+    log_file = os.path.join(log_dir, f"{log_prefix}_{str_current_time}.log")
+    fh = logging.FileHandler(log_file)
+    fh.setLevel(logging.INFO)
+    logger.addHandler(fh)
+
+    # Add formatter to ch and fh
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    fh.setFormatter(formatter)
 
 
 def extract_frames(args, src_dir):
@@ -67,7 +103,7 @@ def classify_characters(args, src_dir):
     if src_dir == dst_dir:
         move = True
     else:
-        move = not args.save_intermediate
+        move = args.remove_intermediate
 
     if args.character_ref_dir is None:
         logging.info(f'Clustering characters to {dst_dir} ...')
@@ -87,6 +123,7 @@ def classify_characters(args, src_dir):
 
 
 def select_images_for_dataset(args, src_dir):
+
     classified_dir = os.path.join(src_dir, 'classified')
     full_dir = os.path.join(src_dir, 'raw')
     dst_dir = os.path.join(args.dst_dir, 'training', args.image_type)
@@ -111,12 +148,13 @@ def select_images_for_dataset(args, src_dir):
             remove_similar_from_dir(os.path.join(dst_dir, folder),
                                     model=model,
                                     thresh=args.similar_thresh)
-    if not args.save_intermediate:
+    if args.remove_intermediate:
         shutil.rmtree(classified_dir)
-        shutil.rmtree(full_dir)
+    return dst_dir
 
 
 def tag_and_caption(args, src_dir):
+
     with open(args.blacklist_tags_file, 'r') as f:
         blacklisted_tags = {line.strip() for line in f}
     overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
@@ -143,14 +181,36 @@ def tag_and_caption(args, src_dir):
         CaptioningAction(args),
     )
 
-    logging.info('Tagging and captioning ...')
+    logging.info(f'Tagging and captioning images in {src_dir} ...')
     source.export(SaveExporter(
         src_dir, no_meta=False,
         save_caption=True, save_aux=args.save_aux, in_place=True))
+    return src_dir
 
 
-def rearrange_and_balance(args):
-    pass
+def rearrange(args, src_dir):
+    logging.info(f'Rearranging {src_dir} ...')
+    arrange_folder(
+        src_dir, src_dir, args.arrange_format,
+        args.max_character_number, args.min_images_per_combination)
+    return src_dir
+
+
+def balance(args, src_dir):
+    training_dir = os.path.join(args.dst_dir, 'training')
+    logging.info(f'Computing repeat for {training_dir} ...')
+    if args.weight_csv is not None:
+        weight_mapping = read_weight_mapping(args.weight_csv)
+    else:
+        weight_mapping = None
+    current_time = datetime.now()
+    str_current_time = str(current_time)
+    log_file = os.path.join(
+        args.log_dir, f"{args.log_prefix}_weighting_{str_current_time}.log")
+    get_repeat(
+        training_dir, weight_mapping,
+        args.min_multiply, args.max_multiply, log_file)
+    return training_dir
 
 
 # Mapping stage numbers to their respective function names
@@ -160,7 +220,8 @@ STAGE_FUNCTIONS = {
     3: classify_characters,
     4: select_images_for_dataset,
     5: tag_and_caption,
-    6: rearrange_and_balance,
+    6: rearrange,
+    7: balance,
 }
 
 
@@ -172,6 +233,7 @@ STAGE_ALIASES = {
     4: ['select'],
     5: ['tag', 'caption', 'tag_and_caption'],
     6: ['arrange'],
+    7: ['balance'],
 }
 
 
@@ -180,63 +242,67 @@ if __name__ == "__main__":
 
     # General arguments
     parser.add_argument("--src_dir", default='.',
-                        help="directory containing source files")
+                        help="Directory containing source files")
     parser.add_argument("--dst_dir", default='.',
-                        help="directory to save output files")
+                        help="Directory to save output files")
     parser.add_argument("--start_stage", default="1",
                         help="Stage or alias to start from")
     parser.add_argument("--end_stage", default="4",
                         help="Stage or alias to end at")
+    parser.add_argument('--log_dir', type=str, default='logs',
+                        help='Directory to save logs')
+    parser.add_argument('--log_prefix', type=str, default='logfile',
+                        help='Prefix for log files')
     parser.add_argument(
         "--image_type", default="screenshots",
         help="Image type that we are dealing with, used for folder name")
     parser.add_argument(
-        "--save_intermediate", action="store_true",
-        help="Whether to save intermediate result or not "
+        "--remove_intermediate", action="store_true",
+        help="Whether to remove intermediate result or not "
         + "(results after stage 1 are always saved)")
 
     # Arguments for video extraction
-    parser.add_argument("--prefix", default='', help="output file prefix")
+    parser.add_argument("--prefix", default='', help="Output file prefix")
     parser.add_argument("--ep_init", type=int, default=1,
-                        help="episode number to start with")
+                        help="Episode number to start with")
 
     # Arguments for duplicate detection
     parser.add_argument("--no_remove_similar", action="store_true",
-                        help="do not remove similar images")
+                        help="Do not remove similar images")
     parser.add_argument("--detect_duplicate_model",
                         default='mobilenet-v2-imagenet-torch',
-                        help="model used for duplicate detection")
+                        help="Model used for duplicate detection")
     parser.add_argument(
         "--similar_thresh", type=float, default=0.985,
-        help="cosine similarity threshold for image duplicate detection")
+        help="Cosine similarity threshold for image duplicate detection")
 
     # Arguments for character cropping
     parser.add_argument("--min_crop_size", type=int, default=320,
-                        help="minimum size for character cropping")
+                        help="Minimum size for character cropping")
 
     # Arguments for character clustering/classification
     parser.add_argument(
         "--cluster_merge_threshold", type=float, default=0.85,
-        help="cluster merge threshold in character clusterining")
+        help="Cluster merge threshold in character clusterining")
     parser.add_argument(
         "--cluster_min_samples", type=int, default=5,
-        help="minimum cluster samples in character clusterining")
+        help="Minimum cluster samples in character clusterining")
     # Important
     parser.add_argument(
         "--character_ref_dir", default=None,
-        help="directory conaining reference character images")
+        help="Directory conaining reference character images")
 
     # Arguments for dataset construction
     parser.add_argument("--no_resize", action="store_true",
-                        help="do not perform image resizing")
+                        help="Do not perform image resizing")
     parser.add_argument("--filter_again", action="store_true",
-                        help="use lpips to filter repeated images here")
+                        help="Filter repeated images again here")
     parser.add_argument("--max_size", type=int, default=768,
-                        help="max image size that shorter edge aligns to")
+                        help="Max image size that shorter edge aligns to")
     parser.add_argument("--image_save_ext", default='.webp',
-                        help="dataset image extensino")
+                        help="Dataset image extensino")
     parser.add_argument("--n_anime_reg", type=int, default=500,
-                        help="number of images with no characters to keep")
+                        help="Number of images with no characters to keep")
 
     # Loading and saving of metadata for tagging and captioning stage
     parser.add_argument('--load_aux', type=str, nargs='*',
@@ -320,6 +386,30 @@ if __name__ == "__main__":
         "--use_tags_prob", type=float, default=1,
         help="Probability to include tag info in captions")
 
+    # Arguments for folder organization
+    parser.add_argument(
+        "--arrange_format", type=str, default='n_characters/character',
+        help='Description of the concept balancing directory hierarchy'
+    )
+    parser.add_argument(
+        "--max_character_number", type=int, default=6,
+        help="If have more than X characters put X+")
+    parser.add_argument(
+        "--min_images_per_combination", type=int, default=10,
+        help=("Put others instead of character name if number of images "
+              "of the character combination is smaller then this number"))
+
+    # For balancing
+    parser.add_argument(
+        '--min_multiply', type=float, default=1,
+        help='Minimum multiply of each image')
+    parser.add_argument(
+        '--max_multiply', type=int, default=100,
+        help='Maximum multiply of each image')
+    parser.add_argument(
+        '--weight_csv', default='csv_examples/default_weighting.csv',
+        help='If provided use the provided csv to modify weights')
+
     args = parser.parse_args()
 
     start_stage = args.start_stage
@@ -334,7 +424,7 @@ if __name__ == "__main__":
 
     src_dir = args.src_dir
 
-    logging.getLogger().setLevel(logging.INFO)
+    setup_logging(args.log_dir, args.log_prefix)
 
     # Loop through the stages and execute them
     for stage_num in range(int(start_stage), int(end_stage) + 1):
