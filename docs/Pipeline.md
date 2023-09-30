@@ -72,8 +72,8 @@ Since the extracted images can take a lot of place, I have made the decision to 
 ### Command line arguments
 
 - `min_crop_size`: Minimum size for cropped image (shorter edge). Smaller images are dropped. Default is 320.
-- `remove_no_head`: Do not save images without head during cropping.
-- `remove_no_face`: Do not save images without face during cropping (this can be problematic if you want to learn how to draw characters from behind).
+- `crop_with_head`: Do not save images without head during cropping.
+- `crop_with_face`: Do not save images without face during cropping (this can be problematic if you want to learn how to draw characters from behind).
 
 
 ## Stage 3: Character Clustering or Classification

@@ -83,11 +83,11 @@ def crop_characters(args, src_dir, is_start_stage):
         # Some not moving while other moving
         # FilterSimilarAction('all'),
     )
-    if args.remove_no_head:
+    if args.crop_with_head:
         source = source.attach(
             HeadCountAction(1, level='n'),
         )
-    if args.remove_no_face:
+    if args.crop_with_face:
         source = source.attach(
             FaceCountAction(1, level='n'),
         )
@@ -309,11 +309,11 @@ if __name__ == "__main__":
     parser.add_argument("--min_crop_size", type=int, default=320,
                         help="Minimum size for character cropping")
     parser.add_argument(
-        "--remove_no_head", action="store_true",
-        help="Remove images without head during cropping")
+        "--crop_with_head", action="store_true",
+        help="Crop only images with head for character identification")
     parser.add_argument(
-        "--remove_no_face", action="store_true",
-        help="Remove images without face during cropping")
+        "--crop_with_face", action="store_true",
+        help="Crop only images with face for character identification")
 
     # Arguments for character clustering/classification
     parser.add_argument(
