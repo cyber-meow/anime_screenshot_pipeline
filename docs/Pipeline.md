@@ -72,6 +72,8 @@ Since the extracted images can take a lot of place, I have made the decision to 
 ### Command line arguments
 
 - `min_crop_size`: Minimum size for cropped image (shorter edge). Smaller images are dropped. Default is 320.
+- `crop_with_head`: Do not save images without head during cropping.
+- `crop_with_face`: Do not save images without face during cropping (this can be problematic if you want to learn how to draw characters from behind).
 
 
 ## Stage 3: Character Clustering or Classification
@@ -118,7 +120,7 @@ The images obtained after this stage are meant to be the ones used for training.
 
 ### Image selection criteria
 
-The folder names from `.../classified` directory are first read and save in the `characters` field of the images' metadata (cropped and original alike). Folder names should be of the form `XXX_{character_name}`. After this, the images are selected in the following way
+The folder names from `.../classified` directory are first read and save in the `characters` field of the images' metadata (cropped and original alike). Folder names here are of the form `{number}_{chracter_name}` by default but using simply `{character_name}` is also acceptable as long as it does not start with `{number}_` (otherwise the program parse with the first format). After this, the images are selected in the following way:
 
 - For cropped images: select those with size smaller than half of the original image
 - For original images:

@@ -20,12 +20,13 @@ python automatic_pipeline.py \
     --dst_dir /path/to/dataset_dir \
     --character_ref_dir /path/to/ref_image_dir \
     --image_type screenshots \
+    --crop_with_head \
     --image_prefix my_favorite_anime \
     --log_prefix my_favorite_anime
 ```
 
 
-The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
+The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
 
 
 - `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline Explained](docs/Pipeline.md)). In the case where `start_stage` is set to 1, this should be a folder containing a the videos to extract frames from.
@@ -35,7 +36,7 @@ The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipe
     - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
 - `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`)
 
-:bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.  
+:bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.
 :bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 4 to 7. See [Pipeline Explained](docs/Pipeline.md) for details.
 
 There are a lot of possible command line arguments that allow you to configure the entire process. See all of them with
@@ -141,13 +142,14 @@ Contributions are welcome
 ### Main
 
 - [x] Readme and Requirements.txt
+- [ ] .toml support
 - [ ] Windows suppot
 - [ ] Fanart support
 - [ ] HCP-diffusion compatibility
 
 ### Secondary
 
-- [ ] Configurable FaceCountAction and HeadCountAction
+- [x] Configurable FaceCountAction and HeadCountAction
 - [ ] Two-stage classification with small clusters and large clusters
 - [ ] Arguments to optionally remove character combinations with too few images
 - [ ] Add size to metadata to avoid opening images for size comparison

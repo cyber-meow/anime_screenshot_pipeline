@@ -60,6 +60,14 @@ def rearrange_related_files(classified_dir):
                         f"to {related_path}")
 
 
+def parse_char_name(folder_name):
+    if '_' in folder_name:
+        parts = folder_name.split('_')
+        if parts[0].strip().isdigit():
+            return '_'.join(parts[1:])
+    return folder_name
+
+
 def save_characters_to_meta(classified_dir):
     """
     Save character information to metadata files in the crop directory.
@@ -73,7 +81,7 @@ def save_characters_to_meta(classified_dir):
     logging.info('Saving characters to metadata ...')
     # Iterate over each folder in the classified directory
     for folder_name in tqdm(os.listdir(classified_dir)):
-        char_name = '_'.join(folder_name.split('_')[1:])
+        char_name = parse_char_name(folder_name)
         folder_path = os.path.join(classified_dir, folder_name)
 
         # Ensure it's a directory
@@ -105,7 +113,7 @@ def save_characters_to_meta(classified_dir):
                     + 'corresponding metadata')
 
             # Update the characters field
-            if char_name.startswith('noise'):
+            if char_name.startswith('noise') or char_name.startswith('Noise'):
                 # This ensures that we overwrite old information
                 meta_data['characters'] = []
             else:
