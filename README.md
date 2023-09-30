@@ -49,8 +49,8 @@ I may add the possibility to read arguments from `.toml` file later.
 
 Clone this directory and install dependencies with
 ```bash
-git clone --recurse-submodules \
-    https://github.com/cyber-meow/anime_screenshot_pipeline
+git clone https://github.com/cyber-meow/anime_screenshot_pipeline
+git submodule update --init --recursive
 
 cd anime_screenshot_pipeline
 

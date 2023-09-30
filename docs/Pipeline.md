@@ -195,70 +195,28 @@ Typically, you can run with `--save_aux processed_tags characters`. You then get
 
 **Arrange folder in n_characters/character format**
 
-- This takes 30 secs to 1 min per 1K images on my laptop
+- This takes 30 secs to 1 min per 1K images on my laptop.
+- If you start from this stage, please set `--src_dir` to the training folder to arrange (`/path/to/dataset_dir/training/{image_type}` by default).
+- In-place operation.
 
-### Only keep images with faces and resize
-
-```
-python arrange_folder.py --min_face_number 1 --max_face_number 10 \
---keep_src_structure --format '' --max_image_size 1024 \
---src_dir /path/to/src_dir --dst_dir /path/to/dst_dir
-```
-
-The above command can be run before cropping and tagging to eliminate images with no faces.
-
-- With `min_face_number` and `max_face_number` it only saves images whose face number is within this range to `dst_dir`.
-- The argument `--keep_src_structure`  makes sure the original folder structure is respected and new folders are only created on top of this structure.
-- Passing `--max_image_size` makes sure that saved images are resized so that both its width and height are smaller than the provided value. No resize is perform by default.
-- Use `--move_file` if you want to move file to destination directory instead of creating new ones. `max_image_size` is ignored in this case.
-    
-
-### Arrange the folder in hierarchy using metadata
-
-For data balance and manual inspection, we can arrange our images into different subfolders.
-
-```
-python arrange_folder.py \
---move_file --format 'n_characters/character/fh_ratio' \
---max_character_number 6 --min_image_per_combination 10 \
---src_dir /path/to/src_dir --dst_dir /path/to/dst_dir
-```
-
-Using the above command we obtain a folder structure as shown at the beginning. The folder structure itself is specified by the argument `--format`. Different levels of folders are separated by `/`. Accepted folder types are `n_characters`, `n_faces`, `n_people`, `character`, and `fh_ratio`.
-
-- `n_characters`: This creates folders using the number of characters. Passing argument `--max_character_number 6` puts all the scenes with more than 6 characters into the folder `6+_characters`.
-- `character`: This creates folders with sorted character names split by `+`. To avoid creating a specific folder for character combination that shows up too few times, we pass the argument `--min_image_per_combination` so that images of all the character combinations with fewer than a certain number of images are saved in `.../character_others`.
-- `fh_ratio`: This creates folders according to the maximum face height ratio. The range of percentage of each folder can be changed with `--face_ratio_folder_range` (default to 25).
-
+Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in readme. You can also set `--arrange_format character` to remove the level that specifies the number of characters.
 
 
 ## Stage 7: Dataset Balancing
 
-**Balanced dataset using a provided weighting file**
+**Balanced dataset by computing repeat/multiply for each sub-folder**
 
-We have now an organized dataset and a json file for each image containing its metadata. If you are not going to train locally, you can already upload these data to cloud to be downloaded for further use. You will just need to run the two scripts `generate_captions.py`  and `gnerate_multiply.py` on your training instance (local, colab, runpod, vast.ai, lambdalab, paperspace, or whatever) before launching the trainer.
+- This runs instantaneously for 5K images.
+- If you start from this stage, please set `--src_dir` to the training folder containing all training images, screenshots, fanarts, regularization images, or whatever (`/path/to/dataset_dir/training` by default).
+- In-place operation.
 
-### Caption generation
+I assume that we have multiple types of images. They should be all put in the training folder for this stage to be effective.
 
-This is pretty self-explanatory. It reads the json file and (randomly) generates some caption.
-```
-python generate_captions.py \
---use_npeople_prob 1 --use_character_prob 1 --use_general_prob 1 \
---use_facepos_prob 0 --use_tags_prob 0.8 --max_tag_numbe 15 --shuffle_tags \
---src_dir /path/to/datset_dir
-```
+### Technical details
 
-The `use_[...]_prob` arguments specific the probability that a component will be put in the caption on condition that information about this component is stored in the metadata. For face position I used five descriptions (each with two token) for horizontal positions and another five for vertical positions but the model failed to learn its meaning.
-We can also pass the arguments `--drop_hair_tag` and/or `--drop_eye_tag` to drop the tags about hair and eyes. This makes sense if we want to teach the model about the concept of specific characters with fixed hair style and eye color.
+We generate her the `multipy.txt` in each image folder to indicate the number of times that the images of this folder should be used in a repeat, with the goal to balance between different concepts during training.
 
-### Multiply generation
-
-Finally we need to generate the `multipy.txt` in each image folder to indicate the number of times that the images of this folder should be used in a repeat, with the goal to balance between different concepts during training. This is done by
-```
-python generate_multiply.py --weight_csv /path/to/weight_csv --max_multiply 250 --src_dir /path/to/datset_dir
-```
-
-To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with a provided csv file ([example](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/csv_examplese/concept_weights_example.csv)). It first searches for the for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
+To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with the csv file provided through `--weight_csv` ([default_weighting.csv](../csv_examples/default_weighting.csv) is used by dedfault). It first searches for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
 
 For example, consider the folder structure
 ```
@@ -275,11 +233,6 @@ and the csv
 class1, 4
 *class2, 6
 ```
-For simplicity (and this should be the good practice) assume images are only in the class folders. Then, the sampling probabilities of `./1_character/class1`, `./1_character/class2`, `./others/class1`, and `./others/class3` are respectively 0.75 * 0.4 = 0.3, 0.75 * 0.6 = 0.45, 0.25 * 0.8 = 0.2, and 0.25 * 0.2 = 0.05. Note that the same weight of `class1` can yield different sampling probability because of the other folders at the same level can have different weights (in this case `./1_character/class2` has weight 6 while `./others/class3` has weight 1).
+For simplicity (and this should be the good practice), assume images are only in the class folders. Then, the sampling probabilities of `./1_character/class1`, `./1_character/class2`, `./others/class1`, and `./others/class3` are respectively 0.75 * 0.4 = 0.3, 0.75 * 0.6 = 0.45, 0.25 * 0.8 = 0.2, and 0.25 * 0.2 = 0.05. Note that the same weight of `class1` can yield different sampling probability because of the other folders at the same level can have different weights (in this case `./1_character/class2` has weight 6 while `./others/class3` has weight 1).
 
-Now that we have the sampling probability of each image folder, we can compute the weight per image by diving it by the number of images in that image folder. Finally, we convert it into multiply by setting the minimum multiply to 1, and then round the results to integer. The argument `--max_multiply` sets a hard limit on the maximum multiply of each image folder above which we clip to this value. After running the command you can check the log file to see if you are satisfied with the generated multiplies.
-
-### Start fine-tuning
-
-The dataset is ready now. Check [EveryDream](https://github.com/victorchall/EveryDream-trainer) / [EveryDream2](https://github.com/victorchall/EveryDream2trainer#readme) for the fine-tuning of Stable Diffusion.
-
+Now that we have the sampling probability of each image folder, we can compute the weight per image by diving it by the number of images in that image folder. Finally, we convert it into multiply by setting the minimum multiply to `--min_multiply` (default to 1). The argument `--max_multiply` sets a hard limit on the maximum multiply of each image folder above which we clip to this value. After running the command you can check the log file to see if you are satisfied with the generated multiplies/repeats.
