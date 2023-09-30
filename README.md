@@ -35,7 +35,7 @@ The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipe
     - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
 - `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`)
 
-:bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.
+:bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.  
 :bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 4 to 7. See [Pipeline Explained](docs/Pipeline.md) for details.
 
 There are a lot of possible command line arguments that allow you to configure the entire process. See all of them with
