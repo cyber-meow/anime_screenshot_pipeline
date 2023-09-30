@@ -106,6 +106,7 @@ def is_basic_character_tag(tag):
         'eyes', 'skin', 'hair', 'bun', 'bangs', 'cut', 'sidelocks',
         'twintails', 'braid', 'braids', 'afro', 'ahoge', 'drill',
         'drills', 'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
+        'beard', 'mustache', 'pointy ears',
     ]
 
     tag = tag.replace('_', ' ')
