@@ -20,16 +20,16 @@ class TagPruningAction(ProcessAction):
     def __init__(self,
                  blacklisted_tags,
                  overlap_tags_dict,
-                 pruned_type='character',
+                 pruned_mode='character',
                  tags_attribute='processed_tags'):
-        assert pruned_type in ['none', 'minimal', 'character']
+        assert pruned_mode in ['none', 'minimal', 'character']
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
-        self.pruned_type = pruned_type
+        self.pruned_mode = pruned_mode
         self.tags_attribute = tags_attribute
 
     def process(self, item: ImageItem) -> ImageItem:
-        if self.pruned_type == 'none':
+        if self.pruned_mode == 'none':
             return item
         if self.tags_attribute in item.meta:
             tags = item.meta[self.tags_attribute]
@@ -43,7 +43,7 @@ class TagPruningAction(ProcessAction):
             return item
         tags = remove_blacklisted_tags(tags, self.blacklisted_tags)
         tags = remove_overlap_tags(tags, self.overlap_tags_dict)
-        if self.pruned_type == 'character':
+        if self.pruned_mode == 'character':
             # Only pruned character related tags for character images
             if 'characters' in item.meta and item.meta['characters']:
                 tags = remove_basic_character_tags(tags)

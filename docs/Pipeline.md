@@ -1,6 +1,6 @@
 # Dataset Construction Explained
 
-## Table of Contents
+#### Table of Contents
 
 1. [Frame Extraction and Similar Image Removal](#stage-1-frame-extraction-and-similar-image-removal)
 1. [Character Detection and Cropping](#stage-2-character-detection-and-cropping)
@@ -10,9 +10,9 @@
 1. [Folder Arrangement](#stage-6-folder-arrangement)
 1. [Dataset Balancing](#stage-7-dataset-balancing)
 
-I will also provide below approximate running time on my own laptop with a RTX 3070 Ti.
+I will also provide below approximate running time on my own laptop with a RTX 3070 Ti. The command line arguments listed here are not exhaustive. Please use `--help` to get the entire list.
 
-:bulb: In total it takes me a little more than 2 hours to process four episodes.
+:bulb: In total it takes me a little more than 2 hours to process four episodes (24 mins each).
 
 
 ## Stage 1: Frame Extraction and Similar Image Removal
@@ -21,8 +21,8 @@ I will also provide below approximate running time on my own laptop with a RTX 3
 
 - This stage take 5~10 minutes per episode on my laptop.
 - `--src_dir` should be a folder containing the videos to process.
-- Output folder: `/path/to/dataset_dir/intermediate/image_type/raw`
-- After this stage, you can go over the images yourself to select those you want to keep.
+- Output folder: `/path/to/dataset_dir/intermediate/{image_type}/raw`
+- After this stage, you can go over the images to select those you want to keep.
 
 ### Frame extraction
 
@@ -40,8 +40,8 @@ ffmpeg -hwaccel cuda -i $filename -filter:v \
 
 **:warning: It is important to ensure that every image has different name at this stage. Otherwise some images will be overwritten later.**
 
-- `--image_prefix`: This allows you to give a prefix to the extracted images.
-- `--ep_init`: When you split the process in multiple runs. You should either set different `--image_prefix` or adjust `--ep_init` to specify which episode you start from. Note that the processing order is obtained by sorting the filenames, and thus the episode given here could be different from the actual one if the filename does not have a consistent format.
+- `image_prefix`: This allows you to give a prefix to the extracted images.
+- `ep_init`: When you split the process in multiple runs. You should either set different `--image_prefix` or adjust `--ep_init` to specify which episode you start from. Note that the processing order is obtained by sorting the filenames, and thus the episode given here could be different from the actual one if the filename does not have a consistent format.
 
 
 The use of [mpdecimate](http://underpop.online.fr/f/ffmpeg/help/mpdecimate.htm.gz) filter removes consecutive frames that are too similar. Enabling the filter makes a big difference in both processing speed and the number of extracted frames (probably 10 times fewer images with the filter). For now I have not found a python-only way to achieve the same.  
@@ -66,10 +66,10 @@ Since the extracted images can take a lot of place, I have made the decision to 
 
 - This stage take 5~10 minutes per episode on my laptop.
 - If you start from this stage, please set `--src_dir` to the folder containing all the images to process (like the `.../raw` folder from the first stage).
-- Output folder:  `/path/to/dataset_dir/intermediate/image_type/cropped`
-- After this stage, you can go over the images yourself to select those you want to keep.
+- Output folder:  `/path/to/dataset_dir/intermediate/{image_type}/cropped`
+- After this stage, you can go over the images to select those you want to keep.
 
-As mentioned, this stage simply crops individual characters out to a new folder using character detection.
+### Command line arguments
 
 - `min_crop_size`: Minimum size for cropped image (shorter edge). Smaller images are dropped. Default is 320.
 
@@ -78,9 +78,9 @@ As mentioned, this stage simply crops individual characters out to a new folder 
 
 **0-shot character clustering or few-shot character classification without training**
 
-- This takes ~5 mins for 3k images on my laptop (from 4 episodes)
+- This takes ~5 mins for 3k images on my laptop (from 4 episodes).
 - If you start from this stage, please set `--src_dir` to the folder containing images to classify (like the `.../cropped` folder from the second stage or the `.../classified` folder from this stage).
-- Output folder:  `/path/to/dataset_dir/intermediate/image_type/classified`
+- Output folder:  `/path/to/dataset_dir/intermediate/{image_type}/classified`
 - **Recommended:** After this stage, you can go over the images to rename clusters, construct`--character_ref_dir` and rerun from this stage, and move character images around for correction. More details follow.
 
 ### Detailed instructions
@@ -104,44 +104,96 @@ A recommendation is to first run without any reference folder. Use the obtained 
 
 TODO
 
----
-
-TO be updated
 
 ## Stage 4: Image Selection and Resizing
 
-- This takes ~1 min per 1k images on my laptop
+**Resize images with characters to training folder with resizing**
+
+- This takes ~1 min per 1k images on my laptop.
+- If you start from this stage, please set `--src_dir` to the folder containing both `classified` and `raw` (`/path/to/dataset_dir/intermediate/{image_type}` by default).
+- Output folder:  `/path/to/dataset_dir/tranining/{image_type}`
+- After this stage, you can go over the images to select those you want to keep.
+
+The images obtained after this stage are meant to be the ones used for training.
+
+### Image selection criteria
+
+The folder names from `.../classified` directory are first read and save in the `characters` field of the images' metadata (cropped and original alike). Folder names should be of the form `XXX_{character_name}`. After this, the images are selected in the following way
+
+- For cropped images: select those with size smaller than half of the original image
+- For original images:
+    - Selected those with characters
+    - Selected `--n_anime_reg` images with no characters for style regularization (use all if there are not enough no character images)
+
+### Command line arguments
+
+- `no_resize`: Copy file instead of resize.
+- `filter_again`: Go through the dataset and remove similar images again as in the first stage (cropped images can be similar even the full image is not).
+- `max_size`: Max image size to resize to (the shorter edge is aligned). Default is 768.
+- `image_save_ext`: Image extension for resized image. Default is `.webp`.
+- `n_anime_reg`: Number of images with no characters to put in the dataset (can be background, random people, etc.).
+
 
 ## Stage 5: Tagging and Captioning
 
-- This takes 1~2 mins per 1k images on my laptop
+**Tag, prune tags, and caption**
+
+- This takes 1~2 mins per 1k images on my laptop.
+- If you start from this stage, please set `--src_dir` to the training folder with images to tag and caption (can be independently used as tagger).
+- In-place operation.
+- After this stage, you can edit tags and characters yourself using suitable tools, especially if you put `--save_aux processed_tags characters`. More details follow.
+
+### Tagging
+
+In this phase, we use a publicly available taggers to tag images.
+
+- `tagging_method`: Choose a tagger available in [waifuc](https://github.com/deepghs/waifuc).  
+    Choices: deepdanbooru, wd14_vit, wd14_convnext, wd14_convnextv2, wd14_swinv2, mldanbooru.  
+    Default is wd14_convnextv2.
+- `overwrite_tags`: Overwrite existing tags even if tags exist in metadata.
+- `tag_threshold`: Threshold for tagger.
 
 
-To supplement our captions we would like also to tag our images.
-Nowadays we are fortunate enough to have several taggers that work quite well for anime drawings as we can see from [toriato/stable-diffusion-webui-wd14-tagger](https://github.com/toriato/stable-diffusion-webui-wd14-tagger#mrsmilingwolfs-model-aka-waifu-diffusion-14-tagger). I simply follow [Kohya S's blog post](https://note.com/kohya_ss/n/nbf7ce8d80f29) (in Japanese) and tag all the images by [SmilingWolf/wd-v1-4-vit-tagger](https://huggingface.co/SmilingWolf/wd-v1-4-vit-tagger/tree/main).
+### Tag pruning
 
-I made the following two simple modifications to Kohya S's script `tag_images_by_wd14_tagger.py`
-1. The images of all the subdirectories are tagged
-2. To distinguish tags from the actual caption that will be used by the trainer, the associated file for `XXX.png` is `XXX.png.tags` and not `XXX.txt`.
+For now tag pruning goes through 3 steps. You can deactivate tag pruning by setting `--pruned_mode none`.
 
-Example usage
-```
- python tag_images_by_wd14_tagger.py --batch_size 16 --caption_extension ".tags" /path/to/src_dir
-```
-Again, credit to Kohya S. for the script and credit to SmilingWolf for the model. Other existing alternative is [DeepDanbooru](https://github.com/KichangKim/DeepDanbooru/releases) which works in a similar way and BLIP caption trained on natural images. Kohya S. also provides corresponding scripts for these. However, I heard that BLIP caption is not very helpful for anime related models.
+- Pruned blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](../tag_filtering/blacklist_tags.txt) by default.
+- Pruned overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](../tag_filtering/overlap_tags.json) by default.
+- By default `pruned_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--pruned_mode minimal` to skip this step.
 
-### Save tag information into metadata
+All the tags are saved to the field `processed_tags` of metadata. We also process by this field if it exists by default (unless `--overwrite_tags` is used). If you want to process from the field `tags`, you should use `--process_from_original_tags`. 
 
-```
-python augment_metadata.py --use_tags --general_description "aniscreen" --src_dir /path/to/src_dir
-```
+### Tag ordering
 
-This command saves information contained in the tag file into the metadata file. It also computes the number of people in the image with the help of the `[...]girls` and `[...]boys` tags. The text provided by `--general_description` is stored in the attribute `general`.
+I consistently put 'solo', '1girl', '1boy', 'Xgilrs', 'Xboys' at the beginning. After that, `sort_mode` can be one of the following
+- `original`: use original order
+- `shuffle`: random shuffling
+- `score`: only applicable when tagger is used. Tagger produces score. We then put tags with higher score in front.
 
-> {"n_faces": 2, "facepos": [[0.1, 0.4935185185185185, 0.2984375, 0.8481481481481481], [0.5494791666666666, 0.25555555555555554, 0.7578125, 0.6472222222222223]], "fh_ratio": 0.39166666666666666, "cropped": false, "general": "aniscreen", "tags": ["1girl", "long_hair", "blush", "short_hair", "brown_hair", "hair_ornament", "red_eyes", "1boy", "closed_eyes", "upper_body", "braid", "hairclip", ":o", "parody", "cardigan", "braided_bangs"], "n_people": 2}
+After sorting at most `--max_tag_number` tags are kept.
 
+### Captioning
+
+This step uses tags and other fields to produce captions, saved in `caption` field of metadata.
+
+- `separator`: Tags are always separated by commas. This is used to separate characters and information from different fields.
+- `use_XXX_prob`: The probability of using some sort of information. Use `--help` to see all. Some of them have no effect for the moment.
+- `caption_no_underscore`: Remove all underscores from captions (note that underscores are always removed from tags---except for '\^\_\^').
+
+### Manual inspection: Tag and character editing
+
+You can use `--save_aux` to save some metadata fields to separate files and use `--load aux` to load them.
+
+Typically, you can run with `--save_aux processed_tags characters`. You then get files with names like `XXX.processed_tags` and `XXX.characters`. These can be batch edited with tools such as [dataset-tag-editor](https://github.com/toshiaki1729/stable-diffusion-webui-dataset-tag-editor) or [BatchPrompter](https://github.com/Snowad14/BatchPrompter). These changes can then be loaded with `--load_aux processed_tags characters`. Remember to run again from this stage to update captions.
+
+- Since tags are not overwritten by default, you don't need to worry about tagger overwriting the edited tags.
+- It is better to correct detected characters after stage 3. Here you can edit `XXX.characters` to add non-detected characters (like viewed from behind).
+- :warning: If you edit caption directly, running this stage again will overwrite the changes.
 
 ## Stage 6: Folder Arrangement
+
+**Arrange folder in n_characters/character format**
 
 - This takes 30 secs to 1 min per 1K images on my laptop
 
@@ -181,6 +233,8 @@ Using the above command we obtain a folder structure as shown at the beginning. 
 
 
 ## Stage 7: Dataset Balancing
+
+**Balanced dataset using a provided weighting file**
 
 We have now an organized dataset and a json file for each image containing its metadata. If you are not going to train locally, you can already upload these data to cloud to be downloaded for further use. You will just need to run the two scripts `generate_captions.py`  and `gnerate_multiply.py` on your training instance (local, colab, runpod, vast.ai, lambdalab, paperspace, or whatever) before launching the trainer.
 

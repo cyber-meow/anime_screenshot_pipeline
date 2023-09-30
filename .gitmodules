@@ -1,0 +1,3 @@
+[submodule "waifuc"]
+	path = waifuc
+	url = https://github.com/deepghs/waifuc

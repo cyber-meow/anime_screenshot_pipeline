@@ -69,6 +69,7 @@ def extract_frames(args, src_dir, is_start_stage):
                                model_name=args.detect_duplicate_model,
                                thresh=args.similar_thresh,
                                to_remove_similar=not args.no_remove_similar)
+    return dst_dir
 
 
 def crop_characters(args, src_dir, is_start_stage):
@@ -176,7 +177,7 @@ def tag_and_caption(args, src_dir, is_start_stage):
         TagPruningAction(
             blacklisted_tags,
             overlap_tags_dict,
-            pruned_type=args.pruned_type,
+            pruned_mode=args.pruned_mode,
             tags_attribute=tags_attribute),
         TagSortingAction(
             args.sort_mode,
@@ -204,11 +205,11 @@ def rearrange(args, src_dir, is_start_stage):
     arrange_folder(
         src_dir, src_dir, args.arrange_format,
         args.max_character_number, args.min_images_per_combination)
-    return src_dir
+    return os.path.join(args.dst_dir, 'training')
 
 
 def balance(args, src_dir, is_start_stage):
-    training_dir = os.path.join(args.dst_dir, 'training')
+    training_dir = src_dir
     logging.info(f'Computing repeat for {training_dir} ...')
     if is_start_stage:
         logging.info('Load metadata from auxiliary data ...')
@@ -356,9 +357,9 @@ if __name__ == "__main__":
               "Options are 'score', 'shuffle', 'original'.")
     )
     parser.add_argument(
-        '--pruned_type', type=str, default='character',
+        '--pruned_mode', type=str, default='character',
         choices=['character', 'minimal', 'none'],
-        help=("Type of tags to be pruned. "
+        help=("Different ways to prune tags. "
               "Options are 'character', 'minimal', 'none'.")
     )
     parser.add_argument(
@@ -367,7 +368,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--blacklist_tags_file', type=str,
-        default='tag_filtering/blacklist.txt',
+        default='tag_filtering/blacklist_tags.txt',
         help="Path to the file containing blacklisted tags."
     )
     parser.add_argument(

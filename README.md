@@ -33,6 +33,7 @@ The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipe
 - `--character_ref_dir`: Optional. A folder containing some example images for characters you want to train for. There are two ways to organize
     - With sub-folders: You can put character images in different sub-folders. Sub-folder names are then used as character names.
     - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
+- `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`)
 
 :bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.
 :bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 4 to 7. See [Pipeline Explained](docs/Pipeline.md) for details.
@@ -44,17 +45,27 @@ python automatic_pipeline.py --help
 
 I may add the possibility to read arguments from `.toml` file later.
 
-## Quick Start
+## Installation
 
-Clone this directory and install anime2sd with
+Clone this directory and install dependencies with
 ```bash
-git clone https://github.com/cyber-meow/anime_screenshot_pipeline
-pip install -e .
+git clone --recurse-submodules \
+    https://github.com/cyber-meow/anime_screenshot_pipeline
+
+cd anime_screenshot_pipeline
+
+# Use venv, conda or whatever you like here
+python -m venv venv
+source venv/bin/activate  # Syntax changes according to OS
+
+pip install torch torchvision torchaudio
+# add "--index-url https://download.pytorch.org/whl/cu11"
+# for windows to install gpu version 
+pip install -r requirements.txt
+cd waifuc && pip install . && cd ..
 ```
 
-requirements: TODO
-
-** I am a Linux user and I am not sure to what extent the script runs on Windows. Contributions to fix compatibility issues and/or develop corresponding GUIs are welcome.
+:warning: I am a Linux user and I am not sure to what extent the script runs on Windows. Contributions to fix compatibility issues and/or develop corresponding GUIs are welcome.
 
 ## Dataset Organization
 
@@ -127,14 +138,21 @@ TODO: Compute repeat directly based on metadata and output appropriate format fo
 
 Contributions are welcome
 
-- [ ] Requirements.txt
-- [ ] Used on Windows
+### Main
+
+- [x] Readme and Requirements.txt
+- [ ] Windows suppot
 - [ ] Fanart support
-- [ ] Replace ffmpeg command by built-in python functions
+- [ ] HCP-diffusion compatibility
+
+### Secondary
+
+- [ ] Configurable FaceCountAction and HeadCountAction
 - [ ] Two-stage classification with small clusters and large clusters
 - [ ] Arguments to optionally remove character combinations with too few images
+- [ ] Add size to metadata to avoid opening images for size comparison
+- [ ] Replace ffmpeg command by built-in python functions
 - [ ] Compute repeat based on metadata and trainer-dependent folder organization in the same script
-- [ ] HCP-diffusion compatibility
 - [ ] Improved tag pruning (with tag tree?)
 
 ### Advanced
