@@ -28,7 +28,7 @@ python automatic_pipeline.py \
 The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
 
 
-- `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline Explained](docs/Pipeline.md)). In the case where `start_stage` is set to 1, this should be a folder containing a the videos to extract frames from.
+- `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki)). In the case where `start_stage` is set to 1, this should be a folder containing the videos to extract frames from.
 - `--dst_dir`: Place to construct dataset.
 - `--character_ref_dir`: Optional. A folder containing some example images for characters you want to train for. There are two ways to organize
     - With sub-folders: You can put character images in different sub-folders. Sub-folder names are then used as character names.
@@ -36,7 +36,7 @@ The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipe
 - `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`)
 
 :bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.  
-:bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 4 to 7. See [Pipeline Explained](docs/Pipeline.md) for details.
+:bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 4 to 7. See [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.
 
 There are a lot of possible command line arguments that allow you to configure the entire process. See all of them with
 ```bash

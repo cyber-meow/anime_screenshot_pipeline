@@ -7,7 +7,7 @@ from datetime import datetime
 import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
-# from waifuc.action import FaceCountAction, HeadCountAction
+from waifuc.action import FaceCountAction, HeadCountAction
 from waifuc.action import MinSizeFilterAction, NoMonochromeAction
 from waifuc.action import TaggingAction
 
@@ -47,7 +47,7 @@ def setup_logging(log_dir, log_prefix):
     ch.setFormatter(formatter)
 
     # Create file handler and set level to info
-    if log_dir not in ['None', 'none']:
+    if log_dir.lower() != 'none':
         os.makedirs(log_dir, exist_ok=True)
         current_time = datetime.now()
         str_current_time = str(current_time)
@@ -78,15 +78,19 @@ def crop_characters(args, src_dir, is_start_stage):
     source = source.attach(
         NoMonochromeAction(),
         PersonSplitAction(keep_original=False, level='n'),
-        # TODO: investigate the problem
-        # This seems to filter out some character with more special appearance
-        # FaceCountAction(1, level='n'),
-        # HeadCountAction(1, level='n'),
         MinSizeFilterAction(args.min_crop_size),
         # Not used here because it can be problematic for multi-character scene
         # Some not moving while other moving
         # FilterSimilarAction('all'),
     )
+    if args.remove_no_head:
+        source = source.attach(
+            HeadCountAction(1, level='n'),
+        )
+    if args.remove_no_face:
+        source = source.attach(
+            FaceCountAction(1, level='n'),
+        )
 
     dst_dir = os.path.join(
         args.dst_dir, 'intermediate', args.image_type, 'cropped')
@@ -224,8 +228,12 @@ def balance(args, src_dir, is_start_stage):
         weight_mapping = None
     current_time = datetime.now()
     str_current_time = str(current_time)
-    log_file = os.path.join(
-        args.log_dir, f"{args.log_prefix}_weighting_{str_current_time}.log")
+    if args.log_dir.lower() == 'none':
+        log_file = None
+    else:
+        log_file = os.path.join(
+            args.log_dir,
+            f"{args.log_prefix}_weighting_{str_current_time}.log")
     get_repeat(
         training_dir, weight_mapping,
         args.min_multiply, args.max_multiply, log_file)
@@ -269,7 +277,8 @@ if __name__ == "__main__":
     parser.add_argument("--end_stage", default="4",
                         help="Stage or alias to end at")
     parser.add_argument('--log_dir', type=str, default='logs',
-                        help='Directory to save logs')
+                        help=("Directory to save logs. "
+                              "Set to None or none to disable."))
     parser.add_argument('--log_prefix', type=str, default='logfile',
                         help='Prefix for log files')
     parser.add_argument(
@@ -299,6 +308,12 @@ if __name__ == "__main__":
     # Arguments for character cropping
     parser.add_argument("--min_crop_size", type=int, default=320,
                         help="Minimum size for character cropping")
+    parser.add_argument(
+        "--remove_no_head", action="store_true",
+        help="Remove images without head during cropping")
+    parser.add_argument(
+        "--remove_no_face", action="store_true",
+        help="Remove images without face during cropping")
 
     # Arguments for character clustering/classification
     parser.add_argument(
