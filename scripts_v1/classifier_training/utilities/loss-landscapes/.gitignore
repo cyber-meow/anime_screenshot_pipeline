@@ -1,0 +1,23 @@
+# environments
+env/
+ENV/
+Env/
+
+# data
+data/
+
+# debugging files
+tests/paste.txt
+
+# jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# pip
+loss_landscapes.egg-info/
+
+# dist
+dist/
+build/
+
+# tests
+tests/
