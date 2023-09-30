@@ -25,7 +25,7 @@ python automatic_pipeline.py \
 ```
 
 
-The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
+The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
 
 
 - `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline Explained](docs/Pipeline.md)). In the case where `start_stage` is set to 1, this should be a folder containing a the videos to extract frames from.
