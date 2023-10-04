@@ -63,7 +63,7 @@ def rearrange_related_files(classified_dir):
 def parse_char_name(folder_name):
     if '_' in folder_name:
         parts = folder_name.split('_')
-        if parts[0].strip().isdigit():
+        if parts[0].strip('-').isdigit():
             return '_'.join(parts[1:])
     return folder_name
 
@@ -141,7 +141,7 @@ def save_characters_to_meta(classified_dir):
                 # Append the character name if it's not already in the list
                 # and is not noise
                 if (char_name not in orig_meta_data['characters']
-                        and not char_name.startswith('noise')):
+                        and not char_name.lower().startswith('noise')):
                     orig_meta_data['characters'].append(char_name)
 
                 # Save the updated original metadata
