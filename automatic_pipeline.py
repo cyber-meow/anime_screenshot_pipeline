@@ -7,7 +7,6 @@ from datetime import datetime
 import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
-from waifuc.action import FaceCountAction, HeadCountAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import TaggingAction
 
@@ -22,6 +21,7 @@ from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import TagPruningAction, TagSortingAction
 from anime2sd.waifuc_customize import TagRemovingUnderscoreAction
 from anime2sd.waifuc_customize import CaptioningAction
+from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
 
 
 def setup_logging(log_dir, log_prefix):
@@ -86,11 +86,11 @@ def crop_characters(args, src_dir, is_start_stage):
     )
     if args.crop_with_head:
         source = source.attach(
-            HeadCountAction(1, level='n'),
+            MinHeadCountAction(1, level='n'),
         )
     if args.crop_with_face:
         source = source.attach(
-            FaceCountAction(1, level='n'),
+            MinFaceCountAction(1, level='n'),
         )
 
     dst_dir = os.path.join(
