@@ -40,6 +40,7 @@ ffmpeg -hwaccel cuda -i $filename -filter:v \
 
 **:warning: It is important to ensure that every image has different name at this stage. Otherwise some images will be overwritten later.**
 
+- `extract_key`: Extract key frames instead of using mpdecimate filter.
 - `image_prefix`: This allows you to give a prefix to the extracted images.
 - `ep_init`: When you split the process in multiple runs. You should either set different `--image_prefix` or adjust `--ep_init` to specify which episode you start from. Note that the processing order is obtained by sorting the filenames, and thus the episode given here could be different from the actual one if the filename does not have a consistent format.
 

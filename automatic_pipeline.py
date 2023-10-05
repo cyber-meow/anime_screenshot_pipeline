@@ -7,8 +7,7 @@ from datetime import datetime
 import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
-from waifuc.action import FaceCountAction, HeadCountAction
-from waifuc.action import MinSizeFilterAction, NoMonochromeAction
+from waifuc.action import MinSizeFilterAction
 from waifuc.action import TaggingAction
 
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
@@ -22,6 +21,7 @@ from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import TagPruningAction, TagSortingAction
 from anime2sd.waifuc_customize import TagRemovingUnderscoreAction
 from anime2sd.waifuc_customize import CaptioningAction
+from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
 
 
 def setup_logging(log_dir, log_prefix):
@@ -66,6 +66,7 @@ def extract_frames(args, src_dir, is_start_stage):
     logging.info(f'Extracting frames to {dst_dir} ...')
     extract_and_remove_similar(src_dir, dst_dir, args.image_prefix,
                                ep_init=args.ep_init,
+                               extract_key=args.extract_key,
                                model_name=args.detect_duplicate_model,
                                thresh=args.similar_thresh,
                                to_remove_similar=not args.no_remove_similar)
@@ -76,7 +77,7 @@ def crop_characters(args, src_dir, is_start_stage):
 
     source = LocalSource(src_dir)
     source = source.attach(
-        NoMonochromeAction(),
+        # NoMonochromeAction(),
         PersonSplitAction(keep_original=False, level='n'),
         MinSizeFilterAction(args.min_crop_size),
         # Not used here because it can be problematic for multi-character scene
@@ -85,11 +86,11 @@ def crop_characters(args, src_dir, is_start_stage):
     )
     if args.crop_with_head:
         source = source.attach(
-            HeadCountAction(1, level='n'),
+            MinHeadCountAction(1, level='n'),
         )
     if args.crop_with_face:
         source = source.attach(
-            FaceCountAction(1, level='n'),
+            MinFaceCountAction(1, level='n'),
         )
 
     dst_dir = os.path.join(
@@ -138,8 +139,11 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     dst_dir = os.path.join(args.dst_dir, 'training', args.image_type)
 
     logging.info(f'Preparing dataset images to {dst_dir} ...')
-    # rearrange json and ccip in case of manual inspection
-    rearrange_related_files(classified_dir)
+
+    if is_start_stage:
+        # rearrange json and ccip in case of manual inspection
+        rearrange_related_files(classified_dir)
+
     # update metadata using folder name
     save_characters_to_meta(classified_dir)
     # select images, resize, and save to training
@@ -163,6 +167,9 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
 
 
 def tag_and_caption(args, src_dir, is_start_stage):
+    if is_start_stage:
+        # rearrange json and ccip in case of manual inspection
+        rearrange_related_files(src_dir)
 
     with open(args.blacklist_tags_file, 'r') as f:
         blacklisted_tags = {line.strip() for line in f}
@@ -206,6 +213,7 @@ def rearrange(args, src_dir, is_start_stage):
             src_dir, no_meta=False,
             save_caption=True,
             save_aux=args.save_aux, in_place=True))
+        rearrange_related_files(src_dir)
     arrange_folder(
         src_dir, src_dir, args.arrange_format,
         args.max_character_number, args.min_images_per_combination)
@@ -290,6 +298,8 @@ if __name__ == "__main__":
         + "(results after stage 1 are always saved)")
 
     # Arguments for video extraction
+    parser.add_argument("--extract_key", action="store_true",
+                        help="Only extract key frames")
     parser.add_argument("--image_prefix", default='',
                         help="Output image prefix")
     parser.add_argument("--ep_init", type=int, default=1,
@@ -302,7 +312,7 @@ if __name__ == "__main__":
                         default='mobilenet-v2-imagenet-torch',
                         help="Model used for duplicate detection")
     parser.add_argument(
-        "--similar_thresh", type=float, default=0.985,
+        "--similar_thresh", type=float, default=0.98,
         help="Cosine similarity threshold for image duplicate detection")
 
     # Arguments for character cropping

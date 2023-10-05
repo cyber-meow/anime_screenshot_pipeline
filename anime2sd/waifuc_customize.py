@@ -7,12 +7,47 @@ from tqdm import tqdm
 
 from waifuc.source.base import BaseDataSource
 from waifuc.export.base import LocalDirectoryExporter
-from waifuc.action.base import ProcessAction
+from waifuc.action.base import ProcessAction, FilterAction
 from waifuc.model import ImageItem
+from imgutils.detect import detect_faces, detect_heads
 
 from anime2sd.captioning import dict_to_caption
 from anime2sd.tagging import remove_blacklisted_tags, remove_overlap_tags
 from anime2sd.tagging import remove_basic_character_tags, sort_tags
+
+
+class MinFaceCountAction(FilterAction):
+    def __init__(self, count: int, level: str = 's', version: str = 'v1.4',
+                 conf_threshold: float = 0.25, iou_threshold: float = 0.7):
+        self.count = count
+        self.level = level
+        self.version = version
+        self.conf_threshold = conf_threshold
+        self.iou_threshold = iou_threshold
+
+    def check(self, item: ImageItem) -> bool:
+        detection = detect_faces(
+            item.image, self.level, self.version,
+            conf_threshold=self.conf_threshold,
+            iou_threshold=self.iou_threshold)
+        return len(detection) >= self.count
+
+
+class MinHeadCountAction(FilterAction):
+    def __init__(self, count: int, level: str = 's',
+                 conf_threshold: float = 0.3, iou_threshold: float = 0.7):
+        self.count = count
+        self.level = level
+        self.conf_threshold = conf_threshold
+        self.iou_threshold = iou_threshold
+
+    def check(self, item: ImageItem) -> bool:
+        detection = detect_heads(
+            item.image, self.level,
+            conf_threshold=self.conf_threshold,
+            iou_threshold=self.iou_threshold
+        )
+        return len(detection) >= self.count
 
 
 class TagPruningAction(ProcessAction):
