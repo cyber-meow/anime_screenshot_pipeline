@@ -21,8 +21,9 @@ def is_aux_file(img_file, candidate_file):
     candidate_base, _ = os.path.splitext(candidate_file)
 
     # Check the conditions
+    # not dedaling with ccip cache
     if (candidate_base == img_base or
-            candidate_base.startswith(f".{img_base}_")):
+            candidate_base.startswith(f".{img_base}_meta")):
         return True
 
     return False

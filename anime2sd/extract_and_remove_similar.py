@@ -1,6 +1,7 @@
 import os
 import shlex
 import logging
+import subprocess
 from tqdm import tqdm
 
 import numpy as np
@@ -9,6 +10,38 @@ import fiftyone.zoo as foz
 from sklearn.metrics.pairwise import cosine_similarity
 
 from anime2sd.basics import get_related_paths
+
+
+def check_cuda_availability():
+    try:
+        output = subprocess.check_output(['ffmpeg', '-hwaccels'],
+                                         universal_newlines=True)
+        return 'cuda' in output
+    except Exception as e:
+        logging.warning(f"Error checking CUDA availability: {e}")
+        return False
+
+
+def get_ffmpeg_command(file, file_pattern, extract_key):
+    cuda_available = check_cuda_availability()
+    hwaccel_command = "-hwaccel cuda" if cuda_available else ""
+    if not cuda_available:
+        logging.warning("CUDA is not available. Proceeding without CUDA.")
+
+    if extract_key:
+        filter_command = "-vf \"select='eq(pict_type,I)'\" -vsync vfr"
+    else:
+        filter_command = (
+            "-filter:v 'mpdecimate=hi=64*200:lo=64*50: "
+            "frac=0.33,setpts=N/FRAME_RATE/TB'")
+
+    ffmpeg_command = (
+        f"ffmpeg {hwaccel_command} -i {shlex.quote(file)} "
+        + filter_command + " "
+        + f"-qscale:v 1 -qmin 1 -c:a copy {shlex.quote(file_pattern)}"
+    )
+
+    return ffmpeg_command
 
 
 def load_image_dataset(dataset_dir):
@@ -93,7 +126,7 @@ def create_dataset_from_subdirs(dataset_dir, portion="first"):
     return dataset
 
 
-def mark_duplicate(subdataset, similarity_matrix, thresh=0.985):
+def mark_duplicate(subdataset, similarity_matrix, thresh=0.98):
 
     n = len(similarity_matrix)
     similarity_matrix = similarity_matrix - np.identity(n)
@@ -127,7 +160,7 @@ def mark_duplicate(subdataset, similarity_matrix, thresh=0.985):
     return samples_to_remove, samples_to_keep
 
 
-def remove_similar(dataset, model, thresh=0.985, max_compare_size=10000):
+def remove_similar(dataset, model, thresh=0.98, max_compare_size=10000):
     logging.info('Compute embeddings ...')
     embeddings = dataset.compute_embeddings(model)
 
@@ -161,8 +194,10 @@ def remove_similar_from_dir(dirpath, model,
 
 def extract_and_remove_similar(src_dir, dst_dir, prefix,
                                ep_init=1,
+                               extract_key=False,
                                model_name=None,
-                               to_remove_similar=True, thresh=0.985):
+                               to_remove_similar=True,
+                               thresh=0.98):
     # Supported video file extensions
     video_extensions = ['.mp4', '.mkv', '.avi', '.flv', '.mov', '.wmv']
 
@@ -189,11 +224,7 @@ def extract_and_remove_similar(src_dir, dst_dir, prefix,
                                     f'{prefix}EP{i+ep_init}_%d.png')
 
         # Run ffmpeg on the file, saving the output to the output directory
-        ffmpeg_command = \
-            f"ffmpeg -hwaccel cuda -i {shlex.quote(file)} -filter:v "\
-            "'mpdecimate=hi=64*200:lo=64*50:"\
-            "frac=0.33,setpts=N/FRAME_RATE/TB' "\
-            f"-qscale:v 1 -qmin 1 -c:a copy {shlex.quote(file_pattern)}"
+        ffmpeg_command = get_ffmpeg_command(file, file_pattern, extract_key)
         logging.info(ffmpeg_command)
         os.system(ffmpeg_command)
 

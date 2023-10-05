@@ -46,9 +46,9 @@ def rearrange_related_files(classified_dir):
                 # Search for the file in the all_files dictionary
                 found_path = all_files.get(os.path.basename(related_path))
                 if found_path is None:
-                    logging.warning(
-                        f"No related file found for {related_path}")
                     if related_path.endswith('json'):
+                        logging.warning(
+                            f"No related file found for {related_path}")
                         meta_data = default_metadata(img_path)
                         with open(related_path, 'w') as f:
                             json.dump(meta_data, f)
