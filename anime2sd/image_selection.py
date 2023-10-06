@@ -22,7 +22,7 @@ def construct_file_list(classified_dir):
     for root, _, filenames in os.walk(classified_dir):
         for filename in filenames:
             path = os.path.join(root, filename)
-            if filename in all_files:
+            if filename in all_files and filename != 'multiply.txt':
                 raise ValueError(f"Duplicate filename found: {filename}")
             all_files[filename] = path
     return all_files
