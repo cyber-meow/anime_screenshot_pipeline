@@ -145,6 +145,7 @@ def create_embeddings(args):
     content = OmegaConf.load(args.main_config_file)
     pretrained_model = content.model.pretrained_model_name_or_path
     pt_creator = PTCreator(pretrained_model, args.emb_dir)
+    os.makedirs(args.emb_dir, exist_ok=True)
     # Read the embedding names from trigger_word_file
     names_inits = get_emb_names_and_inits(args.trigger_word_file)
     for name in names_inits:
@@ -196,7 +197,7 @@ if __name__ == "__main__":
                         help='Learning rate for embeddings. Default is 1e-3.')
 
     args = parser.parse_args()
-    
+
     if args.exp_dir is None:
         args.exp_dir = os.path.join(args.config_dst_dir, 'exps')
 
