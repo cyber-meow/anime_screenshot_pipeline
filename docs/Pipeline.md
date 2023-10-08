@@ -205,7 +205,7 @@ Typically, you can run with `--save_aux processed_tags characters`. You then get
 - If you start from this stage, please set `--src_dir` to the training folder to arrange (`/path/to/dataset_dir/training/{image_type}` by default).
 - In-place operation.
 
-Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in readme. You can also set `--arrange_format character` to remove the level that specifies the number of characters.
+Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in [Dataset Organization](Dataset_organization.md). You can also set `--arrange_format character` to remove the level that specifies the number of characters. You can also set `--arrange_format character` to remove the level that specifies the number of characters.
 
 
 ## Stage 7: Dataset Balancing
