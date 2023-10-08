@@ -34,12 +34,12 @@ train:
     type: 'eps' # 'eps' or 'sample'
 
   optimizer:
-    _target_: torch.optim.AdamW8bit
+    _target_: bitsandbytes.optim.AdamW8bit
     _partial_: True
     weight_decay: 1e-3
 
   optimizer_pt:
-    _target_: torch.optim.AdamW8bit
+    _target_: bitsandbytes.optim.AdamW8bit
     _partial_: True
     weight_decay: 5e-4
 

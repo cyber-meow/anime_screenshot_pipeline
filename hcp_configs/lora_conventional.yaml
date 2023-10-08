@@ -1,7 +1,7 @@
 exp_dir_base: 'hcp_exps'
 config_dir: 'hcp_configs'
 emb_dir: 'embs'
-embedding_lr: 1e-3
+emb_lr: 1e-3
 
 _base_:
   - ${config_dir}/train_base.yaml
@@ -10,7 +10,7 @@ _base_:
 exp_dir: ${exp_dir_base}/${hcp.time:}
 
 model:
-  pretrained_model_name_or_path: 'deepghs/animefull-latest'	# JosephusCheung/ACertainty, Crosstyan/BPModel
+  pretrained_model_name_or_path: 'deepghs/animefull-latest' # JosephusCheung/ACertainty, Crosstyan/BPModel
   tokenizer_repeats: 1
   clip_skip: 1
   ema_unet: 0
@@ -26,9 +26,13 @@ train:
     num_warmup_steps: 1000
     num_training_steps: 50000
 
+unet: null
+text_encoder: null
+plugin_unet: null
+plugin_TE: null
+
 lora_unet:
-  -
-    lr: 2e-4
+  - lr: 2e-4
     rank: 8
     alpha: 4
     layers:
@@ -47,7 +51,8 @@ tokenizer_pt:
   emb_dir: '${emb_dir}'
   replace: False
   train:
-    - {name: Tomoko, lr: ${embedding_lr}}
+    - name: pt1
+      lr: ${emb_lr}
 
 logger:
   - _target_: hcpdiff.loggers.CLILogger

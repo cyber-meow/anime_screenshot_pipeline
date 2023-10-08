@@ -15,7 +15,7 @@ data:
         repeat: 1
         prompt_template: '${config_dir}/caption.txt'
         caption_file:
-	  _target_: hcpdiff.data.TXTCaptionLoader
+          _target_: hcpdiff.data.TXTCaptionLoader
           path: 'imgs/'
 
         att_mask: null
@@ -30,12 +30,12 @@ data:
             - _target_: torchvision.transforms.Normalize
               mean: [ 0.5 ]
               std: [ 0.5 ]
-        # tag_transforms:
-          # _target_: torchvision.transforms.Compose
-          # transforms:
+        tag_transforms:
+          _target_: torchvision.transforms.Compose
+          transforms:
+            - _target_: hcpdiff.utils.caption_tools.TagDropout
+              p: 0
           #   - _target_: hcpdiff.utils.caption_tools.TagShuffle
-          #   - _target_: hcpdiff.utils.caption_tools.TagDropout
-          #     p: 0.1
           #   - _target_: hcpdiff.utils.caption_tools.TemplateFill
           #     word_names: ${....word_names}
 
