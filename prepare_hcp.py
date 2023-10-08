@@ -66,7 +66,10 @@ def modify_main_config_file(filepath, args):
             'train': [{'name': name, 'lr': '${emb_lr}'} for name in names]
         }
     else:
-        content.tokenizer_pt = None
+        content.tokenizer_pt = {
+            'emb_dir': '${emb_dir}',
+            'train': None,
+        }
 
     # Save the modified content back to the file
     OmegaConf.save(
@@ -145,7 +148,6 @@ def create_embeddings(args):
     content = OmegaConf.load(args.main_config_file)
     pretrained_model = content.model.pretrained_model_name_or_path
     pt_creator = PTCreator(pretrained_model, args.emb_dir)
-    os.makedirs(args.emb_dir, exist_ok=True)
     # Read the embedding names from trigger_word_file
     names_inits = get_emb_names_and_inits(args.trigger_word_file)
     for name in names_inits:
@@ -203,6 +205,7 @@ if __name__ == "__main__":
 
     if args.emb_dir is None:
         args.emb_dir = os.path.join(args.config_dst_dir, 'embs')
+    os.makedirs(args.emb_dir, exist_ok=True)
 
     os.makedirs(args.config_dst_dir, exist_ok=True)
     # Copy files
