@@ -1,5 +1,4 @@
 import os
-import shlex
 import logging
 import subprocess
 from tqdm import tqdm
@@ -24,24 +23,26 @@ def check_cuda_availability():
 
 def get_ffmpeg_command(file, file_pattern, extract_key):
     cuda_available = check_cuda_availability()
-    hwaccel_command = "-hwaccel cuda" if cuda_available else ""
-    if not cuda_available:
+    command = ["ffmpeg"]
+
+    if cuda_available:
+        command.extend(["-hwaccel", "cuda"])
+    else:
         logging.warning("CUDA is not available. Proceeding without CUDA.")
 
+    command.extend(["-i", file])
+
     if extract_key:
-        filter_command = "-vf \"select='eq(pict_type,I)'\" -vsync vfr"
+        command.extend(["-vf", "select='eq(pict_type,I)'", "-vsync", "vfr"])
     else:
-        filter_command = (
-            "-filter:v 'mpdecimate=hi=64*200:lo=64*50: "
-            "frac=0.33,setpts=N/FRAME_RATE/TB'")
+        command.extend(
+            ["-filter:v",
+             "mpdecimate=hi=64*200:lo=64*50:frac=0.33,setpts=N/FRAME_RATE/TB"])
 
-    ffmpeg_command = (
-        f"ffmpeg {hwaccel_command} -i {shlex.quote(file)} "
-        + filter_command + " "
-        + f"-qscale:v 1 -qmin 1 -c:a copy {shlex.quote(file_pattern)}"
-    )
+    command.extend(["-qscale:v", "1", "-qmin", "1",
+                   "-c:a", "copy", file_pattern])
 
-    return ffmpeg_command
+    return command
 
 
 def load_image_dataset(dataset_dir):
@@ -226,7 +227,7 @@ def extract_and_remove_similar(src_dir, dst_dir, prefix,
         # Run ffmpeg on the file, saving the output to the output directory
         ffmpeg_command = get_ffmpeg_command(file, file_pattern, extract_key)
         logging.info(ffmpeg_command)
-        os.system(ffmpeg_command)
+        subprocess.run(ffmpeg_command, check=True)
 
         if to_remove_similar:
             logging.info("Removing duplicates for '{filename_without_ext}':")

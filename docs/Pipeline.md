@@ -26,7 +26,7 @@ I will also provide below approximate running time on my own laptop with a RTX 3
 
 ### Frame extraction
 
-**Requirements: `ffmpeg` with [mpdecimate](http://underpop.online.fr/f/ffmpeg/help/mpdecimate.htm.gz) filter and cuda support**
+**Requirements: `ffmpeg` with [mpdecimate](http://underpop.online.fr/f/ffmpeg/help/mpdecimate.htm.gz) filter; cuda support is optional but highly recommended**
 
 For the moment being, I directly rely on calling `ffmpeg` command like
 

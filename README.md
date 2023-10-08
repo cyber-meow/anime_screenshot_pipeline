@@ -64,9 +64,12 @@ pip install torch torchvision torchaudio
 # for windows to install gpu version 
 pip install -r requirements.txt
 cd waifuc && pip install . && cd ..
+# cd waifuc ; pip install . ; cd . for powershell
 ```
 
-:warning: I am a Linux user and I am not sure to what extent the script runs on Windows. Contributions to fix compatibility issues and/or develop corresponding GUIs are welcome.
+**The first stage of the process also uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpege from the command line (ideally with cuda support) for this stage.**
+
+** While I personally work on Linux, others have successfully run the scripts on Windows.
 
 ## Dataset Organization
 
@@ -143,7 +146,6 @@ Contributions are welcome
 
 - [x] Readme and Requirements.txt
 - [ ] .toml support
-- [ ] Windows suppot
 - [ ] Fanart support
 - [ ] HCP-diffusion compatibility
 
