@@ -59,14 +59,17 @@ cd anime_screenshot_pipeline
 python -m venv venv
 source venv/bin/activate  # Syntax changes according to OS
 
-pip install torch torchvision torchaudio
-# add "--index-url https://download.pytorch.org/whl/cu11"
-# for windows to install gpu version 
+pip3 install torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
+# run also pip install fiftyone-db-ubuntu2204 for ubuntu 22.04
 cd waifuc && pip install . && cd ..
+# cd waifuc ; pip install . ; cd . for powershell
 ```
 
-:warning: I am a Linux user and I am not sure to what extent the script runs on Windows. Contributions to fix compatibility issues and/or develop corresponding GUIs are welcome.
+**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpege from the command line (ideally with cuda support) for this stage.**
+
+** While I personally work on Linux, others have successfully run the scripts on Windows.
 
 ## Dataset Organization
 
@@ -143,7 +146,6 @@ Contributions are welcome
 
 - [x] Readme and Requirements.txt
 - [ ] .toml support
-- [ ] Windows suppot
 - [ ] Fanart support
 - [ ] HCP-diffusion compatibility
 

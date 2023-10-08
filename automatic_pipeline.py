@@ -50,7 +50,7 @@ def setup_logging(log_dir, log_prefix):
     if log_dir.lower() != 'none':
         os.makedirs(log_dir, exist_ok=True)
         current_time = datetime.now()
-        str_current_time = str(current_time)
+        str_current_time = current_time.strftime("%Y-%m-%d%H-%M-%S")
         log_file = os.path.join(
             log_dir, f"{log_prefix}_{str_current_time}.log")
         fh = logging.FileHandler(log_file)
@@ -235,7 +235,7 @@ def balance(args, src_dir, is_start_stage):
     else:
         weight_mapping = None
     current_time = datetime.now()
-    str_current_time = str(current_time)
+    str_current_time = current_time.strftime("%Y-%m-%d%H-%M-%S")
     if args.log_dir.lower() == 'none':
         log_file = None
     else:

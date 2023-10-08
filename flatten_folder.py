@@ -22,14 +22,15 @@ def get_new_path(src_dir, path, separator):
     if os.path.exists(multiply_file):
         with open(multiply_file, 'r') as f:
             repeat = round(float(f.readline().strip()))
-    subpath = path.replace(src_dir, '').lstrip('/')
-    new_subpath = subpath.replace('/', separator)
+    subpath = path.replace(src_dir, '').lstrip(os.path.sep)
+    new_subpath = subpath.replace(os.path.sep, separator)
     return os.path.join(src_dir, f'{repeat}_{new_subpath}')
 
 
 def revert_path(src_dir, path, separator):
-    subpath = '_'.join(path.replace(src_dir, '').lstrip('/').split('_')[1:])
-    new_subpath = subpath.replace(separator, '/')
+    subpath = '_'.join(
+        path.replace(src_dir, '').lstrip(os.path.sep).split('_')[1:])
+    new_subpath = subpath.replace(separator, os.path.sep)
     return os.path.join(src_dir, new_subpath)
 
 

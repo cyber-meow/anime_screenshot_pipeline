@@ -203,8 +203,12 @@ class LocalSource(BaseDataSource):
                 if os.path.exists(aux_file_path):
                     with open(aux_file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        items = content.split(',')
-                        meta[attribute] = [item.strip() for item in items]
+                        items = []
+                        for item in content.split(','):
+                            item = item.strip()
+                            if item != "":
+                                items.append(item)
+                        meta[attribute] = items
 
             yield ImageItem(origin_item.image, meta)
 
