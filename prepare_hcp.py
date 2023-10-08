@@ -52,13 +52,9 @@ def modify_main_config_file(filepath, args):
 
     # Update the configuration headers
     content.config_dir = os.path.abspath(args.config_dst_dir)
+    content.exp_dir_base = os.path.abspath(args.exp_dir)
+    content.emb_dir = os.path.abspath(args.emb_dir)
     content.emb_lr = args.emb_lr
-    content.exp_dir_base = (
-        args.exp_dir if args.exp_dir
-        else os.path.join(os.path.abspath(args.config_dst_dir), 'exps'))
-    content.emb_dir = (
-        args.emb_dir if args.emb_dir
-        else os.path.join(os.path.abspath(args.config_dst_dir), 'embs'))
 
     # Update the tokenizer_pt section
     if args.pivotal:
@@ -200,6 +196,12 @@ if __name__ == "__main__":
                         help='Learning rate for embeddings. Default is 1e-3.')
 
     args = parser.parse_args()
+    
+    if args.exp_dir is None:
+        args.exp_dir = os.path.join(args.config_dst_dir, 'exps')
+
+    if args.emb_dir is None:
+        args.emb_dir = os.path.join(args.config_dst_dir, 'embs')
 
     os.makedirs(args.config_dst_dir, exist_ok=True)
     # Copy files
