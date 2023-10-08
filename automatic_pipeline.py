@@ -12,7 +12,8 @@ from waifuc.action import TaggingAction
 
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import cluster_from_directory, classify_from_directory
-from anime2sd import rearrange_related_files, save_characters_to_meta
+from anime2sd import rearrange_related_files
+from anime2sd import save_characters_to_meta, update_trigger_word_info
 from anime2sd import resize_character_images
 from anime2sd import parse_overlap_tags, read_weight_mapping
 from anime2sd import arrange_folder, get_repeat
@@ -145,7 +146,14 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         rearrange_related_files(classified_dir)
 
     # update metadata using folder name
-    save_characters_to_meta(classified_dir)
+    characters = save_characters_to_meta(classified_dir)
+
+    # save trigger word info
+    trigger_word_filepath = os.path.join(args.dst_dir, 'trigger_words.csv')
+    update_trigger_word_info(
+        trigger_word_filepath, characters,
+        args.image_type, args.overwrite_trigger_word_info)
+
     # select images, resize, and save to training
     resize_character_images(classified_dir, full_dir, dst_dir,
                             max_size=args.max_size,
@@ -338,6 +346,8 @@ if __name__ == "__main__":
         help="Directory conaining reference character images")
 
     # Arguments for dataset construction
+    parser.add_argument("--overwrite_trigger_word_info", action="store_true",
+                        help="Overwrite existing trigger word csv")
     parser.add_argument("--no_resize", action="store_true",
                         help="Do not perform image resizing")
     parser.add_argument("--filter_again", action="store_true",

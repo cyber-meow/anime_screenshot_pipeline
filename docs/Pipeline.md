@@ -128,8 +128,11 @@ The folder names from `.../classified` directory are first read and save in the 
     - Selected those with characters
     - Selected `--n_anime_reg` images with no characters for style regularization (use all if there are not enough no character images)
 
+:warning: The cropped images are mapped back to the original images using file paths. Thus, moving the original images to another place, removing them, or renaming them would cause errors at this stage.
+
 ### Command line arguments
 
+- `overwrite_trigger_word_info`: The file `trigger_words.csv` is also saved at this stage. By default the original content of the file is kept if it exists. With this argument the file is completely overwritten.
 - `no_resize`: Copy file instead of resize.
 - `filter_again`: Go through the dataset and remove similar images again as in the first stage (cropped images can be similar even the full image is not).
 - `max_size`: Max image size to resize to (the shorter edge is aligned). Default is 768.
@@ -202,7 +205,7 @@ Typically, you can run with `--save_aux processed_tags characters`. You then get
 - If you start from this stage, please set `--src_dir` to the training folder to arrange (`/path/to/dataset_dir/training/{image_type}` by default).
 - In-place operation.
 
-Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in readme. You can also set `--arrange_format character` to remove the level that specifies the number of characters.
+Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in [Dataset Organization](Dataset_organization.md). You can also set `--arrange_format character` to remove the level that specifies the number of characters. You can also set `--arrange_format character` to remove the level that specifies the number of characters.
 
 
 ## Stage 7: Dataset Balancing

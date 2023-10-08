@@ -25,7 +25,6 @@ python automatic_pipeline.py \
     --log_prefix my_favorite_anime
 ```
 
-
 The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
 
 
@@ -45,6 +44,12 @@ python automatic_pipeline.py --help
 ```
 
 I may add the possibility to read arguments from `.toml` file later.
+
+
+## Dataset Organization and Training
+
+- Once we go through the pipeline, the dataset is hierarchically organized in `/path/to/dataset_dir/training` with `multiply.txt` in each subfolder indicating the repeat of the images from this directory. More details on this are provided in [Dataset Organization](docs/Dataset_organization.md).
+- Since each trainer reads data differently. Some more steps may be required before training is performed. See [Start Training](docs/Start_training.md) for what to do for [EveryDream2](https://github.com/victorchall/EveryDream2trainer), [kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts), and [HCP-Diffusion](https://github.com/7eu7d7/HCP-Diffusion).
 
 ## Installation
 
@@ -71,73 +76,6 @@ cd waifuc && pip install . && cd ..
 
 ** While I personally work on Linux, others have successfully run the scripts on Windows.
 
-## Dataset Organization
-
-After the entire process, you will get the following structure in `/path/to/dataset_dir` (assume that `image_type` is set to `screenshots`)
-
-```
-├── intermediate
-│   └── screenshots
-│       ├── classified
-│       ├── cropped
-│       └── raw
-└── training
-    └── screenshots
-```
-:bulb: **Tip:** If `--remove_intermediate` is specified the folders `classified` and `cropped` are removed during the process.
-
-The folder that should be used for training is `/path/to/dataset/training`. You can put other folders, such as your regularization images in this folder before launching the process so that they will be taken into account as well when we compute the repeat to balance the concept at the end.
-
-As for `/path/to/dataset/training/sreenshots`, it is organized in th following way
-
-**Level 1**
-```
-├── ./0_characters
-├── ./1_character
-├── ./2_characters
-├── ./3_characters
-├── ./4+_characters
-```
-
-:bulb: **Tip:** Use `--max_character_number n` so that images containing more than `n` characters are all put together. If you don't want them to be included in the dataset. You can remove it manually.
-
-**Level 2**
-```
-├── ./1_character
-│   ├── ./1_character/AobaKokona
-│   ├── ./1_character/AobaMai
-│   ├── ./1_character/KuraueHinata
-│   ├── ./1_character/KuraueHinata Hairdown
-│   ├── ./1_character/KuraueKenichi
-│   ├── ./1_character/KuraueMai
-│   ├── ./1_character/KurosakiHonoka
-│   ├── ./1_character/KurosakiTaiki
-...
-```
-:bulb: **Tip:** Use `--min_images_per_combination m` so that character combinations with fewer than `m` images are all put in the folder `character_others`.  
-TODO: Add add an argument to optionally remove them.
-
-The hierarchical organization allows to auto-balance between different concepts without too much need of worrying about the number of images in each class.
-With `multiply.txt` in each folder, this is directly compatible with [EveryDream2](https://github.com/victorchall/EveryDream2trainer). For [kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts) you need just one more step with `flatten_folder.py`
-
-```
-python flatten_folder.py \
-    --separator ~ \
-    --src_dir /path/to/dataset_dir/training
-```
-
-If you do not have the used separator (`~` by default) in any folder name you can undo the change by
-
-```
-python flatten_folder.py \
-    --separator ~ \
-    --src_dir /path/to/dataset_dir/training \
-    --revert
-```
-
-It is important to switch between the two modes as I rely on the folder structure to compute repeat for now.  
-TODO: Compute repeat directly based on metadata and output appropriate format for each trainer (pivotal tuning with [HCP-Diffusion](https://github.com/7eu7d7/HCP-Diffusion) support hopefully coming soon).
-
 ## TODO / Potential improvements
 
 Contributions are welcome
@@ -147,7 +85,7 @@ Contributions are welcome
 - [x] Readme and Requirements.txt
 - [ ] .toml support
 - [ ] Fanart support
-- [ ] HCP-diffusion compatibility
+- [x] HCP-diffusion compatibility
 
 ### Secondary
 

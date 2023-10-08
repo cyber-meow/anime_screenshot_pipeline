@@ -92,7 +92,7 @@ def is_basic_character_tag(tag):
     """
     whitelist = set([
         'drill',
-        'public_hair',
+        'pubic_hair',
         'closed_eyes',
         'half-closed_eyes',
         'empty_eyes',
