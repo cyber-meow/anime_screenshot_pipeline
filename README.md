@@ -81,8 +81,9 @@ After the entire process, you will get the following structure in `/path/to/data
 │       ├── classified
 │       ├── cropped
 │       └── raw
-└── training
-    └── screenshots
+├── training
+│   └── screenshots
+└── trigger_words.csv
 ```
 :bulb: **Tip:** If `--remove_intermediate` is specified the folders `classified` and `cropped` are removed during the process.
 

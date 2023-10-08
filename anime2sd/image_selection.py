@@ -1,6 +1,7 @@
 import os
 import cv2
 import json
+import csv
 import random
 import logging
 import shutil
@@ -8,56 +9,6 @@ from tqdm import tqdm
 
 from anime2sd.basics import get_images_recursively
 from anime2sd.basics import get_corr_meta_names, default_metadata
-from anime2sd.basics import get_related_paths
-
-
-def construct_file_list(classified_dir):
-    """
-    Construct a list of all files in the directory and checks for duplicates.
-
-    :param classified_dir: The directory to search.
-    :return: A list of all file paths in the directory.
-    """
-    all_files = {}
-    for root, _, filenames in os.walk(classified_dir):
-        for filename in filenames:
-            path = os.path.join(root, filename)
-            if filename in all_files and filename != 'multiply.txt':
-                raise ValueError(f"Duplicate filename found: {filename}")
-            all_files[filename] = path
-    return all_files
-
-
-def rearrange_related_files(classified_dir):
-    """
-    Rearrange related files in the classified directory.
-
-    :param classified_dir: The directory containing classified images.
-    """
-    all_files = construct_file_list(classified_dir)
-    image_files = get_images_recursively(classified_dir)
-
-    logging.info('Arranging related files ...')
-    for img_path in tqdm(image_files, desc="Rearranging related files"):
-        related_paths = get_related_paths(img_path)
-        for related_path in related_paths:
-            # If the related file does not exist in the expected location
-            if not os.path.exists(related_path):
-                # Search for the file in the all_files dictionary
-                found_path = all_files.get(os.path.basename(related_path))
-                if found_path is None:
-                    if related_path.endswith('json'):
-                        logging.warning(
-                            f"No related file found for {related_path}")
-                        meta_data = default_metadata(img_path)
-                        with open(related_path, 'w') as f:
-                            json.dump(meta_data, f)
-                else:
-                    # Move the found file to the expected location
-                    shutil.move(found_path, related_path)
-                    logging.info(
-                        f"Moved related file from {found_path} "
-                        f"to {related_path}")
 
 
 def parse_char_name(folder_name):
@@ -77,11 +28,15 @@ def save_characters_to_meta(classified_dir):
     """
 
     encountered_paths = set()  # To keep track of paths encountered in this run
+    characters = set()
 
     logging.info('Saving characters to metadata ...')
     # Iterate over each folder in the classified directory
     for folder_name in tqdm(os.listdir(classified_dir)):
         char_name = parse_char_name(folder_name)
+
+        if not char_name.lower().startswith('noise'):
+            characters.add(char_name)
         folder_path = os.path.join(classified_dir, folder_name)
 
         # Ensure it's a directory
@@ -151,6 +106,52 @@ def save_characters_to_meta(classified_dir):
             # Save the updated metadata for the cropped image
             with open(meta_file_path, 'w') as meta_file:
                 json.dump(meta_data, meta_file, indent=4)
+    return list(characters)
+
+
+def update_trigger_word_info(
+        filepath, characters, image_type, overwrite=False):
+    """
+    Update the trigger word CSV file with new entries.
+
+    Args:
+    - filepath: Path to the trigger word CSV file.
+    - characters: List of character names to add.
+    - image_type: Type of the image ("screenshots" or other).
+    - overwrite: Whether to overwrite existing CSV content.
+
+    Returns:
+    - None
+    """
+    # Dictionary to hold the embedding names and initialization texts
+    name_init_map = {}
+
+    # If not overwriting, read the existing content of the CSV
+    if not overwrite and os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                name = row[0]
+                init_text = row[1]
+                name_init_map[name] = init_text
+
+    # Add characters to the CSV if they're not already present
+    for character in characters:
+        if character not in name_init_map:
+            name_init_map[character] = '*1'  # Default initialization text
+
+    # Add image_type to the CSV
+    if image_type not in name_init_map:
+        if image_type == "screenshots":
+            name_init_map[image_type] = "anime screencap"
+        else:
+            name_init_map[image_type] = '*1'  # Default initialization text
+
+    # Write the updated content back to the CSV
+    with open(filepath, 'w') as file:
+        writer = csv.writer(file)
+        for name, init_text in name_init_map.items():
+            writer.writerow([name, init_text])
 
 
 def resize_image(image, max_size):
