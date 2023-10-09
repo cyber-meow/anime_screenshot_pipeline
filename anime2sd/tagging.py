@@ -108,10 +108,12 @@ def is_basic_character_tag(tag):
         'drills', 'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
         'beard', 'mustache', 'pointy ears',
     ]
+    prefixes = ['hair over', 'hair between']
 
     tag = tag.replace('_', ' ')
-    result = any(tag.endswith(suffix) for suffix in suffixes)
-    return result
+    result_suffix = any(tag.endswith(suffix) for suffix in suffixes)
+    result_prefix = any(tag.startswith(prefix) for prefix in prefixes)
+    return result_suffix or result_prefix
 
 
 def remove_basic_character_tags(tags):
