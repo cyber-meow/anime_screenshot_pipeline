@@ -54,7 +54,6 @@ def modify_main_config_file(filepath, args):
     content.config_dir = os.path.abspath(args.config_dst_dir)
     content.exp_dir_base = os.path.abspath(args.exp_dir)
     content.emb_dir = os.path.abspath(args.emb_dir)
-    content.emb_lr = args.emb_lr
 
     # Update the tokenizer_pt section
     if args.pivotal:
@@ -194,10 +193,6 @@ if __name__ == "__main__":
                         default=2,
                         type=int,
                         help=('Number of tokens for each embedding.'))
-    parser.add_argument('--emb_lr',
-                        default=1e-3,
-                        type=float,
-                        help='Learning rate for embeddings. Default is 1e-3.')
 
     args = parser.parse_args()
 
