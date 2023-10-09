@@ -68,6 +68,7 @@ def modify_main_config_file(filepath, args):
     else:
         content.tokenizer_pt = {
             'emb_dir': '${emb_dir}',
+            'replace': False,
             'train': None,
         }
 
