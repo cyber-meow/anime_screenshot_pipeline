@@ -1,7 +1,7 @@
 exp_dir_base: 'hcp_exps'
 config_dir: 'hcp_configs'
 emb_dir: 'embs'
-emb_lr: 1e-3
+emb_lr: 5e-3
 
 _base_:
   - ${config_dir}/train_base.yaml
@@ -33,16 +33,16 @@ plugin_TE: null
 
 lora_unet:
   - lr: 2e-4
-    rank: 8
-    alpha: 4
+    rank: 16
+    alpha: 8
     layers:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
 lora_text_encoder:
   - lr: 6e-5
-    rank: 4
-    alpha: 2
+    rank: 8
+    alpha: 4
     layers:
       - 're:.*self_attn$'
       - 're:.*mlp$'
