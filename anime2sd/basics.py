@@ -24,6 +24,19 @@ def get_images_recursively(folder_path):
     return image_path_list
 
 
+def get_files_recursively(folder_path):
+    """
+    Get all files recursively from a folder using Path and rglob.
+
+    Args:
+    - folder_path (str): The path to the folder.
+
+    Returns:
+    - list: A list of file paths.
+    """
+    return [file for file in Path(folder_path).rglob('*') if file.is_file()]
+
+
 def get_corr_meta_names(img_path):
     filename = os.path.basename(img_path)
     base_filename = os.path.splitext(filename)[0]

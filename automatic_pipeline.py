@@ -227,7 +227,7 @@ def tag_and_caption(args, src_dir, is_start_stage):
 
 def rearrange(args, src_dir, is_start_stage):
     logging.info(f'Rearranging {src_dir} ...')
-    if is_start_stage:
+    if is_start_stage and args.load_aux:
         logging.info('Load metadata from auxiliary data ...')
         source = LocalSource(
             src_dir, load_aux=args.load_aux,
@@ -246,7 +246,7 @@ def rearrange(args, src_dir, is_start_stage):
 def balance(args, src_dir, is_start_stage):
     training_dir = src_dir
     logging.info(f'Computing repeat for {training_dir} ...')
-    if is_start_stage:
+    if is_start_stage and args.load_aux:
         logging.info('Load metadata from auxiliary data ...')
         source = LocalSource(
             src_dir, load_aux=args.load_aux,

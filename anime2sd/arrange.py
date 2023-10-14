@@ -1,35 +1,40 @@
 import os
+import re
 import json
 import shutil
 import logging
 from tqdm import tqdm
 
-from anime2sd.basics import get_images_recursively, get_corr_meta_names
+from anime2sd.basics import get_images_recursively, get_files_recursively
+from anime2sd.basics import get_corr_meta_names
 
 
-def is_aux_file(img_file, candidate_file):
+def construct_aux_files_dict(paths):
     """
-    Check if candidate_file is an auxiliary file for img_file.
+    Construct a dictionary where keys are the img_base values
+    and the values are lists of files that are auxiliary to that img_base.
 
-    :param img_file: The image file name.
-    :param candidate_file: The candidate file name.
-    :return: True if candidate_file is an auxiliary file for
-        img_file, False otherwise.
+    :param files: List of all files.
+    :return: Dictionary with img_base as keys and
+        lists of auxiliary files as values.
     """
-    img_base, _ = os.path.splitext(img_file)
+    aux_dict = {}
 
-    candidate_base, _ = os.path.splitext(candidate_file)
+    for path in tqdm(paths):
+        dirname, filename = os.path.split(path)
+        if filename.startswith('.'):
+            file_base = re.sub(r"\_meta.json$", "", filename).lstrip('.')
+        else:
+            file_base = os.path.splitext(filename)[0]
+        file_base = os.path.join(dirname, file_base)
+        if file_base not in aux_dict:
+            aux_dict[file_base] = [path]
+        else:
+            aux_dict[file_base].append(path)
+    return aux_dict
 
-    # Check the conditions
-    # not dedaling with ccip cache
-    if (candidate_base == img_base or
-            candidate_base.startswith(f".{img_base}_meta")):
-        return True
 
-    return False
-
-
-def move_img_with_aux(img_path, dst_dir):
+def move_img_with_aux(img_path, dst_dir, aux_dict):
     """
     Move image along with its auxiliary files to a destination directory.
 
@@ -40,18 +45,10 @@ def move_img_with_aux(img_path, dst_dir):
     # Ensure the destination directory exists
     os.makedirs(dst_dir, exist_ok=True)
 
-    # Get the directory containing the image file
-    src_dir = os.path.dirname(img_path)
-
-    # List all files in the source directory
-    for candidate_file in os.listdir(src_dir):
-        # Construct the full path of candidate_file
-        candidate_path = os.path.join(src_dir, candidate_file)
-
-        if (candidate_path == img_path
-                or is_aux_file(os.path.basename(img_path), candidate_file)):
-            if os.path.dirname(candidate_path) != dst_dir:
-                shutil.move(candidate_path, dst_dir)
+    img_base, _ = os.path.splitext(img_path)
+    for path in aux_dict[img_base]:
+        if os.path.dirname(path) != dst_dir:
+            shutil.move(path, dst_dir)
 
 
 def get_folder_name(folder_type, info_dict, max_character_number):
@@ -122,7 +119,7 @@ def count_n_images(filenames):
     return count
 
 
-def merge_folder(character_comb_dict, min_images_per_comb):
+def merge_folder(character_comb_dict, min_images_per_comb, aux_dict):
     for comb in tqdm(character_comb_dict):
         files = character_comb_dict[comb]
         n_images = count_n_images(files)
@@ -133,7 +130,7 @@ def merge_folder(character_comb_dict, min_images_per_comb):
             for file in files:
                 new_path = file.replace(comb, 'character_others')
                 dst_dir = os.path.dirname(new_path)
-                move_img_with_aux(file, dst_dir)
+                move_img_with_aux(file, dst_dir, aux_dict)
 
 
 def remove_empty_folders(path_abs):
@@ -150,8 +147,13 @@ def arrange_folder(src_dir,
                    min_images_per_combination):
 
     img_paths = get_images_recursively(src_dir)
+    file_paths = get_files_recursively(src_dir)
+
+    logging.info('Constructing dictionary for auxiliary files...')
+    aux_dict = construct_aux_files_dict(file_paths)
     character_combination_dict = dict()
 
+    logging.info('Rearranging...')
     for img_path in tqdm(img_paths):
 
         meta_file_path, _ = get_corr_meta_names(img_path)
@@ -165,7 +167,7 @@ def arrange_folder(src_dir,
         img_dst_dir, character_folder = get_dst_dir(
             meta_data, dst_dir, arrange_format, max_character_number)
 
-        move_img_with_aux(img_path, img_dst_dir)
+        move_img_with_aux(img_path, img_dst_dir, aux_dict)
 
         new_path = os.path.join(img_dst_dir, os.path.basename(img_path))
         if character_folder is not None:
@@ -174,8 +176,9 @@ def arrange_folder(src_dir,
             else:
                 character_combination_dict[character_folder] = [new_path]
 
+    logging.info('Merging folders...')
     if min_images_per_combination > 1:
         merge_folder(
-            character_combination_dict, min_images_per_combination)
+            character_combination_dict, min_images_per_combination, aux_dict)
     remove_empty_folders(src_dir)
     remove_empty_folders(dst_dir)
