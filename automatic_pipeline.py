@@ -17,10 +17,14 @@ from anime2sd import rearrange_related_files
 from anime2sd import save_characters_to_meta, update_trigger_word_info
 from anime2sd import resize_character_images
 from anime2sd import parse_overlap_tags, read_weight_mapping
+from anime2sd import CharacterTagProcessor
+from anime2sd import get_character_core_tags, get_character_core_tags_and_save
+from anime2sd import save_core_tag_info
 from anime2sd import arrange_folder, get_repeat
 
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import TagPruningAction, TagSortingAction
+from anime2sd.waifuc_customize import CoreCharacterTagPruningAction
 from anime2sd.waifuc_customize import TagRemovingUnderscoreAction
 from anime2sd.waifuc_customize import CaptioningAction
 from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
@@ -151,7 +155,7 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     characters = save_characters_to_meta(classified_dir)
 
     # save trigger word info
-    trigger_word_filepath = os.path.join(args.dst_dir, 'trigger_words.csv')
+    trigger_word_filepath = os.path.join(args.dst_dir, 'emb_init.csv')
     update_trigger_word_info(
         trigger_word_filepath, characters,
         args.image_type, args.overwrite_trigger_word_info)
@@ -189,14 +193,31 @@ def tag_and_caption(args, src_dir, is_start_stage):
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(src_dir)
 
-    with open(args.blacklist_tags_file, 'r') as f:
-        blacklisted_tags = {line.strip() for line in f}
-    overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
+    if 'character' in args.pruned_mode:
+        if args.drop_hard_character_tags:
+            drop_difficulty = 2
+        else:
+            drop_difficulty = 1
+        # TODO: Deal with emb init difficulty later
+        char_tag_proc = CharacterTagProcessor(
+            drop_difficulty, emb_init_difficutly=0)
+    core_tag_path = os.path.join(args.dst_dir, 'core_tags.json')
+    wildcard_path = os.path.join(args.dst_dir, 'wildcard.txt')
+
     if args.process_from_original_tags or args.overwrite_tags:
         tags_attribute = 'tags'
     else:
         tags_attribute = 'processed_tags'
+    if args.pruned_mode == 'characer_core':
+        pruned_mode = 'minimal'
+    else:
+        pruned_mode = args.pruned_mode
+
+    with open(args.blacklist_tags_file, 'r') as f:
+        blacklisted_tags = {line.strip() for line in f}
+    overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
     overwrite_path = is_start_stage and args.overwrite_path
+
     source = LocalSource(
         src_dir, load_aux=args.load_aux, overwrite_path=overwrite_path)
     source = source.attach(
@@ -208,20 +229,41 @@ def tag_and_caption(args, src_dir, is_start_stage):
         TagPruningAction(
             blacklisted_tags,
             overlap_tags_dict,
-            pruned_mode=args.pruned_mode,
-            drop_hard_character_tags=args.drop_hard_character_tags,
-            tags_attribute=tags_attribute),
+            pruned_mode=pruned_mode,
+            tags_attribute=tags_attribute,
+            character_tag_proceesor=char_tag_proc))
+    logging.info(f'Tagging and captioning images in {src_dir} ...')
+
+    if args.pruned_mode == 'character_core':
+        source.export(SaveExporter(
+            src_dir, no_meta=False, save_caption=False, in_place=True))
+        character_core_tags = get_character_core_tags(
+            src_dir,
+            frequency_threshold=args.core_frequency_thresh)
+        character_core_tags = char_tag_proc.categorize_character_tag_dict(
+            character_core_tags)
+        save_core_tag_info(character_core_tags, core_tag_path, wildcard_path)
+        source = source.attach(
+            CoreCharacterTagPruningAction(
+                character_core_tags,
+                tags_attribute=tags_attribute),
+        )
+
+    source = source.attach(
         TagSortingAction(
             args.sort_mode,
             max_tag_number=args.max_tag_number),
         TagRemovingUnderscoreAction(),
         CaptioningAction(args),
     )
-
-    logging.info(f'Tagging and captioning images in {src_dir} ...')
     source.export(SaveExporter(
         src_dir, no_meta=False,
         save_caption=True, save_aux=args.save_aux, in_place=True))
+
+    if args.pruned_mode != 'character_core':
+        get_character_core_tags_and_save(
+            src_dir, core_tag_path, wildcard_path,
+            frequency_threshold=args.core_frequency_thresh)
     return src_dir
 
 
@@ -417,10 +459,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--pruned_mode', type=str, default='character',
-        choices=['character', 'minimal', 'none'],
+        choices=['character', 'character_core', 'minimal', 'none'],
         help=("Different ways to prune tags. "
-              "Options are 'character', 'minimal', 'none'.")
+              "Options are 'character', 'character_core', ''minimal', 'none'.")
     )
+    parser.add_argument(
+        '--core_frequency_thresh', type=float, default=0.5,
+        help="Minimum frequency for a tag to be considered core tag.")
     parser.add_argument(
         '--drop_hard_character_tags', action="store_true",
         help=("Experimental. Whether to drop 'more difficult' character "

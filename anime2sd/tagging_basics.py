@@ -1,6 +1,27 @@
 import json
 import random
 
+from hbutils.string import singular_form, plural_form
+
+
+def get_all_singular_plural_forms(tags):
+    """
+    Get all singular and plural forms of the given tags.
+
+    :param tags: List of tags.
+    :type tags: list[str]
+    :return: List of all singular and plural forms of the tags.
+    :rtype: list[str]
+    """
+    forms = set()
+    for tag in tags:
+        forms.add(tag)  # Add the original form
+        sing = singular_form(tag)
+        forms.add(sing)
+        plur = plural_form(tag)
+        forms.add(plur)
+    return list(forms)
+
 
 def sort_tags(tags, sort_mode):
     """

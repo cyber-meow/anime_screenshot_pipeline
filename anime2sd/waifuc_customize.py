@@ -4,7 +4,6 @@ import logging
 from typing import Iterator, Optional
 from PIL import UnidentifiedImageError
 from tqdm import tqdm
-from hbutils.string import singular_form, plural_form
 
 from waifuc.source.base import BaseDataSource
 from waifuc.export.base import LocalDirectoryExporter
@@ -12,10 +11,11 @@ from waifuc.action.base import ProcessAction, FilterAction
 from waifuc.model import ImageItem
 from imgutils.detect import detect_faces, detect_heads
 
+from anime2sd import CharacterTagProcessor
 from anime2sd.captioning import dict_to_caption
-from anime2sd.tagging import drop_blacklisted_tags, drop_overlap_tags
-from anime2sd.tagging import sort_tags
-from anime2sd.tagging_character import drop_basic_character_tags
+from anime2sd.tagging_basics import drop_blacklisted_tags, drop_overlap_tags
+from anime2sd.tagging_basics import sort_tags
+from anime2sd.tagging_character import drop_character_core_tags
 
 
 class MinFaceCountAction(FilterAction):
@@ -54,46 +54,21 @@ class MinHeadCountAction(FilterAction):
 
 class TagPruningAction(ProcessAction):
 
-    _CHAR_WHITELIST = [
-        'drill', 'pubic hair', 'closed eyes',
-        'half-closed eyes', 'empty eyes'
-    ]
-
-    _CHAR_SUFFIXES_EASY = [
-        'eyes', 'skin', 'hair', 'bun', 'bangs', 'cut', 'sidelocks',
-        'twintails', 'braid', 'braids', 'afro', 'ahoge', 'drill',
-        'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
-        'beard', 'mustache', 'hair intake',
-    ]
-
-    _CHAR_SUFFIXES_HARD = [
-        'ear', 'horn', 'halo'
-    ]
-
-    _CHAR_PREFIXES = [
-        'hair over', 'hair between'
-    ]
-
     def __init__(self,
                  blacklisted_tags,
                  overlap_tags_dict,
                  pruned_mode='character',
-                 drop_hard_character_tags=False,
-                 tags_attribute='processed_tags'):
+                 tags_attribute='processed_tags',
+                 character_tag_processor:
+                 Optional[CharacterTagProcessor] = None):
         assert pruned_mode in ['none', 'minimal', 'character']
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
         self.pruned_mode = pruned_mode
         self.tags_attribute = tags_attribute
-        # character related
-        self.char_white_list = self.get_all_singular_plural_forms(
-            self._CHAR_WHITELIST)
-        self.char_prefixes = self._CHAR_PREFIXES
-        self.char_suffixes = self._CHAR_SUFFIXES_EASY
-        if drop_hard_character_tags:
-            self.char_suffixes.extend(self._CHAR_SUFFIXES_HARD)
-        self.char_suffixes = self.get_all_singular_plural_forms(
-            self.char_suffixes)
+        if pruned_mode == 'character':
+            assert character_tag_processor is not None
+        self.character_tag_processor = character_tag_processor
 
     def process(self, item: ImageItem) -> ImageItem:
         if self.pruned_mode == 'none':
@@ -113,29 +88,36 @@ class TagPruningAction(ProcessAction):
         if self.pruned_mode == 'character':
             # Only pruned character related tags for character images
             if 'characters' in item.meta and item.meta['characters']:
-                tags = drop_basic_character_tags(
-                    tags, self.char_white_list,
-                    self.char_prefixes, self.char_suffixes)
+                tags = self.character_tag_processor.drop_character_tags(tags)
         return ImageItem(item.image, {**item.meta, 'processed_tags': tags})
 
-    @staticmethod
-    def get_all_singular_plural_forms(tags):
-        """
-        Get all singular and plural forms of the given tags.
 
-        :param tags: List of tags.
-        :type tags: list[str]
-        :return: List of all singular and plural forms of the tags.
-        :rtype: list[str]
-        """
-        forms = set()
-        for tag in tags:
-            forms.add(tag)  # Add the original form
-            sing = singular_form(tag)
-            forms.add(sing)
-            plur = plural_form(tag)
-            forms.add(plur)
-        return list(forms)
+class CoreCharacterTagPruningAction(ProcessAction):
+
+    def __init__(self,
+                 character_core_tags,
+                 tags_attribute='processed_tags'):
+        self.tags_attribute = tags_attribute
+        self.character_core_tags = character_core_tags
+
+    def process(self, item: ImageItem) -> ImageItem:
+        if self.pruned_mode == 'none':
+            return item
+        if self.tags_attribute in item.meta:
+            tags = item.meta[self.tags_attribute]
+        # fallback behavior
+        elif 'tags' in item.meta:
+            tags = item.meta['tags']
+        else:
+            logging.warning(
+                f"{self.tags_attribute} unfound ",
+                f"for {item.meta['current_path']}, skip")
+            return item
+        # Only pruned character related tags for character images
+        if 'characters' in item.meta and item.meta['characters']:
+            tags = drop_character_core_tags(
+                item.meta['characters'], tags, self.character_core_tags)
+        return ImageItem(item.image, {**item.meta, 'processed_tags': tags})
 
 
 class TagSortingAction(ProcessAction):
