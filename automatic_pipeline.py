@@ -9,6 +9,7 @@ import fiftyone.zoo as foz
 from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import TaggingAction
+from waifuc.action import ThreeStageSplitAction
 
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import cluster_from_directory, classify_from_directory
@@ -154,6 +155,14 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         trigger_word_filepath, characters,
         args.image_type, args.overwrite_trigger_word_info)
 
+    if args.use_3stage_crop:
+        logging.info(f'Performing 3 stage cropping for {classified_dir} ...')
+        stage_cropped_dir = os.path.join(src_dir, '3stage_cropped')
+        source = LocalSource(classified_dir)
+        source.attach(
+            ThreeStageSplitAction(split_person=False),
+        ).export(SaveExporter(stage_cropped_dir))
+
     # select images, resize, and save to training
     resize_character_images(classified_dir, full_dir, dst_dir,
                             max_size=args.max_size,
@@ -197,6 +206,7 @@ def tag_and_caption(args, src_dir, is_start_stage):
             blacklisted_tags,
             overlap_tags_dict,
             pruned_mode=args.pruned_mode,
+            drop_hard_character_tags=args.drop_hard_character_tags,
             tags_attribute=tags_attribute),
         TagSortingAction(
             args.sort_mode,
@@ -358,6 +368,9 @@ if __name__ == "__main__":
                         help="Dataset image extensino")
     parser.add_argument("--n_anime_reg", type=int, default=500,
                         help="Number of images with no characters to keep")
+    parser.add_argument(
+        "--use_3stage_crop", action="store_true",
+        help="Experimental. Use 3 stage crop for halfbody and head crops")
 
     # Loading and saving of metadata for tagging and captioning stage
     parser.add_argument('--load_aux', type=str, nargs='*',
@@ -397,6 +410,11 @@ if __name__ == "__main__":
         help=("Different ways to prune tags. "
               "Options are 'character', 'minimal', 'none'.")
     )
+    parser.add_argument(
+        '--drop_hard_character_tags', action="store_true",
+        help=("Experimental. Whether to drop 'more difficult' character "
+              "core tags or not. Ear, horn, and halo related tags are "
+              "considered difficult for the moment."))
     parser.add_argument(
         '--max_tag_number', type=int, default=30,
         help="Max number of tags to include in caption."

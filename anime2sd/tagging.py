@@ -56,7 +56,7 @@ def parse_overlap_tags(json_file):
     return overlap_tags_dict
 
 
-def remove_blacklisted_tags(tags, blacklisted_tags):
+def drop_blacklisted_tags(tags, blacklisted_tags):
     """
     Remove blacklisted tags from the list or dictionary of tags.
 
@@ -83,58 +83,7 @@ def remove_blacklisted_tags(tags, blacklisted_tags):
         raise ValueError(f"Unsuppored types {type(tags)} for {tags}")
 
 
-def is_basic_character_tag(tag):
-    """
-    Check if the tag is a basic character tag.
-
-    :param tag: A single tag.
-    :return: Boolean value indicating whether the tag is a basic character tag.
-    """
-    whitelist = set([
-        'drill',
-        'pubic_hair',
-        'closed_eyes',
-        'half-closed_eyes',
-        'empty_eyes',
-    ])
-    whitelist_update = set(tag.replace('_', ' ') for tag in whitelist)
-    whitelist.update(whitelist_update)
-    if tag in whitelist:
-        return False
-
-    suffixes = [
-        'eyes', 'skin', 'hair', 'bun', 'bangs', 'cut', 'sidelocks',
-        'twintails', 'braid', 'braids', 'afro', 'ahoge', 'drill',
-        'drills', 'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
-        'beard', 'mustache', 'pointy ears',
-    ]
-    prefixes = ['hair over', 'hair between']
-
-    tag = tag.replace('_', ' ')
-    result_suffix = any(tag.endswith(suffix) for suffix in suffixes)
-    result_prefix = any(tag.startswith(prefix) for prefix in prefixes)
-    return result_suffix or result_prefix
-
-
-def remove_basic_character_tags(tags):
-    """
-    Remove basic character tags from the list or dictionary of tags.
-
-    :param tags: List or dictionary of tags.
-    :return: List or dictionary of tags after removing basic character tags.
-    """
-    if isinstance(tags, dict):
-        return {
-            tag: value for tag, value in tags.items()
-            if not is_basic_character_tag(tag)
-        }
-    elif isinstance(tags, list):
-        return [tag for tag in tags if not is_basic_character_tag(tag)]
-    else:
-        raise ValueError(f"Unsuppored types {type(tags)} for {tags}")
-
-
-def remove_overlap_tags(tags, overlap_tags_dict):
+def drop_overlap_tags(tags, overlap_tags_dict, check_superword=True):
     """
     Removes overlap tags from the list of tags.
 
@@ -166,11 +115,12 @@ def remove_overlap_tags(tags, overlap_tags_dict):
             if overlap_values.intersection(set(tags_underscore)):
                 to_remove = True
 
-        # Checking superword condition separately
-        for tag_another in tags:
-            if tag in tag_another and tag != tag_another:
-                to_remove = True
-                break
+        if check_superword:
+            # Checking superword condition separately
+            for tag_another in tags:
+                if tag in tag_another and tag != tag_another:
+                    to_remove = True
+                    break
 
         if not to_remove:
             result_tags.append(tag)

@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import random
 import string
@@ -14,6 +15,7 @@ from imgutils.metrics import ccip_extract_feature, ccip_default_threshold
 from imgutils.metrics import ccip_difference, ccip_batch_differences
 from anime2sd.basics import get_images_recursively
 from anime2sd.basics import get_corr_meta_names, get_corr_ccip_names
+from anime2sd.basics import get_default_metadata
 
 
 def random_string(length=6):
@@ -64,8 +66,9 @@ def save_to_dir(image_files, images, dst_dir, labels,
                 else:
                     shutil.copyfile(meta_path, meta_path_dst)
             else:
-                raise ValueError(
-                    'All the cropped files should have corresponding metadata')
+                meta_data = get_default_metadata(img_path, warn=True)
+                with open(meta_path_dst, 'w') as meta_file:
+                    json.dump(meta_data, meta_file, indent=4)
 
             ccip_path, ccip_filename = get_corr_ccip_names(img_path)
             ccip_path_dst = os.path.join(dst_dir, folder_name, ccip_filename)

@@ -8,7 +8,7 @@ import shutil
 from tqdm import tqdm
 
 from anime2sd.basics import get_images_recursively
-from anime2sd.basics import get_corr_meta_names, default_metadata
+from anime2sd.basics import get_corr_meta_names, get_or_generate_metadata
 
 
 def parse_char_name(folder_name):
@@ -53,19 +53,8 @@ def save_characters_to_meta(classified_dir):
                 continue
 
             img_path = os.path.join(folder_path, img_file)
-            # Construct the path to the corresponding metadata file
             meta_file_path, _ = get_corr_meta_names(img_path)
-
-            # If the metadata file exists, load it
-            # otherwise initialize an empty dictionary
-            if os.path.exists(meta_file_path):
-                with open(meta_file_path, 'r') as meta_file:
-                    meta_data = json.load(meta_file)
-            else:
-                meta_data = default_metadata(img_path)
-                logging.warning(
-                    f'Cropped file {img_path} does not have '
-                    + 'corresponding metadata')
+            meta_data = get_or_generate_metadata(img_path, warn=True)
 
             # Update the characters field
             if char_name.startswith('noise') or char_name.startswith('Noise'):
@@ -74,18 +63,19 @@ def save_characters_to_meta(classified_dir):
             else:
                 meta_data['characters'] = [char_name]
 
+            # Save the updated metadata for the cropped image
+            with open(meta_file_path, 'w') as meta_file:
+                json.dump(meta_data, meta_file, indent=4)
+
             # Check for the 'path' field and update it
             if 'path' in meta_data:
                 original_path = meta_data['path']
-                original_meta_path, _ = get_corr_meta_names(original_path)
+                if original_path == img_path:
+                    continue
 
-                # If the original metadata file exists,
-                # update its characters field
-                if os.path.exists(original_meta_path):
-                    with open(original_meta_path, 'r') as orig_meta_file:
-                        orig_meta_data = json.load(orig_meta_file)
-                else:
-                    orig_meta_data = default_metadata(original_path)
+                original_meta_path, _ = get_corr_meta_names(original_path)
+                orig_meta_data = get_or_generate_metadata(
+                    original_path, warn=False)
 
                 # Initialize characters list
                 # if the path hasn't been encountered in this run
@@ -102,10 +92,6 @@ def save_characters_to_meta(classified_dir):
                 # Save the updated original metadata
                 with open(original_meta_path, 'w') as orig_meta_file:
                     json.dump(orig_meta_data, orig_meta_file, indent=4)
-
-            # Save the updated metadata for the cropped image
-            with open(meta_file_path, 'w') as meta_file:
-                json.dump(meta_data, meta_file, indent=4)
     return list(characters)
 
 
@@ -199,15 +185,19 @@ def save_image_and_meta(img, img_path, save_dir, ext, image_type):
 
     # Copy the corresponding metadata file
     meta_path, meta_filename = get_corr_meta_names(img_path)
+    meta_data = get_or_generate_metadata(img_path, warn=True)
+
     if os.path.exists(meta_path):
         with open(meta_path, 'r') as meta_file:
             meta_data = json.load(meta_file)
         meta_data['filename'] = meta_data['filename'].replace('.png', ext)
         meta_data['type'] = image_type
+        meta_data['image_size'] = img.shape[:2]
 
         # Save the updated metadata with new extension
         with open(os.path.join(save_dir, meta_filename), 'w') as meta_file:
             json.dump(meta_data, meta_file, indent=4)
+    # Normally this never gets triggered
     else:
         raise ValueError('All metadata must exist before resizing to dst')
 
@@ -224,72 +214,46 @@ def copy_image_and_meta(img_path, save_dir, image_type):
         # Save the updated metadata with new extension
         with open(os.path.join(save_dir, meta_filename), 'w') as meta_file:
             json.dump(meta_data, meta_file, indent=4)
+    # Normally this never gets triggered
     else:
         raise ValueError('All metadata must exist before resizing to dst')
 
 
-def resize_character_images(classified_dir, full_dir, dst_dir,
+def resize_character_images(src_dirs, dst_dir,
                             max_size, ext, image_type,
                             n_nocharacter_frames, to_resize=True):
 
-    # Process images in classified_dir
-    logging.info(f'Processing images from {classified_dir} ...')
-    save_dir = os.path.join(dst_dir, 'cropped')
-    os.makedirs(save_dir, exist_ok=True)
+    nocharacter_frames = []
+    for src_dir in src_dirs:
+        # Process images in classified_dir
+        logging.info(f'Processing images from {src_dir} ...')
+        save_dir = os.path.join(dst_dir, os.path.basename(src_dir))
+        os.makedirs(save_dir, exist_ok=True)
 
-    for img_path in tqdm(get_images_recursively(classified_dir)):
-        meta_path, _ = get_corr_meta_names(img_path)
-
-        if os.path.exists(meta_path):
-            with open(meta_path, 'r') as meta_file:
-                meta_data = json.load(meta_file)
-
+        for img_path in tqdm(get_images_recursively(src_dir)):
+            meta_data = get_or_generate_metadata(img_path, warn=True)
             if 'characters' in meta_data and meta_data['characters']:
                 original_path = meta_data['path']
-                original_img = cv2.imread(original_path)
-                cropped_img = cv2.imread(img_path)
+                if original_path != img_path:
+                    orig_meta_data = get_or_generate_metadata(
+                        original_path, warn=False)
+                    cropped_size = meta_data['image_size']
+                    cropped_area = cropped_size[0] * cropped_size[1]
+                    orig_size = orig_meta_data['image_size']
+                    orig_area = orig_size[0] * orig_size[1]
 
-                if cropped_img.size > 0.5 * original_img.size:
-                    continue
+                    if cropped_area > 0.5 * orig_area:
+                        continue
 
                 if to_resize:
+                    cropped_img = cv2.imread(img_path)
                     resized_img = resize_image(cropped_img, max_size)
-                    save_image_and_meta(
-                        resized_img, img_path, save_dir, ext, image_type)
-                else:
-                    copy_image_and_meta(img_path, save_dir, image_type)
-        else:
-            raise ValueError(
-                'All the cropped files should have corresponding metadata')
-
-    # Process images in full_dir
-    logging.info(f'Processing images from {full_dir} ...')
-    save_dir = os.path.join(dst_dir, 'full')
-    os.makedirs(save_dir, exist_ok=True)
-    nocharacter_frames = []
-    for img_path in tqdm(get_images_recursively(full_dir)):
-        meta_path, _ = get_corr_meta_names(img_path)
-
-        if os.path.exists(meta_path):
-            with open(meta_path, 'r') as meta_file:
-                meta_data = json.load(meta_file)
-
-            if 'characters' in meta_data and meta_data['characters']:
-
-                if to_resize:
-                    full_img = cv2.imread(img_path)
-                    resized_img = resize_image(full_img, max_size)
                     save_image_and_meta(
                         resized_img, img_path, save_dir, ext, image_type)
                 else:
                     copy_image_and_meta(img_path, save_dir, image_type)
             else:
                 nocharacter_frames.append(img_path)
-        else:
-            meta_data = default_metadata(img_path)
-            with open(meta_path, 'w') as meta_file:
-                json.dump(meta_data, meta_file, indent=4)
-            nocharacter_frames.append(img_path)
 
     # Process no character images
     # Randomly select n_nocharacter_frames and save

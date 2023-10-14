@@ -12,8 +12,9 @@ from waifuc.model import ImageItem
 from imgutils.detect import detect_faces, detect_heads
 
 from anime2sd.captioning import dict_to_caption
-from anime2sd.tagging import remove_blacklisted_tags, remove_overlap_tags
-from anime2sd.tagging import remove_basic_character_tags, sort_tags
+from anime2sd.tagging import drop_blacklisted_tags, drop_overlap_tags
+from anime2sd.tagging import sort_tags
+from anime2sd.tagging_character import drop_basic_character_tags
 
 
 class MinFaceCountAction(FilterAction):
@@ -56,11 +57,13 @@ class TagPruningAction(ProcessAction):
                  blacklisted_tags,
                  overlap_tags_dict,
                  pruned_mode='character',
+                 drop_hard_character_tags=False,
                  tags_attribute='processed_tags'):
         assert pruned_mode in ['none', 'minimal', 'character']
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
         self.pruned_mode = pruned_mode
+        self.drop_hard_character_tags = drop_hard_character_tags
         self.tags_attribute = tags_attribute
 
     def process(self, item: ImageItem) -> ImageItem:
@@ -76,12 +79,13 @@ class TagPruningAction(ProcessAction):
                 f"{self.tags_attribute} unfound ",
                 f"for {item.meta['current_path']}, skip")
             return item
-        tags = remove_blacklisted_tags(tags, self.blacklisted_tags)
-        tags = remove_overlap_tags(tags, self.overlap_tags_dict)
+        tags = drop_blacklisted_tags(tags, self.blacklisted_tags)
+        tags = drop_overlap_tags(tags, self.overlap_tags_dict)
         if self.pruned_mode == 'character':
             # Only pruned character related tags for character images
             if 'characters' in item.meta and item.meta['characters']:
-                tags = remove_basic_character_tags(tags)
+                tags = drop_basic_character_tags(
+                    tags, drop_hard=self.drop_hard_character_tags)
         return ImageItem(item.image, {**item.meta, 'processed_tags': tags})
 
 
@@ -194,6 +198,10 @@ class LocalSource(BaseDataSource):
                 'filename': os.path.basename(file),
             }
             meta['current_path'] = os.path.abspath(file)
+            if 'path' not in meta:
+                meta['path'] = meta['current_path']
+            if 'image_size' not in meta:
+                meta['image_size'] = origin_item.image.size
 
             # Load auxiliary data
             file_basename = os.path.splitext(meta['filename'])[0]
@@ -235,6 +243,7 @@ class SaveExporter(LocalDirectoryExporter):
 
         LocalDirectoryExporter.__init__(self, output_dir, clear)
         self.untitles = 0
+        # useful for hierachical structure
         self.in_place = in_place
         self.skip_when_image_exist = skip_when_image_exist
         self.no_meta = no_meta
@@ -253,6 +262,7 @@ class SaveExporter(LocalDirectoryExporter):
         else:
             save_file_path = os.path.join(
                 self.output_dir, filename)
+            item.meta['current_path'] = save_file_path
         save_directory = os.path.dirname(save_file_path)
         if save_directory:
             os.makedirs(save_directory, exist_ok=True)

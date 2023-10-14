@@ -32,11 +32,13 @@ def get_emb_names_and_inits(filepath):
     with open(filepath, 'r') as file:
         reader = csv.reader(file)
         for row in reader:
-            # Extract the first word from the first column
-            name = row[0].split()[0]
-            # Extract initialization text or default to '*1'
-            init_text = row[1] if row[1] else '*1'
-            name_init_map[name] = init_text
+            if len(row) >= 1:
+                # Extract the first word from the first column
+                name = row[0].split()[0]
+                init_text = '*1'
+                if len(row) >= 2 and row[1]:
+                    init_text = row[1]
+                name_init_map[name] = init_text
 
     return name_init_map
 
