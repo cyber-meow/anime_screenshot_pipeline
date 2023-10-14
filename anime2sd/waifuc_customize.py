@@ -101,8 +101,6 @@ class CoreCharacterTagPruningAction(ProcessAction):
         self.character_core_tags = character_core_tags
 
     def process(self, item: ImageItem) -> ImageItem:
-        if self.pruned_mode == 'none':
-            return item
         if self.tags_attribute in item.meta:
             tags = item.meta[self.tags_attribute]
         # fallback behavior

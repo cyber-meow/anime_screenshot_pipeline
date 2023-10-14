@@ -208,7 +208,7 @@ def tag_and_caption(args, src_dir, is_start_stage):
         tags_attribute = 'tags'
     else:
         tags_attribute = 'processed_tags'
-    if args.pruned_mode == 'characer_core':
+    if args.pruned_mode == 'character_core':
         pruned_mode = 'minimal'
     else:
         pruned_mode = args.pruned_mode
@@ -231,7 +231,8 @@ def tag_and_caption(args, src_dir, is_start_stage):
             overlap_tags_dict,
             pruned_mode=pruned_mode,
             tags_attribute=tags_attribute,
-            character_tag_proceesor=char_tag_proc))
+            character_tag_processor=char_tag_proc),
+        TagRemovingUnderscoreAction())
     logging.info(f'Tagging and captioning images in {src_dir} ...')
 
     if args.pruned_mode == 'character_core':
@@ -246,14 +247,13 @@ def tag_and_caption(args, src_dir, is_start_stage):
         source = source.attach(
             CoreCharacterTagPruningAction(
                 character_core_tags,
-                tags_attribute=tags_attribute),
+                tags_attribute='processed_tags'),
         )
 
     source = source.attach(
         TagSortingAction(
             args.sort_mode,
             max_tag_number=args.max_tag_number),
-        TagRemovingUnderscoreAction(),
         CaptioningAction(args),
     )
     source.export(SaveExporter(
@@ -458,7 +458,7 @@ if __name__ == "__main__":
               "Options are 'score', 'shuffle', 'original'.")
     )
     parser.add_argument(
-        '--pruned_mode', type=str, default='character',
+        '--pruned_mode', type=str, default='character_core',
         choices=['character', 'character_core', 'minimal', 'none'],
         help=("Different ways to prune tags. "
               "Options are 'character', 'character_core', ''minimal', 'none'.")

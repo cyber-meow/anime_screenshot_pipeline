@@ -70,18 +70,20 @@ class CharacterTagProcessor(object):
          'hair', 'bun', 'bangs', 'cut', 'sidelocks',
          'twintails', 'braid', 'braids', 'afro', 'ahoge', 'drill',
          'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
-         'beard', 'mustache', 'hair intake', 'bishounen',
+         'beard', 'mustache', 'hair intake', 'thick eyebrows',
+         'otoko no ko', 'bishounen',
+         'short hair with long locks', 'one eye covered',
          ],
         # Furry, Mecha etc
         ['fang', 'mark', 'freckles',
-         'ear', 'horn', 'fur', 'halo', 'wings',
-         'tail', 'animal ear fulff', 'girl', 'boy',
+         'ear', 'horn', 'fur', 'halo', 'wings', 'heterochromia',
+         'tail', 'animal ear fluff', 'girl', 'boy',
          ]
     ]
 
     _CHAR_PREFIXES = [
         ['hair over', 'hair between', 'dark-skinned'],
-        ['mole', 'furry'],
+        ['mole', 'scar', 'furry', 'muscular'],
     ]
 
     def __init__(
