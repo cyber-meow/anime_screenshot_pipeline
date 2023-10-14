@@ -4,6 +4,7 @@ import logging
 from typing import Iterator, Optional
 from PIL import UnidentifiedImageError
 from tqdm import tqdm
+from hbutils.string import singular_form, plural_form
 
 from waifuc.source.base import BaseDataSource
 from waifuc.export.base import LocalDirectoryExporter
@@ -53,6 +54,26 @@ class MinHeadCountAction(FilterAction):
 
 class TagPruningAction(ProcessAction):
 
+    _CHAR_WHITELIST = [
+        'drill', 'pubic hair', 'closed eyes',
+        'half-closed eyes', 'empty eyes'
+    ]
+
+    _CHAR_SUFFIXES_EASY = [
+        'eyes', 'skin', 'hair', 'bun', 'bangs', 'cut', 'sidelocks',
+        'twintails', 'braid', 'braids', 'afro', 'ahoge', 'drill',
+        'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
+        'beard', 'mustache', 'hair intake',
+    ]
+
+    _CHAR_SUFFIXES_HARD = [
+        'ear', 'horn', 'halo'
+    ]
+
+    _CHAR_PREFIXES = [
+        'hair over', 'hair between'
+    ]
+
     def __init__(self,
                  blacklisted_tags,
                  overlap_tags_dict,
@@ -63,8 +84,16 @@ class TagPruningAction(ProcessAction):
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
         self.pruned_mode = pruned_mode
-        self.drop_hard_character_tags = drop_hard_character_tags
         self.tags_attribute = tags_attribute
+        # character related
+        self.char_white_list = self.get_all_singular_plural_forms(
+            self._CHAR_WHITELIST)
+        self.char_prefixes = self._CHAR_PREFIXES
+        self.char_suffixes = self._CHAR_SUFFIXES_EASY
+        if drop_hard_character_tags:
+            self.char_suffixes.extend(self._CHAR_SUFFIXES_HARD)
+        self.char_suffixes = self.get_all_singular_plural_forms(
+            self.char_suffixes)
 
     def process(self, item: ImageItem) -> ImageItem:
         if self.pruned_mode == 'none':
@@ -85,8 +114,28 @@ class TagPruningAction(ProcessAction):
             # Only pruned character related tags for character images
             if 'characters' in item.meta and item.meta['characters']:
                 tags = drop_basic_character_tags(
-                    tags, drop_hard=self.drop_hard_character_tags)
+                    tags, self.char_white_list,
+                    self.char_prefixes, self.char_suffixes)
         return ImageItem(item.image, {**item.meta, 'processed_tags': tags})
+
+    @staticmethod
+    def get_all_singular_plural_forms(tags):
+        """
+        Get all singular and plural forms of the given tags.
+
+        :param tags: List of tags.
+        :type tags: list[str]
+        :return: List of all singular and plural forms of the tags.
+        :rtype: list[str]
+        """
+        forms = set()
+        for tag in tags:
+            forms.add(tag)  # Add the original form
+            sing = singular_form(tag)
+            forms.add(sing)
+            plur = plural_form(tag)
+            forms.add(plur)
+        return list(forms)
 
 
 class TagSortingAction(ProcessAction):
@@ -158,10 +207,12 @@ class LocalSource(BaseDataSource):
 
     def __init__(self, directory: str,
                  recursive: bool = True,
+                 overwrite_path: bool = False,
                  load_aux: Optional[list] = None,
                  progress_bar: bool = True):
         self.directory = directory
         self.recursive = recursive
+        self.overwrite_path = overwrite_path
         self.load_aux = load_aux or []
         self.progress_bar = progress_bar
         self.total_images = (
@@ -198,10 +249,11 @@ class LocalSource(BaseDataSource):
                 'filename': os.path.basename(file),
             }
             meta['current_path'] = os.path.abspath(file)
-            if 'path' not in meta:
+            if 'path' not in meta or self.overwrite_path:
                 meta['path'] = meta['current_path']
             if 'image_size' not in meta:
-                meta['image_size'] = origin_item.image.size
+                width, height = origin_item.image.size
+                meta['image_size'] = [width, height]
 
             # Load auxiliary data
             file_basename = os.path.splitext(meta['filename'])[0]
@@ -258,12 +310,15 @@ class SaveExporter(LocalDirectoryExporter):
             filename = f'untited_{self.untitles}.png'
 
         if self.in_place:
-            save_file_path = item.meta['current_path']
+            save_directory = os.path.dirname(item.meta['current_path'])
         else:
-            save_file_path = os.path.join(
-                self.output_dir, filename)
-            item.meta['current_path'] = save_file_path
-        save_directory = os.path.dirname(save_file_path)
+            save_directory = self.output_dir
+        save_file_path = os.path.join(save_directory, filename)
+        item.meta['current_path'] = save_file_path
+        # Ideally this is not necessary
+        # image size field is modified during action
+        width, height = item.image.size
+        item.meta['image_size'] = [width, height]
         if save_directory:
             os.makedirs(save_directory, exist_ok=True)
         file_basename = os.path.splitext(filename)[0]

@@ -97,7 +97,7 @@ def get_or_generate_metadata(img_path, warn=False):
             meta_data['image_size'] = get_default_image_size(img_path)
             updated = True
     else:
-        meta_data = get_default_meta_data(img_path, warn)
+        meta_data = get_default_metadata(img_path, warn)
         updated = True
     if updated:
         with open(meta_path, 'w') as meta_file:

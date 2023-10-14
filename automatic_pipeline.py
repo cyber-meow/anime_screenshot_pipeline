@@ -77,7 +77,8 @@ def extract_frames(args, src_dir, is_start_stage):
 
 def crop_characters(args, src_dir, is_start_stage):
 
-    source = LocalSource(src_dir)
+    overwrite_path = is_start_stage and args.overwrite_path
+    source = LocalSource(src_dir, overwrite_path=overwrite_path)
     source = source.attach(
         # NoMonochromeAction(),
         PersonSplitAction(keep_original=False, level='n'),
@@ -157,14 +158,14 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
 
     if args.use_3stage_crop:
         logging.info(f'Performing 3 stage cropping for {classified_dir} ...')
-        stage_cropped_dir = os.path.join(src_dir, '3stage_cropped')
-        source = LocalSource(classified_dir)
+        overwrite_path = is_start_stage and args.overwrite_path
+        source = LocalSource(classified_dir, overwrite_path=overwrite_path)
         source.attach(
             ThreeStageSplitAction(split_person=False),
-        ).export(SaveExporter(stage_cropped_dir))
+        ).export(SaveExporter(classified_dir, in_place=True))
 
     # select images, resize, and save to training
-    resize_character_images(classified_dir, full_dir, dst_dir,
+    resize_character_images([classified_dir, full_dir], dst_dir,
                             max_size=args.max_size,
                             ext=args.image_save_ext,
                             image_type=args.image_type,
@@ -195,7 +196,9 @@ def tag_and_caption(args, src_dir, is_start_stage):
         tags_attribute = 'tags'
     else:
         tags_attribute = 'processed_tags'
-    source = LocalSource(src_dir, load_aux=args.load_aux)
+    overwrite_path = is_start_stage and args.overwrite_path
+    source = LocalSource(
+        src_dir, load_aux=args.load_aux, overwrite_path=overwrite_path)
     source = source.attach(
         TaggingAction(
             force=args.overwrite_tags,
@@ -226,7 +229,9 @@ def rearrange(args, src_dir, is_start_stage):
     logging.info(f'Rearranging {src_dir} ...')
     if is_start_stage:
         logging.info('Load metadata from auxiliary data ...')
-        source = LocalSource(src_dir, load_aux=args.load_aux)
+        source = LocalSource(
+            src_dir, load_aux=args.load_aux,
+            overwrite_path=args.overwrite_path)
         source.export(SaveExporter(
             src_dir, no_meta=False,
             save_caption=True,
@@ -243,7 +248,9 @@ def balance(args, src_dir, is_start_stage):
     logging.info(f'Computing repeat for {training_dir} ...')
     if is_start_stage:
         logging.info('Load metadata from auxiliary data ...')
-        source = LocalSource(src_dir, load_aux=args.load_aux)
+        source = LocalSource(
+            src_dir, load_aux=args.load_aux,
+            overwrite_path=args.overwrite_path)
         source.export(SaveExporter(
             src_dir, no_meta=False,
             save_caption=True,
@@ -302,11 +309,15 @@ if __name__ == "__main__":
                         help="Stage or alias to start from")
     parser.add_argument("--end_stage", default="4",
                         help="Stage or alias to end at")
-    parser.add_argument('--log_dir', type=str, default='logs',
+    parser.add_argument("--log_dir", type=str, default="logs",
                         help=("Directory to save logs. "
                               "Set to None or none to disable."))
-    parser.add_argument('--log_prefix', type=str, default='logfile',
+    parser.add_argument("--log_prefix", type=str, default='logfile',
                         help='Prefix for log files')
+    parser.add_argument(
+        '--overwrite_path', action="store_true",
+        help=("Overwrite path in metadata if LocalSource is used "
+              "in the first stage. Should never be used in general."))
     parser.add_argument(
         "--image_type", default="screenshots",
         help="Image type that we are dealing with, used for folder name")
