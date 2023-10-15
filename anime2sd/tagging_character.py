@@ -229,6 +229,7 @@ class CharacterTagProcessor(object):
 For character core tags
 """
 
+# close-up not working
 _BLACKLISTED_WORDS_CORE = [
     'solo', '1girl', '1boy', '2girls', '2boys', '3girls', '3boys', 'girls',
     'boys', 'body', 'background', 'quality', 'chibi', 'monochrome',
