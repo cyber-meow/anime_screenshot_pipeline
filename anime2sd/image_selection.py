@@ -225,13 +225,16 @@ def resize_character_images(src_dirs, dst_dir,
 
     nocharacter_frames = []
     for src_dir in src_dirs:
-        # Process images in classified_dir
+        if os.path.basename(src_dir) == 'raw':
+            warn = False
+        else:
+            warn = True
         logging.info(f'Processing images from {src_dir} ...')
         save_dir = os.path.join(dst_dir, os.path.basename(src_dir))
         os.makedirs(save_dir, exist_ok=True)
 
         for img_path in tqdm(get_images_recursively(src_dir)):
-            meta_data = get_or_generate_metadata(img_path, warn=True)
+            meta_data = get_or_generate_metadata(img_path, warn=warn)
             if 'characters' in meta_data and meta_data['characters']:
                 original_path = meta_data['path']
                 if original_path != img_path:

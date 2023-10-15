@@ -176,6 +176,10 @@ def arrange_folder(src_dir,
             else:
                 character_combination_dict[character_folder] = [new_path]
 
+    # We need to cosntruct the dictionary again after moving the files
+    logging.info('Constructing dictionary for auxiliary files...')
+    file_paths = get_files_recursively(src_dir)
+    aux_dict = construct_aux_files_dict(file_paths)
     logging.info('Merging folders...')
     if min_images_per_combination > 1:
         merge_folder(
