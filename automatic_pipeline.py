@@ -155,7 +155,7 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     characters = save_characters_to_meta(classified_dir)
 
     # save trigger word info
-    trigger_word_filepath = os.path.join(args.dst_dir, 'emb_init.csv')
+    trigger_word_filepath = os.path.join(dst_dir, 'emb_init.csv')
     update_trigger_word_info(
         trigger_word_filepath, characters,
         args.image_type, args.overwrite_trigger_word_info)
@@ -201,8 +201,9 @@ def tag_and_caption(args, src_dir, is_start_stage):
         # TODO: Deal with emb init difficulty later
         char_tag_proc = CharacterTagProcessor(
             drop_difficulty, emb_init_difficutly=0)
-    core_tag_path = os.path.join(args.dst_dir, 'core_tags.json')
-    wildcard_path = os.path.join(args.dst_dir, 'wildcard.txt')
+    dst_dir = os.path.join(args.dst_dir, 'training', args.image_type)
+    core_tag_path = os.path.join(dst_dir, 'core_tags.json')
+    wildcard_path = os.path.join(dst_dir, 'wildcard.txt')
 
     if args.process_from_original_tags or args.overwrite_tags:
         tags_attribute = 'tags'
