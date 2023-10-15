@@ -70,7 +70,7 @@ class CharacterTagProcessor(object):
          'hair', 'bun', 'bangs', 'cut', 'sidelocks',
          'twintails', 'braid', 'braids', 'afro', 'ahoge', 'drill',
          'bald', 'dreadlocks', 'side up', 'ponytail', 'updo',
-         'beard', 'mustache', 'hair intake', 'thick eyebrows',
+         'beard', 'mustache', 'goatee', 'hair intake', 'thick eyebrows',
          'otoko no ko', 'bishounen',
          'short hair with long locks', 'one eye covered',
          ],
@@ -233,11 +233,13 @@ _BLACKLISTED_WORDS_CORE = [
     'solo', '1girl', '1boy', '2girls', '2boys', '3girls', '3boys', 'girls',
     'boys', 'body', 'background', 'quality', 'chibi', 'monochrome',
     'comic', 'looking', 'text', 'signature', 'peeking', 'focus',
-    'smile', 'mouth',
+    'smile', 'mouth', 'anime', 'screenshot',
+    'sky', 'tree', 'cloud', 'day', 'indoors', 'outdoors', 'close-up',
+    'window', 'curtains',
 ]
 
 
-# TODO: Improved the blacklist mechanism here
+# TODO: Improved the blacklist mechanism here (maybe use whitelist instead)
 # for example mole under mouth should be retained
 def contains_blacklisted_word_core(tag: str):
     words = [word for word in re.split(r'[\W_]+', tag.lower()) if word]
@@ -322,8 +324,9 @@ def get_character_core_tags(folder_path, frequency_threshold):
             tags = meta_data['tags']
         else:
             continue
-        for character in characters:
-            update_character_tag_dict(character, tags, character_tag_dict)
+        # Only update for single character image
+        if len(characters) == 1:
+            update_character_tag_dict(characters[0], tags, character_tag_dict)
     frequent_tag_dict = get_frequent_tags(
         character_tag_dict, frequency_threshold)
     return frequent_tag_dict

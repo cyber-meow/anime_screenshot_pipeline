@@ -171,7 +171,7 @@ def rearrange_related_files(src_dir):
                     if related_path.endswith('json'):
                         logging.warning(
                             f"No related file found for {related_path}")
-                        meta_data = default_metadata(img_path)
+                        meta_data = get_default_metadata(img_path)
                         with open(related_path, 'w') as f:
                             json.dump(meta_data, f)
                 else:
