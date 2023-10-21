@@ -279,6 +279,15 @@ def get_unet_te_pairs(lora_path):
     return file_pairs
 
 
+def get_network_type(sd_unet, sd_TE):
+    if 'lora' in sd_unet.keys() and 'lora' in sd_TE.keys():
+        return 'lora'
+    elif 'plugin' in sd_unet.keys() and 'plugin' in sd_TE.keys():
+        return 'plugin'
+    else:
+        return None
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Convert LoRA models.")
     parser.add_argument(
@@ -296,22 +305,22 @@ if __name__ == '__main__':
     parser.add_argument("--from_webui",
                         action="store_true",
                         help="Convert from webui format.")
+    parser.add_argument("--save_network_type",
+                        type=str,
+                        help="Specify the network type for conversion.")
     parser.add_argument("--to_webui",
                         action="store_true",
                         help="Convert to webui format.")
+    parser.add_argument("--output_prefix",
+                        default="",
+                        type=str,
+                        help="Prefix for output filenames.")
     parser.add_argument("--auto_scale_alpha",
                         action="store_true",
                         help="Automatically scale alpha.")
     parser.add_argument("--sdxl",
                         action="store_true",
                         help="Enable SDXL conversion.")
-    parser.add_argument("--network_type",
-                        type=str,
-                        help="Specify the network type for conversion.")
-    parser.add_argument("--output_prefix",
-                        default="",
-                        type=str,
-                        help="Prefix for output filenames.")
     args = parser.parse_args()
 
     converter = LoraConverter()
@@ -326,7 +335,7 @@ if __name__ == '__main__':
                     state = ckpt_manager.load_ckpt(file_path)
                     sd_TE, sd_unet = converter.convert_from_webui(
                         state,
-                        network_type=args.network_type,
+                        network_type=args.save_network_type,
                         auto_scale_alpha=args.auto_scale_alpha,
                         sdxl=args.sdxl)
 
@@ -344,12 +353,8 @@ if __name__ == '__main__':
                 if paths['TE'] and paths['unet']:
                     sd_unet = ckpt_manager.load_ckpt(paths['unet'])
                     sd_TE = ckpt_manager.load_ckpt(paths['TE'])
-                    if 'lora' in sd_unet.keys() and 'lora' in sd_TE.keys():
-                        network_type = 'lora'
-                    elif 'plugin' in sd_unet.keys() and 'plugin' in sd_TE.keys(
-                    ):
-                        network_type = 'plugin'
-                    else:
+                    network_type = get_network_type(sd_unet, sd_TE)
+                    if network_type is None:
                         print('no saved lora/lycoris found, skip')
                         continue
                     print(f'Converting pair: {paths["TE"]} and {paths["unet"]}'
@@ -373,7 +378,7 @@ if __name__ == '__main__':
             state = ckpt_manager.load_ckpt(args.lora_path)
             sd_TE, sd_unet = converter.convert_from_webui(
                 state,
-                network_type=args.network_type,
+                network_type=args.save_network_type,
                 auto_scale_alpha=args.auto_scale_alpha,
                 sdxl=args.sdxl)
             TE_path = os.path.join(
@@ -386,10 +391,15 @@ if __name__ == '__main__':
         elif args.to_webui:
             sd_unet = ckpt_manager.load_ckpt(args.lora_path)
             sd_TE = ckpt_manager.load_ckpt(args.lora_path_TE)
+            network_type = get_network_type(sd_unet, sd_TE)
+            if network_type is None:
+                print('no saved lora/lycoris found, terminating')
+                exit(1)
+            print(f'Converting with key "{network_type}"')
             state = converter.convert_to_webui(
-                sd_unet[args.network_type],
-                sd_TE[args.network_type],
-                network_type=args.network_type,
+                sd_unet[network_type],
+                sd_TE[network_type],
+                network_type=network_type,
                 auto_scale_alpha=args.auto_scale_alpha,
                 sdxl=args.sdxl)
             lora_name = os.path.basename(args.lora)
