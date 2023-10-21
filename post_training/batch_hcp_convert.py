@@ -29,7 +29,8 @@ class LoraConverter(object):
     def convert_from_webui(self,
                            state,
                            network_type='lora',
-                           auto_scale_alpha=False):
+                           auto_scale_alpha=False,
+                           sdxl=False):
         assert network_type in ['lora', 'plugin']
         sd_unet = self.convert_from_webui_(state,
                                            network_type=network_type,
@@ -44,7 +45,7 @@ class LoraConverter(object):
         if auto_scale_alpha and network_type == 'lora':
             sd_unet = self.alpha_scale_from_webui(sd_unet)
             sd_TE = self.alpha_scale_from_webui(sd_TE)
-        return {self.network_type: sd_TE}, {self.network_type: sd_unet}
+        return {network_type: sd_TE}, {network_type: sd_unet}
 
     def convert_to_webui(self,
                          sd_unet,
@@ -303,13 +304,7 @@ if __name__ == '__main__':
             for filename in os.listdir(args.lora_path):
                 if filename.endswith('.safetensors'):
                     parts = os.path.splitext(filename)[0].split('-')
-                    if len(parts) == 3:
-                        prefix, network_type, number = parts
-                    elif len(parts) == 2:
-                        prefix, number = parts
-                        network_type = 'lora'
-                    else:
-                        continue
+                    prefix, number = parts[0], '-'.join(parts[1:])
 
                     if 'text_encoder' in prefix:
                         file_pairs[number]['TE'] = os.path.join(
@@ -320,11 +315,18 @@ if __name__ == '__main__':
 
             for number, paths in file_pairs.items():
                 if paths['TE'] and paths['unet']:
-                    print(
-                        f'Converting pair: {paths["TE"]} and {paths["unet"]}')
-                    network_type = 'plugin' if '-' in number else 'lora'
                     sd_unet = ckpt_manager.load_ckpt(paths['unet'])
                     sd_TE = ckpt_manager.load_ckpt(paths['TE'])
+                    if 'lora' in sd_unet.keys() and 'lora' in sd_TE.keys():
+                        network_type = 'lora'
+                    elif 'plugin' in sd_unet.keys() and 'plugin' in sd_TE.keys():
+                        network_type = 'plugin'
+                    else:
+                        print('no saved lora/lycoris found, skip')
+                        continue
+                    print(
+                        f'Converting pair: {paths["TE"]} and {paths["unet"]}'
+                        f' with key "{network_type}"')
                     state = converter.convert_to_webui(
                         sd_unet[network_type],
                         sd_TE[network_type],
