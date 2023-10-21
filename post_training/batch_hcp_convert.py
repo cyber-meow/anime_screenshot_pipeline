@@ -32,16 +32,38 @@ class LoraConverter(object):
                            auto_scale_alpha=False,
                            sdxl=False):
         assert network_type in ['lora', 'plugin']
-        sd_unet = self.convert_from_webui_(state,
-                                           network_type=network_type,
-                                           prefix=self.prefix_unet,
-                                           com_name=self.com_name_unet,
-                                           com_name_tmp=self.com_name_unet_tmp)
-        sd_TE = self.convert_from_webui_(state,
-                                         network_type=network_type,
-                                         prefix=self.prefix_TE,
-                                         com_name=self.com_name_TE,
-                                         com_name_tmp=self.com_name_TE_tmp)
+        if not sdxl:
+            sd_unet = self.convert_from_webui_(
+                state,
+                network_type=network_type,
+                prefix=self.prefix_unet,
+                com_name=self.com_name_unet,
+                com_name_tmp=self.com_name_unet_tmp)
+            sd_TE = self.convert_from_webui_(state,
+                                             network_type=network_type,
+                                             prefix=self.prefix_TE,
+                                             com_name=self.com_name_TE,
+                                             com_name_tmp=self.com_name_TE_tmp)
+        else:
+            sd_unet = self.convert_from_webui_xl_unet_(
+                state,
+                network_type=network_type,
+                prefix=self.prefix_unet,
+                com_name=self.com_name_unet,
+                com_name_tmp=self.com_name_unet_tmp)
+            sd_TE = self.convert_from_webui_xl_te_(
+                state,
+                network_type=network_type,
+                prefix=self.prefix_TE_xl_clip_B,
+                com_name=self.com_name_TE,
+                com_name_tmp=self.com_name_TE_tmp)
+            sd_TE2 = self.convert_from_webui_xl_te_(
+                state,
+                network_type=network_type,
+                prefix=self.prefix_TE_xl_clip_bigG,
+                com_name=self.com_name_TE,
+                com_name_tmp=self.com_name_TE_tmp)
+            sd_TE.update(sd_TE2)
         if auto_scale_alpha and network_type == 'lora':
             sd_unet = self.alpha_scale_from_webui(sd_unet)
             sd_TE = self.alpha_scale_from_webui(sd_TE)
@@ -241,6 +263,22 @@ def save_and_print_path(sd, path):
     print('Saved to:', path)
 
 
+def get_unet_te_pairs(lora_path):
+    file_pairs = defaultdict(lambda: {'TE': None, 'unet': None})
+    for filename in os.listdir(lora_path):
+        if filename.endswith('.safetensors'):
+            parts = os.path.splitext(filename)[0].split('-')
+            prefix, name = parts[0], '-'.join(parts[1:])
+
+            if 'text_encoder' in prefix:
+                file_pairs[name]['TE'] = os.path.join(
+                    args.lora_path, filename)
+            elif 'unet' in prefix:
+                file_pairs[name]['unet'] = os.path.join(
+                    args.lora_path, filename)
+    return file_pairs
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Convert LoRA models.")
     parser.add_argument(
@@ -300,33 +338,22 @@ if __name__ == '__main__':
                     save_and_print_path(sd_unet, unet_path)
 
         elif args.to_webui:
-            file_pairs = defaultdict(lambda: {'TE': None, 'unet': None})
-            for filename in os.listdir(args.lora_path):
-                if filename.endswith('.safetensors'):
-                    parts = os.path.splitext(filename)[0].split('-')
-                    prefix, number = parts[0], '-'.join(parts[1:])
+            file_pairs = get_unet_te_pairs(args.lora_path)
 
-                    if 'text_encoder' in prefix:
-                        file_pairs[number]['TE'] = os.path.join(
-                            args.lora_path, filename)
-                    elif 'unet' in prefix:
-                        file_pairs[number]['unet'] = os.path.join(
-                            args.lora_path, filename)
-
-            for number, paths in file_pairs.items():
+            for name, paths in file_pairs.items():
                 if paths['TE'] and paths['unet']:
                     sd_unet = ckpt_manager.load_ckpt(paths['unet'])
                     sd_TE = ckpt_manager.load_ckpt(paths['TE'])
                     if 'lora' in sd_unet.keys() and 'lora' in sd_TE.keys():
                         network_type = 'lora'
-                    elif 'plugin' in sd_unet.keys() and 'plugin' in sd_TE.keys():
+                    elif 'plugin' in sd_unet.keys() and 'plugin' in sd_TE.keys(
+                    ):
                         network_type = 'plugin'
                     else:
                         print('no saved lora/lycoris found, skip')
                         continue
-                    print(
-                        f'Converting pair: {paths["TE"]} and {paths["unet"]}'
-                        f' with key "{network_type}"')
+                    print(f'Converting pair: {paths["TE"]} and {paths["unet"]}'
+                          f' with key "{network_type}"')
                     state = converter.convert_to_webui(
                         sd_unet[network_type],
                         sd_TE[network_type],
@@ -336,7 +363,7 @@ if __name__ == '__main__':
 
                     output_path = os.path.join(
                         args.dump_path,
-                        f'{args.output_prefix}-{number}.safetensors')
+                        f'{args.output_prefix}-{name}.safetensors')
                     save_and_print_path(state, output_path)
 
     else:
@@ -368,7 +395,6 @@ if __name__ == '__main__':
             lora_name = os.path.basename(args.lora)
             if '-' in lora_name:
                 lora_name = '-'.join(lora_name.split('-')[1:])
-            output_path = os.path.join(
-                args.dump_path,
-                args.output_prefix + '-' + lora_name)
+            output_path = os.path.join(args.dump_path,
+                                       args.output_prefix + '-' + lora_name)
             save_and_print_path(state, output_path)
