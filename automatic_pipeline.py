@@ -144,6 +144,7 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     classified_dir = os.path.join(src_dir, 'classified')
     full_dir = os.path.join(src_dir, 'raw')
     dst_dir = os.path.join(args.dst_dir, 'training', args.image_type)
+    os.makedirs(dst_dir, exist_ok=True)
 
     logging.info(f'Preparing dataset images to {dst_dir} ...')
 

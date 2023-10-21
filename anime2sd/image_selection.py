@@ -124,14 +124,14 @@ def update_trigger_word_info(
     # Add characters to the CSV if they're not already present
     for character in characters:
         if character not in name_init_map:
-            name_init_map[character] = '*1'  # Default initialization text
+            name_init_map[character] = ''  # Default initialization text
 
     # Add image_type to the CSV
     if image_type not in name_init_map:
         if image_type == "screenshots":
             name_init_map[image_type] = "anime screencap"
         else:
-            name_init_map[image_type] = '*1'  # Default initialization text
+            name_init_map[image_type] = ''  # Default initialization text
 
     # Write the updated content back to the CSV
     with open(filepath, 'w') as file:

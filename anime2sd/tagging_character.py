@@ -82,7 +82,7 @@ class CharacterTagProcessor(object):
     ]
 
     _CHAR_PREFIXES = [
-        ['hair over', 'hair between', 'dark-skinned'],
+        ['hair over', 'hair between', 'dark-skinned', 'mature'],
         ['mole', 'scar', 'furry', 'muscular'],
     ]
 
