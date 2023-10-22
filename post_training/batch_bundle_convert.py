@@ -47,7 +47,8 @@ def pack_bundle(lora, emb_dict, verbose=False):
     return lora
 
 
-def unpack_bundle(lora, verbose, step=''):
+def unpack_bundle(lora, verbose, step='', emb_format='.pt'):
+    assert emb_format in ['.pt', '.safetensors']
     if step != '':
         step = '-' + str(step)
     emb_dict = {}
@@ -57,22 +58,24 @@ def unpack_bundle(lora, verbose, step=''):
             bundle_keys.append(lora_key)
             _, emb, *rest = lora_key.split('.')
             emb = emb + step
+            if emb not in emb_dict:
+                emb_dict[emb] = {}
             if len(rest) == 2:
                 key, subkey = rest
-                if emb not in emb_dict:
-                    emb_dict[emb] = {}
-                if key not in emb_dict[emb]:
-                    emb_dict[emb][key] = {}
-                emb_dict[emb][key][subkey] = value
+                if emb_format == '.pt':
+                    if key not in emb_dict[emb]:
+                        emb_dict[emb][key] = {}
+                    emb_dict[emb][key][subkey] = value
+                else:
+                    emb_dict[emb][subkey] = value
             elif len(rest) == 1:
                 key = rest[0]
-                if emb not in emb_dict:
-                    emb_dict[emb] = {}
                 emb_dict[emb][key] = value
     for bundle_key in bundle_keys:
         del lora[bundle_key]
-    for emb, emb_sd in emb_dict.items():
-        emb_sd['name'] = emb
+    if emb_format == '.pt':
+        for emb, emb_sd in emb_dict.items():
+            emb_sd['name'] = emb
     if verbose:
         print('The following embeddings have been loaded from bundle')
         print_emb_information(emb_dict)
@@ -248,7 +251,8 @@ if __name__ == '__main__':
                 print(f'Unpacking {lora_path}')
             lora = load_state_dict(lora_path)
             _, step = extract_step(lora_path)
-            lora, emb_dict = unpack_bundle(lora, args.verbose >= 2, step=step)
+            lora, emb_dict = unpack_bundle(
+                lora, args.verbose >= 2, step=step, emb_format=args.emb_ext[0])
             lora_save_path = convert_lora_name(lora_path,
                                                dst_dir,
                                                to_bundle=False)
