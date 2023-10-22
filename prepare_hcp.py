@@ -17,7 +17,7 @@ def copy_files(src_dir, dst_dir):
         shutil.copy(os.path.join(src_dir, file), os.path.join(dst_dir, file))
 
 
-def get_emb_names_and_inits(filepath):
+def get_emb_names_and_inits(filepath, emb_n_words):
     """
     Read a CSV file to extract embedding names and their initialization texts.
 
@@ -32,11 +32,13 @@ def get_emb_names_and_inits(filepath):
     with open(filepath, 'r') as file:
         reader = csv.reader(file)
         for row in reader:
-            # Extract the first word from the first column
-            name = row[0].split()[0]
-            # Extract initialization text or default to '*1'
-            init_text = row[1] if row[1] else '*1'
-            name_init_map[name] = init_text
+            if len(row) >= 1:
+                # Extract the first word from the first column
+                name = row[0].split()[0]
+                init_text = f'*[0.017, {emb_n_words}]'
+                if len(row) >= 2 and row[1]:
+                    init_text = row[1]
+                name_init_map[name] = init_text
 
     return name_init_map
 
@@ -58,11 +60,15 @@ def modify_main_config_file(filepath, args):
     # Update the tokenizer_pt section
     if args.pivotal:
         # Read the embedding names from trigger_word_file
-        names = get_emb_names_and_inits(args.trigger_word_file).keys()
+        names = get_emb_names_and_inits(args.trigger_word_file,
+                                        args.emb_n_words).keys()
         content.tokenizer_pt = {
             'emb_dir': '${emb_dir}',
             'replace': False,
-            'train': [{'name': name, 'lr': '${emb_lr}'} for name in names]
+            'train': [{
+                'name': name,
+                'lr': '${emb_lr}'
+            } for name in names]
         }
     else:
         content.tokenizer_pt = {
@@ -72,9 +78,9 @@ def modify_main_config_file(filepath, args):
         }
 
     # Save the modified content back to the file
-    OmegaConf.save(
-        config=content,
-        f=os.path.join(args.config_dst_dir, os.path.basename(filepath)))
+    OmegaConf.save(config=content,
+                   f=os.path.join(args.config_dst_dir,
+                                  os.path.basename(filepath)))
 
 
 def modify_dataset_file(filepath, args):
@@ -98,8 +104,10 @@ def modify_dataset_file(filepath, args):
     del dataset.source.data_source_1
 
     # List all subdirectories in dataset_dir
-    subdirs = [os.path.join(dp, d)
-               for dp, dn, _ in os.walk(args.dataset_dir) for d in dn]
+    subdirs = [
+        os.path.join(dp, d) for dp, dn, _ in os.walk(args.dataset_dir)
+        for d in dn
+    ]
 
     img_exts = ('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif', '.webp')
 
@@ -113,8 +121,8 @@ def modify_dataset_file(filepath, args):
             new_data_source.img_root = os.path.join(args.dataset_dir, subdir)
 
             # Update repeat based on multiply.txt
-            multiply_file = os.path.join(
-                args.dataset_dir, subdir, 'multiply.txt')
+            multiply_file = os.path.join(args.dataset_dir, subdir,
+                                         'multiply.txt')
             if os.path.exists(multiply_file):
                 with open(multiply_file, 'r') as file:
                     repeat_val = round(float(file.readline().strip()))
@@ -135,8 +143,9 @@ def modify_dataset_file(filepath, args):
             data_source_count += 1
 
     # Save the modified content back to the file
-    OmegaConf.save(config=content, f=os.path.join(
-        args.config_dst_dir, os.path.basename(filepath)))
+    OmegaConf.save(config=content,
+                   f=os.path.join(args.config_dst_dir,
+                                  os.path.basename(filepath)))
 
 
 def create_embeddings(args):
@@ -149,10 +158,13 @@ def create_embeddings(args):
     pretrained_model = content.model.pretrained_model_name_or_path
     pt_creator = PTCreator(pretrained_model, args.emb_dir)
     # Read the embedding names from trigger_word_file
-    names_inits = get_emb_names_and_inits(args.trigger_word_file)
+    names_inits = get_emb_names_and_inits(args.trigger_word_file,
+                                          args.emb_n_words)
     for name in names_inits:
-        pt_creator.creat_word_pt(
-            name, args.emb_n_words, names_inits[name], replace=False)
+        pt_creator.creat_word_pt(name,
+                                 args.emb_n_words,
+                                 names_inits[name],
+                                 replace=False)
 
 
 if __name__ == "__main__":
@@ -190,7 +202,7 @@ if __name__ == "__main__":
                         help=('Directory for saving embeddings. '
                               'Default is {config_dst_dir}/embs.'))
     parser.add_argument('--emb_n_words',
-                        default=2,
+                        default=4,
                         type=int,
                         help=('Number of tokens for each embedding.'))
 
@@ -209,8 +221,8 @@ if __name__ == "__main__":
 
     # Modify files
     modify_main_config_file(args.main_config_file, args)
-    modify_dataset_file(
-        os.path.join(args.config_src_dir, 'dataset.yaml'), args)
+    modify_dataset_file(os.path.join(args.config_src_dir, 'dataset.yaml'),
+                        args)
 
     # Create embeddings if pivotal flag is provided
     if args.pivotal:

@@ -1,7 +1,7 @@
 exp_dir_base: 'hcp_exps'
 config_dir: 'hcp_configs'
 emb_dir: 'embs'
-emb_lr: 5e-3
+emb_lr: 1e-2
 
 _base_:
   - ${config_dir}/train_base.yaml

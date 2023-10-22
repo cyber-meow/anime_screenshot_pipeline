@@ -50,7 +50,7 @@ train:
     num_training_steps: 50000
     scheduler_kwargs: {} # args for scheduler
 
-  scale_lr_pt: True
+  scale_lr_pt: False
   scheduler_pt: ${.scheduler}
 
 model:

@@ -92,7 +92,7 @@ Contributions are welcome
 - [x] Configurable FaceCountAction and HeadCountAction
 - [ ] Two-stage classification with small clusters and large clusters
 - [ ] Arguments to optionally remove character combinations with too few images
-- [ ] Add size to metadata to avoid opening images for size comparison
+- [x] Add size to metadata to avoid opening images for size comparison
 - [ ] Replace ffmpeg command by built-in python functions
 - [ ] Compute repeat based on metadata and trainer-dependent folder organization in the same script
 - [ ] Improved tag pruning (with tag tree?)
