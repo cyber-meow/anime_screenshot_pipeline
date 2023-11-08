@@ -13,7 +13,7 @@ from waifuc.action import TaggingAction
 from waifuc.action import ThreeStageSplitAction
 
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
-from anime2sd import cluster_from_directory, classify_from_directory
+from anime2sd import classify_from_directory
 from anime2sd import rearrange_related_files
 from anime2sd import save_characters_to_meta, update_trigger_word_info
 from anime2sd import resize_character_images
@@ -111,9 +111,6 @@ def crop_characters(args, src_dir, is_start_stage):
 
 
 def classify_characters(args, src_dir, is_start_stage):
-    # TODO: multi-stage classification
-    # TODO: add cluster filter mechanism (min image size, max k)
-
     dst_dir = os.path.join(args.dst_dir, "intermediate", args.image_type, "classified")
     os.makedirs(dst_dir, exist_ok=True)
     if src_dir == dst_dir:
@@ -121,24 +118,17 @@ def classify_characters(args, src_dir, is_start_stage):
     else:
         move = args.remove_intermediate
 
-    if args.character_ref_dir is None:
-        logging.info(f"Clustering characters to {dst_dir} ...")
-        cluster_from_directory(
-            src_dir,
-            dst_dir,
-            args.cluster_merge_threshold,
-            clu_min_samples=args.cluster_min_samples,
-            move=move,
-        )
-
-    else:
-        classify_from_directory(
-            src_dir,
-            dst_dir,
-            args.character_ref_dir,
-            clu_min_samples=args.cluster_min_samples,
-            move=move,
-        )
+    logging.info(f"Classifying characters to {dst_dir} ...")
+    classify_from_directory(
+        src_dir,
+        dst_dir,
+        args.character_ref_dir,
+        to_extract_from_noise=True,
+        keep_unnamed=True,
+        clu_min_samples=args.cluster_min_samples,
+        merge_threshold=args.cluster_merge_threshold,
+        move=move,
+    )
     return os.path.dirname(dst_dir)
 
 

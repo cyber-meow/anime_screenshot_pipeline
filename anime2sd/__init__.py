@@ -3,7 +3,7 @@ from .extract_and_remove_similar import (
     extract_and_remove_similar,
     remove_similar_from_dir,
 )
-from .character_utils import cluster_from_directory, classify_from_directory
+from .classif.classify_characters import classify_from_directory
 from .image_selection import (
     save_characters_to_meta,
     update_trigger_word_info,

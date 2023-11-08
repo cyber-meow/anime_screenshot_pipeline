@@ -2,9 +2,28 @@ import os
 import json
 import shutil
 import logging
+import random
+import string
 from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
+
+
+def random_string(length=6):
+    """Generate a random string of given length."""
+    return "".join(random.choice(string.ascii_letters) for _ in range(length))
+
+
+def remove_empty_folders(path_abs):
+    """Remove empty folders recursively.
+
+    Args:
+        path_abs (str): The absolute path of the root folder.
+    """
+    walk = list(os.walk(path_abs))
+    for path, _, _ in walk[::-1]:
+        if len(os.listdir(path)) == 0:
+            os.rmdir(path)
 
 
 def get_images_recursively(folder_path):
