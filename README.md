@@ -90,7 +90,10 @@ Contributions are welcome
 ### Secondary
 
 - [x] Configurable FaceCountAction and HeadCountAction
+- [x] Core tag-based pruning
 - [ ] Two-stage classification with small clusters and large clusters
+- [ ] Do not crop images that are already cropped before unless otherwise specified
+- [ ] Embedding initialization with hard tags
 - [ ] Arguments to optionally remove character combinations with too few images
 - [x] Add size to metadata to avoid opening images for size comparison
 - [ ] Replace ffmpeg command by built-in python functions

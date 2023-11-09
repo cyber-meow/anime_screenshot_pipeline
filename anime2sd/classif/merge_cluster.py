@@ -170,7 +170,7 @@ def map_clusters_to_reference(
 
 
 def map_clusters_to_existing(
-    labels: np.ndarray, characters_per_image: np.ndarray, min_proportion: float = 0.5
+    labels: np.ndarray, characters_per_image: np.ndarray, min_proportion: float = 0.6
 ) -> np.ndarray:
     """Maps cluster labels to the most frequent character ID in characters_per_image,
     ensuring that the character ID meets a minimum proportion within the cluster.

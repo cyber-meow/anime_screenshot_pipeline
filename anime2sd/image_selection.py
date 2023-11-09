@@ -245,6 +245,7 @@ def resize_character_images(
     src_dirs, dst_dir, max_size, ext, image_type, n_nocharacter_frames, to_resize=True
 ):
     nocharacter_frames = []
+    processed_img_paths = set()
     for src_dir in src_dirs:
         if os.path.basename(src_dir) == "raw":
             warn = False
@@ -255,11 +256,13 @@ def resize_character_images(
         os.makedirs(save_dir, exist_ok=True)
 
         for img_path in tqdm(get_images_recursively(src_dir)):
+            if img_path in processed_img_paths:
+                continue
+            processed_img_paths.add(img_path)
             meta_data = get_or_generate_metadata(img_path, warn=warn)
             if "characters" in meta_data and meta_data["characters"]:
-                # if original_path != img_path:
-                if os.path.basename(src_dir) != "raw":
-                    original_path = meta_data["path"]
+                original_path = meta_data["path"]
+                if os.path.basename(src_dir) != "raw" and original_path != img_path:
                     orig_meta_data = get_or_generate_metadata(original_path, warn=False)
                     cropped_size = meta_data["image_size"]
                     cropped_area = cropped_size[0] * cropped_size[1]
@@ -267,11 +270,14 @@ def resize_character_images(
                     orig_area = orig_size[0] * orig_size[1]
 
                     if cropped_area > 0.5 * orig_area:
-                        continue
+                        if original_path in processed_img_paths:
+                            continue
+                        processed_img_paths.add(original_path)
+                        img_path = original_path
 
                 if to_resize:
-                    cropped_img = cv2.imread(img_path)
-                    resized_img = resize_image(cropped_img, max_size)
+                    img = cv2.imread(img_path)
+                    resized_img = resize_image(img, max_size)
                     save_image_and_meta(
                         resized_img, img_path, save_dir, ext, image_type
                     )
