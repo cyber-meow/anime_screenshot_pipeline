@@ -61,6 +61,7 @@ def classify_characters_imagewise(
         The class labels of the images to be classified
     """
     assert ref_images is not None or batch_diff is not None
+    assert ref_images is None or characters_per_image is None
 
     cls_labels = -1 * np.ones(len(imgs))
     max_ref_label = np.max(ref_labels) if ref_labels is not None else -1

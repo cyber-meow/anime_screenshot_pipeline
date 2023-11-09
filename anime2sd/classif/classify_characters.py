@@ -131,7 +131,7 @@ def classify_from_directory(
         class_names,
     ) = load_image_features_and_characters(src_dir)
 
-    if ignore_character_metadata:
+    if ignore_character_metadata or ref_dir is not None:
         characters_per_image = None
 
     labels, batch_diff, batch_same = cluster_characters_basics(
@@ -197,25 +197,26 @@ def classify_from_directory(
                 same_threshold_abs=same_threshold_abs,
             )
 
-    if keep_unnamed:
-        # trying to merge clusters
-        _exist_ids = np.unique(labels[labels >= 0])
-        max_clu_id = np.max(_exist_ids)
-        merge_clusters(
-            set(_exist_ids),
-            max_clu_id,
-            batch_same,
-            labels,
-            min_merge_id=n_pre_labels,
-            merge_threshold=merge_threshold,
-        )
-    else:
+    # trying to merge clusters
+    _exist_ids = np.unique(labels[labels >= 0])
+    max_clu_id = np.max(_exist_ids)
+    merge_clusters(
+        set(_exist_ids),
+        max_clu_id,
+        batch_same,
+        labels,
+        min_merge_id=n_pre_labels,
+        merge_threshold=merge_threshold,
+    )
+    if not keep_unnamed:
         labels[labels >= n_pre_labels] = -1
 
     if to_extract_from_noise:
         extract_from_noise(
             image_files,
             images,
+            ref_images=ref_images,
+            ref_labels=ref_labels,
             labels=labels,
             batch_diff=batch_diff,
             batch_same=batch_same,

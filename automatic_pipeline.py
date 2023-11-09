@@ -131,7 +131,7 @@ def classify_characters(args, src_dir, is_start_stage):
     move = args.remove_intermediate or (src_dir == dst_dir)
     # Determine whether to ignore existing character metadata.
     ignore_character_metadata = (
-        args.ignore_character_metadata or args.pipeline_type == "screenshots"
+        args.ignore_character_metadata or args.character_ref_dir is not None
     )
 
     # Log information about the classification process.
@@ -145,7 +145,7 @@ def classify_characters(args, src_dir, is_start_stage):
         ignore_character_metadata=ignore_character_metadata,
         to_extract_from_noise=not args.no_extract_from_noise,
         to_filter=not args.no_filter_characters,
-        keep_unnamed=args.keep_unnamed,
+        keep_unnamed=args.keep_unnamed_clusters,
         clu_min_samples=args.cluster_min_samples,
         merge_threshold=args.cluster_merge_threshold,
         same_threshold_rel=args.same_threshold_rel,
@@ -503,8 +503,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Whether to ignore existing character metadata during classification ",
-            "(only meaning ful for 'fanart' pipeline as this is always the case "
-            "for 'screenshots' pipeline)",
+            "(For now this is always the case when character_ref_dir is provided)",
         ),
     )
     parser.add_argument(
@@ -518,7 +517,7 @@ if __name__ == "__main__":
         help="Whether to disable final filtering for character consistency",
     )
     parser.add_argument(
-        "--keep_unnamed",
+        "--keep_unnamed_clusters",
         action="store_true",
         help=(
             "Whether to keep unnamed clusters when reference images are provided "
