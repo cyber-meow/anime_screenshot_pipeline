@@ -117,6 +117,7 @@ def classify_characters_imagewise(
                 # Make sure it is consistent with existing metadata
                 if (
                     characters_per_image is not None
+                    and best_id <= characters_per_image.shape[1]
                     and not characters_per_image[i, best_id]
                 ):
                     continue

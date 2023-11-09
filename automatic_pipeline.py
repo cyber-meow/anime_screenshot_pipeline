@@ -85,11 +85,29 @@ def extract_frames(args, src_dir, is_start_stage):
 
 
 def crop_characters(args, src_dir, is_start_stage):
+    # TODO: Avoid cropping for already cropped data
     overwrite_path = is_start_stage and args.overwrite_path
     source = LocalSource(src_dir, overwrite_path=overwrite_path)
+    detect_config_person = {"level": args.detect_level}
+    if args.detect_level in ["s", "n"]:
+        detect_level_head_halfbody = args.detect_level
+    else:
+        detect_level_head_halfbody = "n"
+    detect_config = {"level": detect_level_head_halfbody}
+    crop_action = (
+        ThreeStageSplitAction(
+            split_person=True,
+            head_conf=detect_config,
+            halfbody_conf=detect_config,
+            person_conf=detect_config_person,
+        )
+        if args.use_3stage_crop == 2
+        else PersonSplitAction(keep_original=False, level=args.detect_level)
+    )
+
     source = source.attach(
         # NoMonochromeAction(),
-        PersonSplitAction(keep_original=False, level="n"),
+        crop_action,
         MinSizeFilterAction(args.min_crop_size),
         # Not used here because it can be problematic for multi-character scene
         # Some not moving while other moving
@@ -183,12 +201,22 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         args.overwrite_trigger_word_info,
     )
 
-    if args.use_3stage_crop:
+    if args.use_3stage_crop == 4:
+        if args.detect_level in ["s", "n"]:
+            detect_level_head_halfbody = args.detect_level
+        else:
+            detect_level_head_halfbody = "n"
+        detect_config = {"level": detect_level_head_halfbody}
+        crop_action = ThreeStageSplitAction(
+            split_person=False,
+            head_conf=detect_config,
+            halfbody_conf=detect_config,
+        )
         logging.info(f"Performing 3 stage cropping for {classified_dir} ...")
         overwrite_path = is_start_stage and args.overwrite_path
         source = LocalSource(classified_dir, overwrite_path=overwrite_path)
         source.attach(
-            ThreeStageSplitAction(split_person=False),
+            crop_action,
         ).export(SaveExporter(classified_dir, in_place=True))
 
     n_reg = args.n_anime_reg if args.pipeline_type == "screenshots" else 0
@@ -490,6 +518,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Crop only images with face for character identification",
     )
+    parser.add_argument(
+        "--detect_level",
+        type=str,
+        choices=["n", "s", "m", "x"],
+        default="n",
+        help=(
+            "The detection model level being used. "
+            "The 'n' model runs faster with smaller system overhead"
+        ),
+    )
 
     # Arguments for character clustering/classification
     # Most important
@@ -593,10 +631,15 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--use_3stage_crop",
-        action="store_true",
+        action="store",
+        type=int,
+        choices=[2, 4],
+        const=2,
+        nargs="?",
         help=(
-            "Use 3 stage crop for halfbody and head crops. "
-            "This is slow and should only be called once for a set of images."
+            "Use 3 stage crop to get halfbody and head crops. "
+            "This is slow and should only be called once for a set of images. "
+            "Possible to use either at stage 2 or 4."
         ),
     )
 
