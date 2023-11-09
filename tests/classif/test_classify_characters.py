@@ -1,7 +1,6 @@
 # tests/classif/test_classify_characters.py
 import pytest
 import os
-import shutil
 from anime2sd.classif.classify_characters import classify_from_directory
 
 
@@ -83,6 +82,7 @@ def test_classify_ref_inplace(test_data_inplace):
         dst_dir,
         character_ref_dir,
         to_extract_from_noise=True,
+        to_filter=True,
         # keep_unnamed=True,
         keep_unnamed=False,
         clu_min_samples=5,

@@ -35,9 +35,11 @@ def setup_logging(log_dir, log_prefix):
     """
     Set up logging to file and stdout with specified directory and prefix.
 
-    :param log_dir: Directory to save the log file.
-    :param log_prefix: Prefix for the log file name.
-    :return: None
+    Args:
+        log_dir: Directory to save the log file.
+        log_prefix: Prefix for the log file name.
+
+    Returns: None
     """
 
     # Create logger
@@ -111,24 +113,45 @@ def crop_characters(args, src_dir, is_start_stage):
 
 
 def classify_characters(args, src_dir, is_start_stage):
+    """Classifies characters in the given source directory.
+
+    Args:
+        args: A Namespace object containing the command-line arguments.
+        src_dir: The path to the source directory containing images to be classified.
+        is_start_stage: Whether this is the start stage of the pipeline.
+
+    Returns:
+        The path to the directory containing the classified images.
+    """
+
     dst_dir = os.path.join(args.dst_dir, "intermediate", args.image_type, "classified")
     os.makedirs(dst_dir, exist_ok=True)
+
+    # Determine whether to move or copy files to the destination directory.
     if src_dir == dst_dir:
         move = True
     else:
         move = args.remove_intermediate
 
+    # Log information about the classification process.
     logging.info(f"Classifying characters to {dst_dir} ...")
+
+    # Call the `classify_from_directory` function with the specified parameters.
     classify_from_directory(
         src_dir,
         dst_dir,
-        args.character_ref_dir,
-        to_extract_from_noise=True,
-        keep_unnamed=True,
+        ref_dir=args.character_ref_dir,
+        ignore_character_metadata=args.ignore_character_metadata,
+        to_extract_from_noise=not args.no_extract_from_noise,
+        to_filter=not args.no_filter_characters,
+        keep_unnamed=args.keep_unnamed,
         clu_min_samples=args.cluster_min_samples,
         merge_threshold=args.cluster_merge_threshold,
+        same_threshold_rel=args.same_threshold_rel,
+        same_threshold_abs=args.same_threshold_abs,
         move=move,
     )
+
     return os.path.dirname(dst_dir)
 
 
@@ -468,6 +491,35 @@ if __name__ == "__main__":
     )
 
     # Arguments for character clustering/classification
+    # Most important
+    parser.add_argument(
+        "--character_ref_dir",
+        default=None,
+        help="Directory containing reference character images",
+    )
+    parser.add_argument(
+        "--ignore_character_metadata",
+        action="store_true",
+        help="Whether to ignore existing character metadata during classification",
+    )
+    parser.add_argument(
+        "--no_extract_from_noise",
+        action="store_true",
+        help="Whether to disable matching character labels for noise images",
+    )
+    parser.add_argument(
+        "--no_filter_characters",
+        action="store_true",
+        help="Whether to disable final filtering for character consistency",
+    )
+    parser.add_argument(
+        "--keep_unnamed",
+        action="store_true",
+        help=(
+            "Whether to keep unnamed clusters when reference images are provided "
+            "or when characters are available in metadata"
+        ),
+    )
     parser.add_argument(
         "--cluster_merge_threshold",
         type=float,
@@ -480,11 +532,23 @@ if __name__ == "__main__":
         default=5,
         help="Minimum cluster samples in character clusterining",
     )
-    # Important
     parser.add_argument(
-        "--character_ref_dir",
-        default=None,
-        help="Directory conaining reference character images",
+        "--same_threshold_rel",
+        type=float,
+        default=0.6,
+        help=(
+            "The relative threshold for determining whether images belong to "
+            "the same cluster for noise extraction and filtering"
+        ),
+    )
+    parser.add_argument(
+        "--same_threshold_abs",
+        type=int,
+        default=10,
+        help=(
+            "The absolute threshold for determining whether images belong to "
+            "the same cluster for noise extraction and filtering"
+        ),
     )
 
     # Arguments for dataset construction
@@ -526,7 +590,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--use_3stage_crop",
         action="store_true",
-        help="Experimental. Use 3 stage crop for halfbody and head crops",
+        help=(
+            "Use 3 stage crop for halfbody and head crops. "
+            "This is slow and should only be called once for a set of images."
+        ),
     )
 
     # Loading and saving of metadata for tagging and captioning stage

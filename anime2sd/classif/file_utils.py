@@ -176,7 +176,6 @@ def save_to_dir(
     """
     unique_labels = sorted(set(labels))
     for label in unique_labels:
-        logging.info(str(label))
         if class_names and label in class_names:
             folder_name = f"{int(label)}_{class_names[label]}"
         elif label == -1:

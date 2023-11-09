@@ -10,7 +10,7 @@ from imgutils.metrics import ccip_extract_feature, ccip_default_threshold
 from imgutils.metrics import ccip_batch_differences
 
 from anime2sd.basics import remove_empty_folders
-from anime2sd.classif.extract_from_noise import extract_from_noise
+from anime2sd.classif.imagewise import extract_from_noise, filter_characters_from_images
 from anime2sd.classif.file_utils import load_image_features_and_characters
 from anime2sd.classif.file_utils import parse_ref_dir, save_to_dir
 
@@ -71,33 +71,57 @@ def classify_from_directory(
     src_dir: str,
     dst_dir: str,
     ref_dir: Optional[str] = None,
+    ignore_character_metadata: bool = False,
     to_extract_from_noise: bool = True,
+    to_filter: bool = True,
     keep_unnamed: bool = True,
     clu_min_samples: int = 5,
     merge_threshold: float = 0.85,
+    same_threshold_rel: float = 0.6,
+    same_threshold_abs: int = 10,
     move: bool = False,
 ):
-    """Classify images from src_dir to dst_dir
+    """
+    Classify images from src_dir to dst_dir
     The entire character classification goes through the following process
-    1. Extract/load ccip features from src_dir
-    2. OPTICS clustering
-    3. Extract from noise: Try to classify images that do not belong to any cluster
-    4. Merge clusters, in more detail
-        - If ref_dir is provided, map clusters to characters using reference images
-        - Otherwise, if images come with characters in metadata, use that
-          to determine character of each cluster
-        - Otherwise, merge clusters based on similarity
-    5. Final filtering to make sure each image has the same character as a certain
-        number of images of the cluster
+    1. Extract or load CCIP features from the source directory.
+    2. Perform OPTICS clustering to identify clusters of images.
+    3. (Optional) Determine labels for images that do not belong to any clusters.
+    4. Merge clusters based on similarity. This may involve:
+        * Mapping clusters to characters using reference images (if provided).
+        * Using image metadata to determine character labels for clusters
+          (if available).
+        * Merging clusters based on similarity
+          (if no reference images or metadata is available).
+    5. (Optional) Apply a final filtering step to ensure character consistency.
 
     Args:
-        src_dir: Path to source directory containing images to be classified
-        dst_dir: Path to destination directory for classified images
-        ref_dir: Path to reference images, default to None
-        to_extract_from_noise: Whether to perform step 3 (extract from noise) or not
-        keep_unnamed: Whether to keep unnamed clusters
-        clu_min_samples: Minimum number of samples in a cluster
-        merge_threshold: Threshold for merging clusters
+        src_dir (str):
+            Path to source directory containing images to be classified.
+        dst_dir (str):
+            Path to destination directory for classified images.
+        ref_dir (str):
+            Path to reference images. Defaults to None.
+        ignore_character_metadata (bool):
+            Whether to ignore existing character metadata or not. Defaults to False.
+        to_extract_from_noise (bool):
+            Whether to perform step 3 (extract from noise) or not. Defaults to True.
+        to_filter (bool):
+            Whether to perform step 5 (final filtering) or not. Defaults to True.
+        keep_unnamed (bool):
+            Whether to keep unnamed clusters when some character information is
+            provided. If False, unnamed clusters will all be treated as noise.
+            Defaults to True.
+        clu_min_samples (int):
+            Minimum number of samples in a cluster. Defaults to 5.
+        merge_threshold (float):
+            Threshold for merging clusters. Defaults to 0.85.
+        same_threshold_rel (float):
+            The relative threshold for determining whether images belong to the same
+            cluster for noise extraction and filtering. Defaults to 0.6.
+        same_threshold_abs (int):
+            The absolute threshold for determining whether images belong to the same
+            cluster for noise extraction and filtering. Defaults to 10.
         move: Whether to move or copy files
     """
     (
@@ -106,6 +130,9 @@ def classify_from_directory(
         characters_per_image,
         class_names,
     ) = load_image_features_and_characters(src_dir)
+
+    if ignore_character_metadata:
+        characters_per_image = None
 
     labels, batch_diff, batch_same = cluster_characters_basics(
         images,
@@ -130,12 +157,15 @@ def classify_from_directory(
         labels[labels >= 0] += n_pre_labels
         if to_extract_from_noise:
             extract_from_noise(
+                image_files,
                 images,
                 labels=labels,
                 batch_diff=batch_diff,
                 batch_same=batch_same,
                 ref_images=ref_images,
                 ref_labels=ref_labels,
+                same_threshold_rel=same_threshold_rel,
+                same_threshold_abs=same_threshold_abs,
             )
         # Use a low threshold here because cluster may represent
         # different forms of the same character
@@ -153,13 +183,18 @@ def classify_from_directory(
             labels = map_clusters_to_existing(
                 labels, characters_per_image, min_proportion=0.5
             )
+        else:
+            keep_unnamed = True
         if to_extract_from_noise:
             extract_from_noise(
+                image_files,
                 images,
                 labels=labels,
                 batch_diff=batch_diff,
                 batch_same=batch_same,
                 characters_per_image=characters_per_image,
+                same_threshold_rel=same_threshold_rel,
+                same_threshold_abs=same_threshold_abs,
             )
 
     if keep_unnamed:
@@ -176,6 +211,28 @@ def classify_from_directory(
         )
     else:
         labels[labels >= n_pre_labels] = -1
+
+    if to_filter:
+        if to_extract_from_noise:
+            extract_from_noise(
+                image_files,
+                images,
+                labels=labels,
+                batch_diff=batch_diff,
+                batch_same=batch_same,
+                characters_per_image=characters_per_image,
+                same_threshold_rel=same_threshold_rel,
+                same_threshold_abs=same_threshold_abs,
+            )
+        labels = filter_characters_from_images(
+            image_files,
+            images,
+            labels,
+            batch_diff,
+            batch_same,
+            same_threshold_rel=same_threshold_rel,
+            same_threshold_abs=same_threshold_abs,
+        )
 
     save_to_dir(image_files, images, dst_dir, labels, class_names, move=move)
     remove_empty_folders(src_dir)
