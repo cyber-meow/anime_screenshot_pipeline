@@ -11,10 +11,10 @@ def classify_characters_imagewise(
     img_files: List[str],
     imgs: np.ndarray,
     ref_images: Optional[np.ndarray] = None,
-    ref_labels: Optional[List[int]] = None,
+    ref_labels: Optional[np.ndarray] = None,
     batch_diff: Optional[np.ndarray] = None,
     batch_same: Optional[np.ndarray] = None,
-    cluster_labels: Optional[List[int]] = None,
+    cluster_labels: Optional[np.ndarray] = None,
     characters_per_image: Optional[np.ndarray] = None,
     same_threshold_rel: float = 0.6,
     same_threshold_abs: int = 10,
@@ -36,13 +36,13 @@ def classify_characters_imagewise(
             CCIP embeddings of images to be classified.
         ref_images (np.ndarray, optional):
             The list of reference images.
-        ref_labels (list, optional):
+        ref_labels (np.ndarray, optional):
             Labels of the reference images.
-        batch_diff (array, optional):
+        batch_diff (np.ndarray, optional):
             The n times m array for the ccip difference of the images.
-        batch_same (array, optional):
+        batch_same (np.ndarray, optional):
             The n times m array for the ccip same of the images.
-        cluster_labels (list, optional):
+        cluster_labels (np.ndarray, optional):
             Labels of the cluster samples.
         characters_per_image (np.ndarray, optional):
             An optional boolean array (num_images x num_characters)
@@ -53,7 +53,7 @@ def classify_characters_imagewise(
         same_threshold_abs (int, optional):
             The absolute threshold for determining whether images belong
             to the same cluster. Defaults to 10.
-        to_filter (bool):
+        to_filter (bool, optional):
             Only perform filtering for classified images instead of classification
             Assume that cluster_labels are exactly the labels of imgs.
 
@@ -61,7 +61,6 @@ def classify_characters_imagewise(
         The class labels of the images to be classified
     """
     assert ref_images is not None or batch_diff is not None
-    assert ref_images is None or characters_per_image is None
 
     cls_labels = -1 * np.ones(len(imgs))
     max_ref_label = np.max(ref_labels) if ref_labels is not None else -1
@@ -102,7 +101,6 @@ def classify_characters_imagewise(
                         for label in range(0, max_cluster_label + 1)
                     ]
                 )
-                best_id = np.argmin(cluster_avg_dists)
                 if (
                     ref_images is not None
                     and ref_avg_dists.min() < cluster_avg_dists.min()
@@ -110,14 +108,19 @@ def classify_characters_imagewise(
                     best_id = np.argmin(ref_avg_dists)
                     ref_r_same = batch_same_ref[ref_labels == best_id].sum()
                     # For reference images only one is similar is enough
-                    if ref_r_same > 0:
+                    # Ensure consistent with existing metadata if any
+                    if ref_r_same > 0 and (
+                        characters_per_image is None or characters_per_image[i, best_id]
+                    ):
                         cls_labels[i] = best_id
                         ref_label_selected = True
+                if not ref_label_selected:
+                    best_id = np.argmin(cluster_avg_dists)
             if not ref_label_selected:
                 # Make sure it is consistent with existing metadata
                 if (
                     characters_per_image is not None
-                    and best_id <= characters_per_image.shape[1]
+                    and best_id < characters_per_image.shape[1]
                     and not characters_per_image[i, best_id]
                 ):
                     continue
@@ -136,7 +139,9 @@ def classify_characters_imagewise(
         else:
             best_id = np.argmin(ref_avg_dists)
             ref_r_same = batch_same_ref[ref_labels == best_id].sum()
-            if ref_r_same > 0:
+            if ref_r_same > 0 and (
+                characters_per_image is None or characters_per_image[i, best_id]
+            ):
                 cls_labels[i] = best_id
 
     return cls_labels
@@ -193,7 +198,7 @@ def extract_from_noise(
     batch_diff_noise = batch_diff[noise_indices]
     batch_same_noise = batch_same[noise_indices]
 
-    logging.info("Matching for noises...")
+    logging.info("Matching for noises ...")
     noise_new_labels = classify_characters_imagewise(
         img_files,
         images_noise,
@@ -260,7 +265,7 @@ def filter_characters_from_images(
         np.ndarray: The filtered labels array.
     """
 
-    logging.info("Filtering characters from images...")
+    logging.info("Filtering characters from images ...")
     filtered_labels = classify_characters_imagewise(
         img_files,
         images,

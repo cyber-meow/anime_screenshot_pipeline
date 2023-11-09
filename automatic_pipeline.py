@@ -149,7 +149,7 @@ def classify_characters(args, src_dir, is_start_stage):
     move = args.remove_intermediate or (src_dir == dst_dir)
     # Determine whether to ignore existing character metadata.
     ignore_character_metadata = (
-        args.ignore_character_metadata or args.character_ref_dir is not None
+        args.ignore_character_metadata or args.pipeline_type == "screenshots"
     )
 
     # Log information about the classification process.
@@ -541,7 +541,8 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Whether to ignore existing character metadata during classification ",
-            "(For now this is always the case when character_ref_dir is provided)",
+            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "for 'screenshots' pipeline)",
         ),
     )
     parser.add_argument(

@@ -28,11 +28,11 @@ def load_image_features_and_characters(
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[int, str]]:
-        - A numpy array of image file paths.
-        - A numpy array of extracted image features.
-        - A boolean array indicating the presence of characters in each image.
-          None if no characters are found.
-        - A dictionary mapping label indices to class names.
+            - A numpy array of image file paths.
+            - A numpy array of extracted image features.
+            - A boolean array indicating the presence of characters in each image.
+              None if no characters are found.
+            - A dictionary mapping label indices to class names.
     """
     image_files = np.array(natsorted(get_images_recursively(src_dir)))
     logging.info(f'Extracting feature of {plural_word(len(image_files), "image")} ...')
@@ -98,10 +98,10 @@ def parse_ref_dir(ref_dir: str) -> Tuple[List[str], np.ndarray, Dict[int, str]]:
 
     Returns:
         Tuple[List[str], np.ndarray, Dict[int, str]]:
-        - A list of paths to image files.
-        - An array of integer labels corresponding to each image,
-          where each label is an index in class_names.
-        - A dictionary mapping label indices to class names.
+            - A list of paths to image files.
+            - An array of integer labels corresponding to each image,
+              where each label is an index in class_names.
+            - A dictionary mapping label indices to class names.
     """
     ref_image_files = []
     labels = []

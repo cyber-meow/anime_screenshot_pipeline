@@ -4,7 +4,8 @@ A 99% automatized pipeline to construct training set from anime and more for tex
 
 The old scripts and readme have been moved into [scripts_v1](scripts_v1)
 
-Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version. I may add a script for batch renaming for compatibility later.
+Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version.
+For conversion please use [scripts_v1/subsidiary/convert_metadata.py](scripts_v1/subsidiary/convert_metadata.py).
 
 **Ensure that you run this script on gpu to have reasonable processing time.**
 
@@ -91,7 +92,7 @@ Contributions are welcome
 
 - [x] Configurable FaceCountAction and HeadCountAction
 - [x] Core tag-based pruning
-- [ ] Two-stage classification with small clusters and large clusters
+- [x] Two-stage classification with small clusters and large clusters
 - [ ] Do not crop images that are already cropped before unless otherwise specified
 - [ ] Embedding initialization with hard tags
 - [ ] Arguments to optionally remove character combinations with too few images

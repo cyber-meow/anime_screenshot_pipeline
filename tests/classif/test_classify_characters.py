@@ -39,8 +39,21 @@ def test_data_fanart():
     src_dir = os.path.join(root_dir, "intermediate", "fanart", "cropped")
     dst_dir = os.path.join(root_dir, "intermediate", "fanart", "classified")
     os.makedirs(dst_dir, exist_ok=True)
+    character_ref_dir = os.path.join(root_dir, "ref_images", "hikikomari")
 
-    return src_dir, dst_dir
+    return src_dir, dst_dir, character_ref_dir
+
+
+@pytest.fixture(scope="module")
+def test_data_fanart_inplace():
+    # Define your test directories
+    root_dir = "data"
+    src_dir = os.path.join(root_dir, "intermediate", "fanart", "classified")
+    dst_dir = os.path.join(root_dir, "intermediate", "fanart", "classified")
+    os.makedirs(dst_dir, exist_ok=True)
+    character_ref_dir = os.path.join(root_dir, "ref_images", "hikikomari")
+
+    return src_dir, dst_dir, character_ref_dir
 
 
 def test_clustering(test_data):
@@ -91,8 +104,8 @@ def test_classify_ref_inplace(test_data_inplace):
     )
 
 
-def test_classify_exsisting(test_data_fanart):
-    src_dir, dst_dir = test_data_fanart
+def test_classify_existing(test_data_fanart):
+    src_dir, dst_dir, _ = test_data_fanart
     # Call the function with the test arguments
     classify_from_directory(
         src_dir,
@@ -103,4 +116,20 @@ def test_classify_exsisting(test_data_fanart):
         clu_min_samples=5,
         merge_threshold=0.85,
         move=False,
+    )
+
+
+def test_classify_existing_ref_inplace(test_data_fanart_inplace):
+    src_dir, dst_dir, character_ref_dir = test_data_fanart_inplace
+    # Call the function with the test arguments
+    classify_from_directory(
+        src_dir,
+        dst_dir,
+        character_ref_dir,
+        to_extract_from_noise=True,
+        to_filter=True,
+        keep_unnamed=True,
+        clu_min_samples=5,
+        merge_threshold=0.85,
+        move=True,
     )

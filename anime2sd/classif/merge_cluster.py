@@ -1,8 +1,60 @@
 import logging
 import numpy as np
-from typing import Set, List, Literal
+from typing import Optional, Set, Sequence, Literal
+from tqdm import tqdm
 
 from imgutils.metrics import ccip_difference, ccip_default_threshold
+
+
+def assign_if_consistent(
+    labels: np.ndarray,
+    candidate_labels: Sequence[int],
+    characters_per_image: Optional[np.ndarray],
+    image_indices: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """
+    Assign new labels to images if they are consistent with characters_per_image.
+    If characters_per_image is None, it assigns labels without consistency checks.
+
+    Args:
+        labels (np.ndarray):
+            Current labels for each image.
+        candidate_labels (Sequence[int]):
+            Candidate labels that could be assigned to the images.
+        characters_per_image (Optional[np.ndarray]):
+            A boolean array indicating the presence of characters in each image,
+            or None if no character information is available.
+        image_indices (Optional[np.ndarray]):
+            Indices of images to be updated. If None, all images are considered.
+
+    Returns:
+        None: The function performs in-place operations and does not return a value.
+    """
+    if image_indices is None:
+        image_indices = np.arange(labels.size)
+
+    if characters_per_image is None:
+        # If no character information is available, assign the candidate label directly
+        labels[image_indices] = candidate_labels[0]
+    else:
+        # If characters_per_image is provided, perform consistency checks
+        # Initialize an array to keep track of which images have been updated
+        updated = np.zeros(labels.shape, dtype=bool)
+
+        for candidate_label in candidate_labels:
+            if candidate_label >= characters_per_image.shape[1]:
+                labels[image_indices[~updated[image_indices]]] = candidate_label
+                break
+            # Get the indices of images where the candidate label is consistent and
+            # have not been updated yet
+            consistent_indices = image_indices[
+                (characters_per_image[image_indices, candidate_label])
+                & (~updated[image_indices])
+            ]
+            # Update the labels for these images
+            labels[consistent_indices] = candidate_label
+            # Mark these images as updated
+            updated[consistent_indices] = True
 
 
 def merge_clusters(
@@ -12,8 +64,10 @@ def merge_clusters(
     labels: np.ndarray,
     min_merge_id: int = 0,
     merge_threshold: float = 0.85,
+    characters_per_image: Optional[np.ndarray] = None,
 ) -> None:
-    """Merges clusters based on a similarity score threshold. Clusters with a similarity
+    """
+    Merges clusters based on a similarity score threshold. Clusters with a similarity
     score above the threshold will be merged. The merging process respects a minimum
     merge ID, below which cluster IDs will not be merged with each other, but can be
     merged into higher IDs.
@@ -35,6 +89,9 @@ def merge_clusters(
         merge_threshold (float):
             The threshold above which two clusters are considered similar enough to be
             merged. Defaults to 0.85.
+        characters_per_image (np.ndarray):
+            A boolean array (num_images x num_characters) indicating the presence of
+            characters in each image.
 
     Returns:
         None: The function performs in-place operations and does not return a value.
@@ -53,7 +110,13 @@ def merge_clusters(
                 score = (batch_same[labels == xi][:, labels == yi]).mean()
                 logging.info(f"Label {xi} and {yi}'s similarity score: {score}")
                 if score >= merge_threshold:
-                    labels[labels == yi] = xi
+                    image_indices_to_update = np.where(labels == yi)[0]
+                    assign_if_consistent(
+                        labels=labels,
+                        candidate_labels=[xi],
+                        characters_per_image=characters_per_image,
+                        image_indices=image_indices_to_update,
+                    )
                     logging.info(f"Merging label {yi} into {xi} ...")
                     exist_ids.remove(yi)
                     _round_merged = True
@@ -73,10 +136,11 @@ def merge_clusters(
 def map_clusters_to_reference(
     imgs: np.ndarray,
     ref_images: np.ndarray,
-    ref_labels,
-    cluster_ids,
+    ref_labels: np.ndarray,
+    cluster_ids: np.ndarray,
     mode: Literal["min", "avg"] = "min",
     same_threshold: float = 0.5,
+    characters_per_image: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Map cluster IDs of images to the labels of reference images based on similarity.
 
@@ -101,15 +165,19 @@ def map_clusters_to_reference(
             The threshold on same character image proportion for determining if a
             cluster is considered the same as a reference.
             Defaults to 0.5.
+        characters_per_image (np.ndarray):
+            A boolean array (num_images x num_characters) indicating the presence of
+            characters in each image.
 
     Returns:
-        np.ndarray: An array of labels where each label corresponds to the reference
-        images that are the most similar to the image cluster.
+        np.ndarray:
+            An array of labels where each label corresponds to the reference
+            images that are the most similar to the image cluster.
 
     Raises:
         ValueError: If an invalid mode is provided.
     """
-    logging.info("Classifying ...")
+    logging.info("Classifying using reference images ...")
 
     cls_labels = cluster_ids.copy()
     max_label = np.max(ref_labels)
@@ -118,7 +186,7 @@ def map_clusters_to_reference(
     if -1 in unique_clusters:
         unique_clusters.remove(-1)
 
-    for cluster_id in unique_clusters:
+    for cluster_id in tqdm(unique_clusters):
         cluster_indices = [
             idx for idx, img in enumerate(imgs) if cluster_ids[idx] == cluster_id
         ]
@@ -153,24 +221,28 @@ def map_clusters_to_reference(
         else:
             raise ValueError("Invalid mode. Choose either 'avg' or 'min'.")
 
-        r_sames = np.array(
-            [
-                (avg_cluster_diff <= ccip_default_threshold())[
-                    ref_labels == label
-                ].mean()
-                for label in range(0, max_label + 1)
-            ]
-        )
-
         best_id = np.argmin(avg_dists)
-        if r_sames[best_id] >= same_threshold:
-            cls_labels[cluster_ids == cluster_id] = best_id
+        r_same = (avg_cluster_diff <= ccip_default_threshold())[
+            ref_labels == best_id
+        ].mean()
+
+        if r_same >= same_threshold:
+            image_indices_to_update = np.where(cluster_ids == cluster_id)[0]
+            assign_if_consistent(
+                labels=cls_labels,
+                candidate_labels=[best_id],
+                characters_per_image=characters_per_image,
+                image_indices=image_indices_to_update,
+            )
 
     return cls_labels
 
 
 def map_clusters_to_existing(
-    labels: np.ndarray, characters_per_image: np.ndarray, min_proportion: float = 0.6
+    labels: np.ndarray,
+    characters_per_image: np.ndarray,
+    n_pre_labels: int,
+    min_proportion: float = 0.6,
 ) -> np.ndarray:
     """Maps cluster labels to the most frequent character ID in characters_per_image,
     ensuring that the character ID meets a minimum proportion within the cluster.
@@ -181,28 +253,33 @@ def map_clusters_to_existing(
         characters_per_image (np.ndarray):
             A boolean array (num_images x num_characters) indicating the presence of
             characters in each image.
+        n_pre_labels (int):
+            The number of pre-defined labels (from metadata and reference images).
         min_proportion (float):
             The minimum proportion for the most frequent character ID to be considered
             as the representative for the cluster.
 
     Returns:
-        np.ndarray: An array of updated labels for each image. Labels are only updated
-        for clusters where a character ID meets the minimum proportion.
-        Otherwise, they remain unchanged.
+        np.ndarray:
+            An array of updated labels for each image. Labels are only updated
+            for clusters where a character ID meets the minimum proportion.
+            Otherwise, they remain unchanged.
 
     Raises:
         Warning: If there are multiple character IDs that can represent a cluster.
     """
+    logging.info("Classifying using existing metadata characters ...")
+
     updated_labels = labels.copy()  # Create a copy of the labels to update
     unique_labels = np.unique(labels)
 
-    for label in unique_labels:
-        # Skip if the label is -1 (usually means 'noise' or 'unclassified')
-        if label == -1:
+    for label in tqdm(unique_labels):
+        # Skip if the label is -1 or belongs to predfined class
+        if label < n_pre_labels:
             continue
 
         # Find indices of images in the current cluster
-        cluster_indices = np.where(labels == label)[0]
+        cluster_indices = np.nonzero(labels == label)[0]
         if cluster_indices.size == 0:
             continue  # No images found for this label
 
@@ -215,7 +292,7 @@ def map_clusters_to_existing(
             continue  # No character meets the minimum proportion
 
         # Find character(s) with the maximum count
-        max_characters = np.where(character_sums == max_count)[0]
+        max_characters = np.nonzero(character_sums == max_count)[0]
         if len(max_characters) > 1:
             # Warn if there are multiple characters with the same count
             logging.warning(
@@ -225,10 +302,11 @@ def map_clusters_to_existing(
 
         # Update the label of the cluster with the character ID that
         # has the maximum count, but only update when agree with orignal labels
-        for cluster_index in cluster_indices:
-            for max_character in max_characters:
-                if characters_per_image[cluster_index, max_character]:
-                    updated_labels[cluster_index] = max_character
-                    break
+        assign_if_consistent(
+            labels=updated_labels,
+            candidate_labels=max_characters,
+            characters_per_image=characters_per_image,
+            image_indices=cluster_indices,
+        )
 
     return updated_labels

@@ -1,6 +1,6 @@
 import logging
 from tqdm import tqdm
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 from hbutils.string import plural_word
 
 import numpy as np
@@ -67,6 +67,85 @@ def cluster_characters_basics(
     return labels, batch_diff, batch_same
 
 
+def merge_class_names(
+    class_names: Dict[int, str],
+    ref_class_names: Dict[int, str],
+    ref_labels: np.ndarray,
+    characters_per_image: Optional[np.ndarray],
+) -> Tuple[Dict[int, str], np.ndarray, Optional[np.ndarray]]:
+    """
+    Merge reference class names into existing class names, update labels,
+    and adjust characters_per_image.
+
+    Args:
+        class_names (Dict[int, str]):
+            Existing class names with labels as keys.
+        ref_class_names (Dict[int, str]):
+            Reference class names with labels as keys.
+        ref_labels (np.ndarray):
+            Array of labels corresponding to reference images.
+        characters_per_image (Optional[np.ndarray]):
+            Array indicating presence of characters in images.
+
+    Returns:
+        Tuple[Dict[int, str], np.ndarray, Optional[np.ndarray]]:
+            - Updated class names dictionary.
+            - Updated reference labels.
+            - Updated characters_per_image if provided.
+    """
+    # Create a new class_names dictionary to avoid modifying the original one
+    updated_class_names = class_names.copy()
+    updated_ref_labels = ref_labels.copy()
+    n_existing_labels = max(class_names.keys()) + 1 if class_names else 0
+
+    # Update the class_names with ref_class_names
+    for ref_label, ref_name in ref_class_names.items():
+        existing_label = next(
+            (label for label, name in class_names.items() if name == ref_name), None
+        )
+        if existing_label is not None:
+            # Update ref_labels with the existing label from class_names
+            updated_ref_labels[ref_labels == ref_label] = existing_label
+        else:
+            # Add new entry to class_names if it doesn't exist
+            updated_class_names[n_existing_labels] = ref_name
+            updated_ref_labels[ref_labels == ref_label] = n_existing_labels
+            n_existing_labels += 1
+
+    # Update characters_per_image for new labels based on the first word of the
+    # class name
+    if characters_per_image is not None:
+        new_characters_per_image = np.zeros(
+            (characters_per_image.shape[0], n_existing_labels), dtype=bool
+        )
+        new_characters_per_image[
+            :, : characters_per_image.shape[1]
+        ] = characters_per_image
+
+        for new_label in range(characters_per_image.shape[1], n_existing_labels):
+            # Get the first word of the new class name
+            new_class_first_word = updated_class_names[new_label].split()[0]
+            # Find an old label with the same first word in the class name
+            old_label = next(
+                (
+                    label
+                    for label, name in class_names.items()
+                    if name.split()[0] == new_class_first_word
+                ),
+                None,
+            )
+            if old_label is not None:
+                # Copy the character presence data from the old label column to
+                # the new label column
+                new_characters_per_image[:, new_label] = new_characters_per_image[
+                    :, old_label
+                ]
+
+        characters_per_image = new_characters_per_image
+
+    return updated_class_names, updated_ref_labels, characters_per_image
+
+
 def classify_from_directory(
     src_dir: str,
     dst_dir: str,
@@ -84,6 +163,7 @@ def classify_from_directory(
     """
     Classify images from src_dir to dst_dir
     The entire character classification goes through the following process
+
     1. Extract or load CCIP features from the source directory.
     2. Perform OPTICS clustering to identify clusters of images.
     3. (Optional) Determine labels for images that do not belong to any clusters.
@@ -131,18 +211,20 @@ def classify_from_directory(
         class_names,
     ) = load_image_features_and_characters(src_dir)
 
-    if ignore_character_metadata or ref_dir is not None:
+    if ignore_character_metadata:
         characters_per_image = None
+        class_names = dict()
 
     labels, batch_diff, batch_same = cluster_characters_basics(
         images,
         clu_min_samples=clu_min_samples,
     )
-    # The number of known character names from either reference or metadata
-    n_pre_labels = 0
+
+    # The number of known character names from metadata
+    n_meta_labels = len(class_names)
 
     if ref_dir is not None:
-        ref_image_files, ref_labels, class_names = parse_ref_dir(ref_dir)
+        ref_image_files, ref_labels, ref_class_names = parse_ref_dir(ref_dir)
         logging.info(
             "Extracting feature of "
             + f'{plural_word(len(ref_image_files), "images")} ...'
@@ -153,20 +235,32 @@ def classify_from_directory(
                 for img in tqdm(ref_image_files, desc="Extract reference features")
             ]
         )
-        n_pre_labels = max(ref_labels) + 1
-        labels[labels >= 0] += n_pre_labels
-        if to_extract_from_noise:
-            extract_from_noise(
-                image_files,
-                images,
-                labels=labels,
-                batch_diff=batch_diff,
-                batch_same=batch_same,
-                ref_images=ref_images,
-                ref_labels=ref_labels,
-                same_threshold_rel=same_threshold_rel,
-                same_threshold_abs=same_threshold_abs,
-            )
+        # Merge class names and update ref_labels and characters_per_image
+        class_names, ref_labels, characters_per_image = merge_class_names(
+            class_names, ref_class_names, ref_labels, characters_per_image
+        )
+    else:
+        ref_images, ref_labels = None, None
+
+    # The number of known character names from either reference or metadata
+    n_pre_labels = len(class_names)
+    labels[labels >= 0] += n_pre_labels
+
+    if to_extract_from_noise:
+        extract_from_noise(
+            image_files,
+            images,
+            labels=labels,
+            batch_diff=batch_diff,
+            batch_same=batch_same,
+            characters_per_image=characters_per_image,
+            ref_images=ref_images,
+            ref_labels=ref_labels,
+            same_threshold_rel=same_threshold_rel,
+            same_threshold_abs=same_threshold_abs,
+        )
+
+    if ref_images is not None:
         # Use a low threshold here because cluster may represent
         # different forms of the same character
         labels = map_clusters_to_reference(
@@ -175,27 +269,19 @@ def classify_from_directory(
             ref_labels,
             cluster_ids=labels,
             same_threshold=0.1,
+            characters_per_image=characters_per_image,
         )
-    else:
-        if characters_per_image is not None:
-            n_pre_labels = characters_per_image.shape[1]
-            labels[labels >= 0] += n_pre_labels
-            labels = map_clusters_to_existing(
-                labels, characters_per_image, min_proportion=0.5
-            )
-        else:
-            keep_unnamed = True
-        if to_extract_from_noise:
-            extract_from_noise(
-                image_files,
-                images,
-                labels=labels,
-                batch_diff=batch_diff,
-                batch_same=batch_same,
-                characters_per_image=characters_per_image,
-                same_threshold_rel=same_threshold_rel,
-                same_threshold_abs=same_threshold_abs,
-            )
+
+    if characters_per_image is not None:
+        labels = map_clusters_to_existing(
+            labels,
+            characters_per_image[:, :n_meta_labels],
+            n_pre_labels,
+            min_proportion=0.6,
+        )
+
+    if ref_images is None and characters_per_image is None:
+        keep_unnamed = True
 
     if keep_unnamed:
         # trying to merge clusters
@@ -208,6 +294,7 @@ def classify_from_directory(
             labels,
             min_merge_id=n_pre_labels,
             merge_threshold=merge_threshold,
+            characters_per_image=characters_per_image,
         )
     else:
         labels[labels >= n_pre_labels] = -1
