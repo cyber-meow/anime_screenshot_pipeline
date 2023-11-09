@@ -1,6 +1,7 @@
 import numpy as np
 import logging
 from tqdm import tqdm
+from typing import Optional
 
 from imgutils.metrics import ccip_difference
 from imgutils.metrics import ccip_default_threshold
@@ -8,13 +9,13 @@ from imgutils.metrics import ccip_default_threshold
 
 def classify_characters_imagewise(
     imgs,
-    same_threshold=0.9,
-    default_thresohold_ratio=0.75,
-    ref_labels=None,
-    cluster_labels=None,
     ref_images=None,
+    ref_labels=None,
     batch_diff=None,
     batch_same=None,
+    cluster_labels=None,
+    same_threshold=0.9,
+    default_threshold_ratio=0.75,
     desc=None,
 ):
     """Classify the images one by one with the help of either the reference images
@@ -26,22 +27,22 @@ def classify_characters_imagewise(
     Args:
         imgs (list):
             A list of images to be classified
+        ref_images (list):
+            The list of reference images
+        ref_labels (list):
+            Labels of the reference images
+        batch_diff (array):
+            The n times n array for the ccip difference of all the processed images
+        batch_same (arrat):
+            The n times n array for the ccip same of all the processed images
+        cluster_labels (list):
+            Labels of the cluster samples
         same_threshold (float):
             The threshold on same character image proportion to determine whether
             a image belongs to a cluster or not
         default_thresohold_ratio (float):
             The ratio of the default threshold to determine whether two images
             represent the same character or not
-        ref_labels (list):
-            Labels of the reference images
-        cluster_labels (list):
-            Labels of the cluster samples
-        ref_images (list):
-            The list of reference images
-        batch_diff (array):
-            The n times n array for the ccip difference of all the processed images
-        batch_same (arrat):
-            The n times n array for the ccip same of all the processed images
         desc (text):
             Description text for tqdm
 
@@ -69,7 +70,7 @@ def classify_characters_imagewise(
                 ]
             )
             batch_same_ref = ref_diff <= (
-                ccip_default_threshold() * default_thresohold_ratio
+                ccip_default_threshold() * default_threshold_ratio
             )
             ref_r_sames = np.array(
                 [
@@ -117,43 +118,69 @@ def classify_characters_imagewise(
 
 
 def extract_from_noise(
-    images, labels, batch_diff, batch_same, ref_images=None, ref_labels=None
-):
-    """Classify character for images that do not belong to any cluster
-    Rerefence images may be used as well
-    Their labels should be different to avoid collision
+    images: np.ndarray,
+    labels: np.ndarray,
+    batch_diff: np.ndarray,
+    batch_same: np.ndarray,
+    characters_per_image: Optional[np.ndarray] = None,
+    ref_images: Optional[np.ndarray] = None,
+    ref_labels: Optional[np.ndarray] = None,
+) -> None:
+    """
+    Classify characters for images that do not belong to any cluster (labeled as noise).
+    Reference images and characters_per_image may be used as well for classification.
+    It updates the labels array in place for noise images with their classified labels.
 
     Args:
-        images (list): List of all processed images
-        labels (list): Labels of the processed images
-        batch_diff (array):
-            The n times n array for the ccip difference of all the processed images
-        batch_same (array):
-            The n times n array for the ccip same of all the processed images
-        ref_images (list): List of reference images
-        ref_labels (list): Labels of the reference images
+        images (np.ndarray):
+            ccip embeddinggs of all processed images.
+        labels (np.ndarray):
+            Labels of the processed images.
+        batch_diff (np.ndarray):
+            The n x n array for the ccip difference of all the processed images.
+        batch_same (np.ndarray):
+            The n x n boolean array indicating similarity below a threshold.
+        characters_per_image (Optional[np.ndarray]):
+            An optional boolean array (num_images x num_characters)
+            indicating the presence of characters in each image. Defaults to None.
+        ref_images (Optional[np.ndarray]):
+            Optional array of ccip embeddings of the reference images. Defaults to None.
+        ref_labels (Optional[np.ndarray]):
+            Optional array of labels for the reference images. Defaults to None.
 
     Returns:
-        None: The function performs in-place operations and does not return a value.
+        None: The function performs in-place operations on the
+              labels array and does not return a value.
     """
-    images_noise = images[labels == -1]
+    noise_indices = np.where(labels == -1)[0]
+    images_noise = images[noise_indices]
+    batch_diff_noise = batch_diff[noise_indices]
+    batch_same_noise = batch_same[noise_indices]
+
     noise_new_labels = classify_characters_imagewise(
         images_noise,
         ref_images=ref_images,
         ref_labels=ref_labels,
-        batch_diff=batch_diff[labels == -1],
-        batch_same=batch_same[labels == -1],
+        batch_diff=batch_diff_noise,
+        batch_same=batch_same_noise,
         cluster_labels=labels,
-        default_thresohold_ratio=0.5,
         same_threshold=0.9,
+        default_threshold_ratio=0.5,
         desc="Matching for noises",
     )
-    labels[labels == -1] = noise_new_labels
+
+    for idx, new_label in zip(noise_indices, noise_new_labels):
+        if new_label != -1:
+            labels[idx] = new_label
+        elif characters_per_image is not None:
+            # Update label based on characters_per_image
+            # if there's only one corresponding character
+            character_counts = characters_per_image[idx]
+            if np.sum(character_counts) == 1:
+                labels[idx] = np.argmax(character_counts)
 
     logging.info("Noise extracting complete.")
     label_cnt = {
-        i: (labels == i).sum()
-        for i in range(-1, max(labels) + 1)
-        if (labels == i).sum() > 0
+        i: (labels == i).sum() for i in np.unique(labels) if (labels == i).sum() > 0
     }
     logging.info(f"Current label count: {label_cnt}")

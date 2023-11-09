@@ -144,8 +144,11 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(classified_dir)
 
+    overwrite_uncropped = (
+        args.pipeline_type == "screenshots" or args.character_overwrite_uncropped
+    )
     # update metadata using folder name
-    characters = save_characters_to_meta(classified_dir)
+    characters = save_characters_to_meta(classified_dir, overwrite_uncropped)
 
     # save trigger word info
     trigger_word_filepath = os.path.join(dst_dir, "emb_init.csv")
@@ -164,6 +167,7 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
             ThreeStageSplitAction(split_person=False),
         ).export(SaveExporter(classified_dir, in_place=True))
 
+    n_reg = args.n_anime_reg if args.pipeline_type == "screenshots" else 0
     # select images, resize, and save to training
     resize_character_images(
         [classified_dir, full_dir],
@@ -171,7 +175,7 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         max_size=args.max_size,
         ext=args.image_save_ext,
         image_type=args.image_type,
-        n_nocharacter_frames=args.n_anime_reg,
+        n_nocharacter_frames=n_reg,
         to_resize=not args.no_resize,
     )
 
@@ -399,8 +403,19 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--image_type",
+        type=str,
         default="screenshots",
         help="Image type that we are dealing with, used for folder name",
+    )
+    parser.add_argument(
+        "--pipeline_type",
+        type=str,
+        default="screenshots",
+        choices=["screenshots", "fanart"],
+        help=(
+            "Pipeline type that is used to construct dataset ",
+            "Options are 'screenshots' and 'fanart'",
+        ),
     )
     parser.add_argument(
         "--remove_intermediate",
@@ -479,6 +494,15 @@ if __name__ == "__main__":
         help="Overwrite existing trigger word csv",
     )
     parser.add_argument(
+        "--character_overwrite_uncropped",
+        action="store_true",
+        help=(
+            "Overwrite existing character metadata for uncropped images "
+            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "for 'screenshots' pipeline)"
+        ),
+    )
+    parser.add_argument(
         "--no_resize", action="store_true", help="Do not perform image resizing"
     )
     parser.add_argument(
@@ -491,13 +515,13 @@ if __name__ == "__main__":
         help="Max image size that shorter edge aligns to",
     )
     parser.add_argument(
-        "--image_save_ext", default=".webp", help="Dataset image extensino"
+        "--image_save_ext", default=".webp", help="Dataset image extension"
     )
     parser.add_argument(
         "--n_anime_reg",
         type=int,
         default=500,
-        help="Number of images with no characters to keep",
+        help="Number of images with no characters to keep (for 'screenshots' pipeline)",
     )
     parser.add_argument(
         "--use_3stage_crop",

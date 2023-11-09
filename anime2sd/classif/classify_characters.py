@@ -159,6 +159,7 @@ def classify_from_directory(
                 labels=labels,
                 batch_diff=batch_diff,
                 batch_same=batch_same,
+                characters_per_image=characters_per_image,
             )
 
     if keep_unnamed:

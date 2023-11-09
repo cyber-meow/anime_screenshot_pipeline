@@ -28,17 +28,24 @@ def parse_char_name(folder_name: str) -> str:
     return folder_name
 
 
-def save_characters_to_meta(classified_dir: str) -> List[str]:
+def save_characters_to_meta(
+    classified_dir: str, overwrite_uncropped: bool = True
+) -> List[str]:
     """Save character information to metadata files
 
     Args:
-        classified_dir (str): Directory containing classified character folders
+        classified_dir (str):
+            Directory containing classified character folders
+        overwrite_raw (bool):
+            Whether to overwrite the character metadata of uncropped images or not
 
     Returns:
         List[str]: Set of character names
     """
 
-    encountered_paths = set()  # To keep track of paths encountered in this run
+    # To keep track of paths encountered in this run
+    # Value set to True if the character list is to be updated
+    encountered_paths = dict()
     characters = set()
 
     logging.info("Saving characters to metadata ...")
@@ -86,11 +93,17 @@ def save_characters_to_meta(classified_dir: str) -> List[str]:
                 original_meta_path, _ = get_corr_meta_names(original_path)
                 orig_meta_data = get_or_generate_metadata(original_path, warn=False)
 
-                # Initialize characters list
-                # if the path hasn't been encountered in this run
-                if original_path not in encountered_paths:
-                    orig_meta_data["characters"] = []
-                    encountered_paths.add(original_path)
+                # Initialize characters list if the path hasn't been encountered
+                # yet in this run and overwrite_uncropped is True
+                if original_path not in encountered_paths.keys():
+                    if "characters" not in orig_meta_data or overwrite_uncropped:
+                        orig_meta_data["characters"] = []
+                        encountered_paths[original_path] = True
+                    else:
+                        encountered_paths[original_path] = False
+                # Go to next image if we do not update
+                if not encountered_paths[original_path]:
+                    continue
 
                 # Append the character name if it's not already in the list
                 # and is not noise
@@ -133,7 +146,7 @@ def update_trigger_word_info(filepath, characters, image_type, overwrite=False):
     # Add characters to the CSV if they're not already present
     for character in characters:
         if character not in name_init_map:
-            name_init_map[character] = ""  # Default initialization text
+            name_init_map[character.split()[0]] = ""
 
     # Add image_type to the CSV
     if image_type not in name_init_map:
@@ -198,7 +211,8 @@ def save_image_and_meta(img, img_path, save_dir, ext, image_type):
     if os.path.exists(meta_path):
         with open(meta_path, "r") as meta_file:
             meta_data = json.load(meta_file)
-        meta_data["filename"] = meta_data["filename"].replace(".png", ext)
+        _, ext_orig = os.path.splitext(meta_data["filename"])
+        meta_data["filename"] = meta_data["filename"].replace(ext_orig, ext)
         meta_data["type"] = image_type
         meta_data["image_size"] = img.shape[:2]
 
@@ -243,8 +257,9 @@ def resize_character_images(
         for img_path in tqdm(get_images_recursively(src_dir)):
             meta_data = get_or_generate_metadata(img_path, warn=warn)
             if "characters" in meta_data and meta_data["characters"]:
-                original_path = meta_data["path"]
-                if original_path != img_path:
+                # if original_path != img_path:
+                if os.path.basename(src_dir) != "raw":
+                    original_path = meta_data["path"]
                     orig_meta_data = get_or_generate_metadata(original_path, warn=False)
                     cropped_size = meta_data["image_size"]
                     cropped_area = cropped_size[0] * cropped_size[1]

@@ -13,8 +13,7 @@ def merge_clusters(
     min_merge_id: int = 0,
     merge_threshold: float = 0.85,
 ) -> None:
-    """
-    Merges clusters based on a similarity score threshold. Clusters with a similarity
+    """Merges clusters based on a similarity score threshold. Clusters with a similarity
     score above the threshold will be merged. The merging process respects a minimum
     merge ID, below which cluster IDs will not be merged with each other, but can be
     merged into higher IDs.
@@ -170,5 +169,62 @@ def map_clusters_to_reference(
     return cls_labels
 
 
-def map_clusters_to_existing(labels, characters_per_image, min_proportion=0.5):
-    pass
+def map_clusters_to_existing(
+    labels: np.ndarray, characters_per_image: np.ndarray, min_proportion: float = 0.5
+) -> np.ndarray:
+    """Maps cluster labels to the most frequent character ID in characters_per_image,
+    ensuring that the character ID meets a minimum proportion within the cluster.
+
+    Args:
+        labels (np.ndarray):
+            An array of integer labels for each image.
+        characters_per_image (np.ndarray):
+            A boolean array (num_images x num_characters) indicating the presence of
+            characters in each image.
+        min_proportion (float):
+            The minimum proportion for the most frequent character ID to be considered
+            as the representative for the cluster.
+
+    Returns:
+        np.ndarray: An array of updated labels for each image. Labels are only updated
+        for clusters where a character ID meets the minimum proportion.
+        Otherwise, they remain unchanged.
+
+    Raises:
+        Warning: If there are multiple character IDs that can represent a cluster.
+    """
+    updated_labels = labels.copy()  # Create a copy of the labels to update
+    unique_labels = np.unique(labels)
+
+    for label in unique_labels:
+        # Skip if the label is -1 (usually means 'noise' or 'unclassified')
+        if label == -1:
+            continue
+
+        # Find indices of images in the current cluster
+        cluster_indices = np.where(labels == label)[0]
+        if cluster_indices.size == 0:
+            continue  # No images found for this label
+
+        # Sum presence of each character in the cluster
+        character_sums = characters_per_image[cluster_indices].sum(axis=0)
+        max_count = np.max(character_sums)
+        proportion = max_count / len(cluster_indices)
+
+        if proportion < min_proportion:
+            continue  # No character meets the minimum proportion
+
+        # Find character(s) with the maximum count
+        max_characters = np.where(character_sums == max_count)[0]
+        if len(max_characters) > 1:
+            # Warn if there are multiple characters with the same count
+            logging.warning(
+                f"Label {label} has multiple potential representative characters: "
+                f"{max_characters}."
+            )
+
+        # Update the label of the cluster with the character ID that
+        # has the maximum count
+        updated_labels[cluster_indices] = max_characters[0]
+
+    return updated_labels
