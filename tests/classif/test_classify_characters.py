@@ -11,7 +11,7 @@ def test_data():
     src_dir = os.path.join(root_dir, "intermediate", "screenshots", "cropped_mini")
     dst_dir = os.path.join(root_dir, "intermediate", "screenshots", "classified_mini")
     os.makedirs(dst_dir, exist_ok=True)
-    character_ref_dir = os.path.join(root_dir, "ref_images")
+    character_ref_dir = os.path.join(root_dir, "ref_images", "tearmoon")
 
     # (Optional) Setup the test data before running the tests
     # shutil.copytree('path_to_sample_data', src_dir)
@@ -27,7 +27,7 @@ def test_data_inplace():
     src_dir = os.path.join(root_dir, "intermediate", "screenshots", "classified_mini")
     dst_dir = os.path.join(root_dir, "intermediate", "screenshots", "classified_mini")
     os.makedirs(dst_dir, exist_ok=True)
-    character_ref_dir = os.path.join(root_dir, "ref_images")
+    character_ref_dir = os.path.join(root_dir, "ref_images", "tearmoon")
 
     return src_dir, dst_dir, character_ref_dir
 

@@ -215,8 +215,6 @@ def classify_from_directory(
         extract_from_noise(
             image_files,
             images,
-            ref_images=ref_images,
-            ref_labels=ref_labels,
             labels=labels,
             batch_diff=batch_diff,
             batch_same=batch_same,
