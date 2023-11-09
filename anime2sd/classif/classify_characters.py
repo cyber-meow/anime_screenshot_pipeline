@@ -212,18 +212,19 @@ def classify_from_directory(
     else:
         labels[labels >= n_pre_labels] = -1
 
+    if to_extract_from_noise:
+        extract_from_noise(
+            image_files,
+            images,
+            labels=labels,
+            batch_diff=batch_diff,
+            batch_same=batch_same,
+            characters_per_image=characters_per_image,
+            same_threshold_rel=same_threshold_rel,
+            same_threshold_abs=same_threshold_abs,
+        )
+
     if to_filter:
-        if to_extract_from_noise:
-            extract_from_noise(
-                image_files,
-                images,
-                labels=labels,
-                batch_diff=batch_diff,
-                batch_same=batch_same,
-                characters_per_image=characters_per_image,
-                same_threshold_rel=same_threshold_rel,
-                same_threshold_abs=same_threshold_abs,
-            )
         labels = filter_characters_from_images(
             image_files,
             images,

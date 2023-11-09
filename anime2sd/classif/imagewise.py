@@ -15,6 +15,7 @@ def classify_characters_imagewise(
     batch_diff: Optional[np.ndarray] = None,
     batch_same: Optional[np.ndarray] = None,
     cluster_labels: Optional[List[int]] = None,
+    characters_per_image: Optional[np.ndarray] = None,
     same_threshold_rel: float = 0.6,
     same_threshold_abs: int = 10,
     default_threshold_ratio: float = 0.75,
@@ -43,6 +44,9 @@ def classify_characters_imagewise(
             The n times m array for the ccip same of the images.
         cluster_labels (list, optional):
             Labels of the cluster samples.
+        characters_per_image (np.ndarray, optional):
+            An optional boolean array (num_images x num_characters)
+            indicating the presence of characters in each image. Defaults to None.
         same_threshold_rel (float, optional):
             The relative threshold for determining whether images belong
             to the same cluster. Defaults to 0.6.
@@ -109,6 +113,12 @@ def classify_characters_imagewise(
                         cls_labels[i] = best_id
                         ref_label_selected = True
             if not ref_label_selected:
+                # Make sure it is consistent with existing metadata
+                if (
+                    characters_per_image is not None
+                    and not characters_per_image[i, best_id]
+                ):
+                    continue
                 r_same_mean = batch_same[i][cluster_labels == best_id].mean()
                 r_same_sum = batch_same[i][cluster_labels == best_id].sum()
                 # if best_id == cluster_labels[i] == 3:
@@ -190,6 +200,7 @@ def extract_from_noise(
         batch_diff=batch_diff_noise,
         batch_same=batch_same_noise,
         cluster_labels=labels,
+        characters_per_image=characters_per_image,
         same_threshold_rel=same_threshold_rel,
         same_threshold_abs=same_threshold_abs,
         default_threshold_ratio=0.5,

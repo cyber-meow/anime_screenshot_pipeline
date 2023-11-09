@@ -224,7 +224,11 @@ def map_clusters_to_existing(
             )
 
         # Update the label of the cluster with the character ID that
-        # has the maximum count
-        updated_labels[cluster_indices] = max_characters[0]
+        # has the maximum count, but only update when agree with orignal labels
+        for cluster_index in cluster_indices:
+            for max_character in max_characters:
+                if characters_per_image[cluster_index, max_character]:
+                    updated_labels[cluster_index] = max_character
+                    break
 
     return updated_labels

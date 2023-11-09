@@ -128,10 +128,11 @@ def classify_characters(args, src_dir, is_start_stage):
     os.makedirs(dst_dir, exist_ok=True)
 
     # Determine whether to move or copy files to the destination directory.
-    if src_dir == dst_dir:
-        move = True
-    else:
-        move = args.remove_intermediate
+    move = args.remove_intermediate or (src_dir == dst_dir)
+    # Determine whether to ignore existing character metadata.
+    ignore_character_metadata = (
+        args.ignore_character_metadata or args.pipeline_type == "screenshots"
+    )
 
     # Log information about the classification process.
     logging.info(f"Classifying characters to {dst_dir} ...")
@@ -141,7 +142,7 @@ def classify_characters(args, src_dir, is_start_stage):
         src_dir,
         dst_dir,
         ref_dir=args.character_ref_dir,
-        ignore_character_metadata=args.ignore_character_metadata,
+        ignore_character_metadata=ignore_character_metadata,
         to_extract_from_noise=not args.no_extract_from_noise,
         to_filter=not args.no_filter_characters,
         keep_unnamed=args.keep_unnamed,
@@ -500,7 +501,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ignore_character_metadata",
         action="store_true",
-        help="Whether to ignore existing character metadata during classification",
+        help=(
+            "Whether to ignore existing character metadata during classification ",
+            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "for 'screenshots' pipeline)",
+        ),
     )
     parser.add_argument(
         "--no_extract_from_noise",
