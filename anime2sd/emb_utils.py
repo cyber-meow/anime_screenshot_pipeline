@@ -8,7 +8,7 @@ from typing import Optional, List, Dict
 from transformers import AutoTokenizer
 
 
-def update_trigger_word_info(
+def update_emb_init_info(
     filepath: str,
     characters: List[str],
     image_type: str,
@@ -70,7 +70,7 @@ def update_trigger_word_info(
     tokenizer = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
     invalid_embedding_names = []
     for embedding_name in name_init_map.keys():
-        if tokenizer.add_tokens([embedding_name]) == 0:
+        if embedding_name.lower() in tokenizer.vocab:
             invalid_embedding_names.append(embedding_name)
 
     # Log warning for invalid embedding names

@@ -4,7 +4,7 @@ from .extract_and_remove_similar import (
     remove_similar_from_dir,
 )
 from .classif.classify_characters import classify_from_directory
-from .emb_utils import update_trigger_word_info
+from .emb_utils import update_emb_init_info
 from .image_selection import (
     save_characters_to_meta,
     resize_character_images,

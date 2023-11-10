@@ -16,7 +16,7 @@ from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import classify_from_directory
 from anime2sd import rearrange_related_files
 from anime2sd import save_characters_to_meta
-from anime2sd import update_trigger_word_info
+from anime2sd import update_emb_init_info
 from anime2sd import resize_character_images
 from anime2sd import parse_overlap_tags, read_weight_mapping
 from anime2sd import CharacterTagProcessor
@@ -194,12 +194,12 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     characters = save_characters_to_meta(classified_dir, overwrite_uncropped)
 
     # save trigger word info
-    trigger_word_filepath = os.path.join(dst_dir, "emb_init.json")
-    update_trigger_word_info(
-        trigger_word_filepath,
+    emb_init_filepath = os.path.join(dst_dir, "emb_init.json")
+    update_emb_init_info(
+        emb_init_filepath,
         characters,
         args.image_type,
-        overwrite=args.overwrite_trigger_word_info,
+        overwrite=args.overwrite_emb_init_info,
     )
 
     if args.use_3stage_crop == 4:
@@ -264,7 +264,7 @@ def tag_and_caption(args, src_dir, is_start_stage):
         char_tag_proc = None
     core_tag_path = os.path.join(dst_dir, "core_tags.json")
     wildcard_path = os.path.join(dst_dir, "wildcard.txt")
-    trigger_word_filepath = os.path.join(dst_dir, "emb_init.json")
+    emb_init_filepath = os.path.join(dst_dir, "emb_init.json")
 
     if args.process_from_original_tags or args.overwrite_tags:
         tags_attribute = "tags"
@@ -316,12 +316,12 @@ def tag_and_caption(args, src_dir, is_start_stage):
                 emb_init_dict,
             ) = char_tag_proc.categorize_character_tag_dict(character_core_tags)
             save_core_tag_info(character_core_tags, core_tag_path, wildcard_path)
-            update_trigger_word_info(
-                trigger_word_filepath,
+            update_emb_init_info(
+                emb_init_filepath,
                 emb_init_dict.keys(),
                 args.image_type,
                 emb_init_dict=emb_init_dict,
-                overwrite=args.overwrite_trigger_word_info,
+                overwrite=args.overwrite_emb_init_info,
             )
         source = source.attach(
             CoreCharacterTagPruningAction(
@@ -613,7 +613,7 @@ if __name__ == "__main__":
 
     # Arguments for dataset construction
     parser.add_argument(
-        "--overwrite_trigger_word_info",
+        "--overwrite_emb_init_info",
         action="store_true",
         help="Overwrite existing trigger word csv",
     )
