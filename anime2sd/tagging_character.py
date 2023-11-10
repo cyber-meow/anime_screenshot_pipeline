@@ -3,6 +3,7 @@ import re
 import json
 import logging
 from tqdm import tqdm
+from typing import List, Dict
 
 from anime2sd.basics import get_images_recursively, get_corr_meta_names
 from anime2sd.tagging_basics import get_all_singular_plural_forms
@@ -70,6 +71,8 @@ class CharacterTagProcessor(object):
     _CHAR_SUFFIXES = [
         # Pure human
         [
+            "man",
+            "woman",
             "eyes",
             "skin",
             "hair",
@@ -117,11 +120,16 @@ class CharacterTagProcessor(object):
     ]
 
     _CHAR_PREFIXES = [
-        ["hair over", "hair between", "dark-skinned", "mature"],
+        ["hair over", "hair between", "dark-skinned", "mature", "old"],
         ["mole", "scar", "furry", "muscular"],
     ]
 
-    def __init__(self, drop_difficulty: int, emb_init_difficutly: int = 0):
+    def __init__(
+        self,
+        drop_difficulty: int = 2,
+        emb_min_difficulty: int = 1,
+        emb_max_difficutly: int = 2,
+    ):
         """
         Generates default character tag lists based on the specified
         difficulties.
@@ -131,13 +139,18 @@ class CharacterTagProcessor(object):
         difficulty levels.
 
         Args:
-            drop_difficulty (int): The difficulty level up to which tags should
-                be dropped. Tags with difficulty less than this value will be
-                added to the drop lists.
-            emb_init_difficutly (int, optional): The difficulty level up to
-                which tags should be used for embedding initialization. Tags
-                with difficulty between `drop_difficulty` and this value will
-                be added to the embedding initialization lists. Defaults to 0.
+            drop_difficulty (int):
+                The difficulty level up to which tags should be dropped. Tags with
+                difficulty less than this value will be added to the drop lists.
+                Defaults to 2.
+            emb_min_difficulty:
+                The difficulty level from which tags should be used for embedding
+                initialization.
+                Defaults to 1.
+            emb_max_difficutly (int, optional):
+                The difficulty level up to which tags should be used for embedding
+                initialization.
+                Defaults to 2.
 
         Initialize:
             tuple: A tuple containing five lists:
@@ -163,7 +176,7 @@ class CharacterTagProcessor(object):
             self.drop_prefixes.extend(self._CHAR_PREFIXES[difficulty])
             self.drop_suffixes.extend(self._CHAR_SUFFIXES[difficulty])
         for difficulty in range(
-            drop_difficulty, min(emb_init_difficutly, self._MAX_DIFFICULTY)
+            emb_min_difficulty, min(emb_max_difficutly, self._MAX_DIFFICULTY)
         ):
             self.emb_init_prefixes.extend(self._CHAR_PREFIXES[difficulty])
             self.emb_init_suffixes.extend(self._CHAR_SUFFIXES[difficulty])
@@ -235,27 +248,64 @@ class CharacterTagProcessor(object):
         for tag in tags:
             if self.is_character_tag(tag, mode="drop"):
                 dropped.append(tag)
-            elif self.is_character_tag(tag, mode="emb_init"):
-                emb_init.append(tag)
             else:
                 kept.append(tag)
+            if self.is_character_tag(tag, mode="emb_init"):
+                emb_init.append(tag)
 
         return {"kept": kept, "dropped": dropped, "emb_init": emb_init}
 
-    def categorize_character_tag_dict(self, character_tag_dict):
+    def categorize_character_tag_dict(self, character_tag_dict: Dict[str, List[str]]):
         """
-        Update character_tag_dict by categorizing core tags.
+        Update character_tag_dict by grouping characters based on shared embeddings
+        and categorizing tags for these embeddings.
 
         Args:
             character_tag_dict: Dictionary of characters and their core tags.
 
         Returns:
-            Updated dictionary with categorized tags.
+            Tuple[Dict[str, Dict[str, List[str]]], Dict[str, List[str]]]:
+                - The first dictionary contains categorized tags at the
+                  character form level.
+                - The second dictionary contains 'emb_init' tags at the embedding level.
         """
-        updated_dict = {}
-        for character, tags in character_tag_dict.items():
-            updated_dict[character] = self.categorize_tags(tags)
-        return updated_dict
+        # Categorize tags for each character form initially
+        categorized_character_tags = {
+            character: self.categorize_tags(tags)
+            for character, tags in character_tag_dict.items()
+        }
+
+        # Group characters by embedding
+        embedding_dict = {}
+        for character, categorized_tags in categorized_character_tags.items():
+            embedding = character.split()[0]
+            if embedding not in embedding_dict:
+                embedding_dict[embedding] = {"characters": [], "tags": []}
+            embedding_dict[embedding]["characters"].append(character)
+            embedding_dict[embedding]["tags"].append(categorized_tags["emb_init"])
+
+        # Find intersection of emb_init tags for each embedding
+        character_form_dict = {}
+        embedding_level_dict = {}
+        for embedding, data in embedding_dict.items():
+            shared_emb_init = set(data["tags"][0])
+            for tags in data["tags"][1:]:
+                shared_emb_init.intersection_update(tags)
+            shared_emb_init = list(shared_emb_init)
+
+            # Update character form level dictionary
+            for character in data["characters"]:
+                character_form_dict[character] = categorized_character_tags[character]
+                # Update emb_init for each character form
+                categorized_character_tags[character]["emb_init"] = shared_emb_init
+                for tag in shared_emb_init:
+                    if tag in character_form_dict[character]["kept"]:
+                        character_form_dict[character]["kept"].remove(tag)
+
+            # Save the shared emb_init for the embedding
+            embedding_level_dict[embedding] = shared_emb_init
+
+        return character_form_dict, embedding_level_dict
 
 
 """
@@ -359,6 +409,7 @@ def get_character_core_tags(folder_path, frequency_threshold):
     """
     For each character in the given folder, find the tags whose appearance
     frequency is higher than a certain threshold.
+    A character is considered only if there contains solo images of the character.
 
     Args:
         folder_path (str): The path to the folder containing image metadata.
@@ -410,8 +461,9 @@ def save_core_tag_info(data, json_output, wildcard_ouput):
 def get_character_core_tags_and_save(
     folder_path, core_tag_output, wildcard_output, frequency_threshold
 ):
-    frequent_tags = get_character_core_tags(folder_path, frequency_threshold)
-    save_core_tag_info(frequent_tags, core_tag_output, wildcard_output)
+    frequent_tags_dict = get_character_core_tags(folder_path, frequency_threshold)
+    save_core_tag_info(frequent_tags_dict, core_tag_output, wildcard_output)
+    return frequent_tags_dict
 
 
 def drop_character_core_tags(characters, tags, character_tag_dict):

@@ -93,7 +93,7 @@ Contributions are welcome
 - [x] Add size to metadata to avoid opening images for size comparison [2023.10.14]
 - [x] Core tag-based pruning [2023.10.15]
 - [x] Improved classification workflow that takes existing character metadata into account [2023.11.10]
-- [ ] Embedding initialization with hard tags
+- [x] Embedding initialization with hard tags
 - [ ] Do not crop images that are already cropped before unless otherwise specified
 - [ ] Arguments to optionally remove character combinations with too few images
 - [ ] Replace ffmpeg command by built-in python functions

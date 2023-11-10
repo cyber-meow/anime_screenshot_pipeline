@@ -15,7 +15,8 @@ from waifuc.action import ThreeStageSplitAction
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import classify_from_directory
 from anime2sd import rearrange_related_files
-from anime2sd import save_characters_to_meta, update_trigger_word_info
+from anime2sd import save_characters_to_meta
+from anime2sd import update_trigger_word_info
 from anime2sd import resize_character_images
 from anime2sd import parse_overlap_tags, read_weight_mapping
 from anime2sd import CharacterTagProcessor
@@ -193,12 +194,12 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     characters = save_characters_to_meta(classified_dir, overwrite_uncropped)
 
     # save trigger word info
-    trigger_word_filepath = os.path.join(dst_dir, "emb_init.csv")
+    trigger_word_filepath = os.path.join(dst_dir, "emb_init.json")
     update_trigger_word_info(
         trigger_word_filepath,
         characters,
         args.image_type,
-        args.overwrite_trigger_word_info,
+        overwrite=args.overwrite_trigger_word_info,
     )
 
     if args.use_3stage_crop == 4:
@@ -234,10 +235,13 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
     if args.filter_again:
         logging.info(f"Removing duplicates from {dst_dir} ...")
         model = foz.load_zoo_model(args.detect_duplicate_model)
-        for folder in ["cropped", "full", "no_characters"]:
-            remove_similar_from_dir(
-                os.path.join(dst_dir, folder), model=model, thresh=args.similar_thresh
-            )
+        for folder in os.listdir(dst_dir):
+            if os.path.isdir(os.path.join(dst_dir, folder)):
+                remove_similar_from_dir(
+                    os.path.join(dst_dir, folder),
+                    model=model,
+                    thresh=args.similar_thresh,
+                )
     if args.remove_intermediate:
         shutil.rmtree(classified_dir)
     return dst_dir
@@ -248,18 +252,19 @@ def tag_and_caption(args, src_dir, is_start_stage):
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(src_dir)
 
+    dst_dir = os.path.join(args.dst_dir, "training", args.image_type)
+
     if "character" in args.pruned_mode:
-        if args.drop_hard_character_tags:
-            drop_difficulty = 2
-        else:
-            drop_difficulty = 1
-        # TODO: Deal with emb init difficulty later
-        char_tag_proc = CharacterTagProcessor(drop_difficulty, emb_init_difficutly=0)
+        char_tag_proc = CharacterTagProcessor(
+            drop_difficulty=args.drop_difficulty,
+            emb_min_difficulty=args.emb_min_difficulty,
+            emb_max_difficutly=args.emb_max_difficulty,
+        )
     else:
         char_tag_proc = None
-    dst_dir = os.path.join(args.dst_dir, "training", args.image_type)
     core_tag_path = os.path.join(dst_dir, "core_tags.json")
     wildcard_path = os.path.join(dst_dir, "wildcard.txt")
+    trigger_word_filepath = os.path.join(dst_dir, "emb_init.json")
 
     if args.process_from_original_tags or args.overwrite_tags:
         tags_attribute = "tags"
@@ -306,19 +311,35 @@ def tag_and_caption(args, src_dir, is_start_stage):
             character_core_tags = get_character_core_tags(
                 src_dir, frequency_threshold=args.core_frequency_thresh
             )
-            character_core_tags = char_tag_proc.categorize_character_tag_dict(
-                character_core_tags
-            )
+            (
+                character_core_tags,
+                emb_init_dict,
+            ) = char_tag_proc.categorize_character_tag_dict(character_core_tags)
             save_core_tag_info(character_core_tags, core_tag_path, wildcard_path)
+            update_trigger_word_info(
+                trigger_word_filepath,
+                emb_init_dict.keys(),
+                args.image_type,
+                emb_init_dict=emb_init_dict,
+                overwrite=args.overwrite_trigger_word_info,
+            )
         source = source.attach(
             CoreCharacterTagPruningAction(
                 character_core_tags, tags_attribute="processed_tags"
             )
         )
+    else:
+        character_core_tags = get_character_core_tags_and_save(
+            src_dir,
+            core_tag_path,
+            wildcard_path,
+            frequency_threshold=args.core_frequency_thresh,
+        )
+    characters = list(character_core_tags.keys())
 
     source = source.attach(
         TagSortingAction(args.sort_mode, max_tag_number=args.max_tag_number),
-        CaptioningAction(args),
+        CaptioningAction(args, characters),
     )
     source.export(
         SaveExporter(
@@ -330,13 +351,6 @@ def tag_and_caption(args, src_dir, is_start_stage):
         )
     )
 
-    if args.pruned_mode != "character_core":
-        get_character_core_tags_and_save(
-            src_dir,
-            core_tag_path,
-            wildcard_path,
-            frequency_threshold=args.core_frequency_thresh,
-        )
     return src_dir
 
 
@@ -450,14 +464,8 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Overwrite path in metadata if LocalSource is used "
-            "in the first stage. Should never be used in general."
+            "in the first stage. Should never be used in general"
         ),
-    )
-    parser.add_argument(
-        "--image_type",
-        type=str,
-        default="screenshots",
-        help="Image type that we are dealing with, used for folder name",
     )
     parser.add_argument(
         "--pipeline_type",
@@ -467,6 +475,15 @@ if __name__ == "__main__":
         help=(
             "Pipeline type that is used to construct dataset ",
             "Options are 'screenshots' and 'fanart'",
+        ),
+    )
+    parser.add_argument(
+        "--image_type",
+        type=str,
+        default=None,
+        help=(
+            "Image type that we are dealing with, used for folder name. "
+            "Defaults to pipeline_type."
         ),
     )
     parser.add_argument(
@@ -497,7 +514,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--similar_thresh",
         type=float,
-        default=0.98,
+        default=0.96,
         help="Cosine similarity threshold for image duplicate detection",
     )
 
@@ -686,7 +703,11 @@ if __name__ == "__main__":
         type=str,
         default="score",
         choices=["score", "shuffle", "original"],
-        help=("Mode to sort the tags. " "Options are 'score', 'shuffle', 'original'."),
+        help=(
+            "Mode to sort the tags. "
+            "Options are 'score', 'shuffle', 'original'. "
+            "Default is 'score'."
+        ),
     )
     parser.add_argument(
         "--max_tag_number",
@@ -718,7 +739,8 @@ if __name__ == "__main__":
         choices=["character", "character_core", "minimal", "none"],
         help=(
             "Different ways to prune tags. "
-            "Options are 'character', 'character_core', ''minimal', 'none'."
+            "Options are 'character', 'character_core', 'minimal', 'none'. "
+            "Default is 'character_core'."
         ),
     )
 
@@ -726,7 +748,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--core_frequency_thresh",
         type=float,
-        default=0.5,
+        default=0.4,
         help="Minimum frequency for a tag to be considered core tag.",
     )
     parser.add_argument(
@@ -735,26 +757,41 @@ if __name__ == "__main__":
         help=("Use existing core tag json instead of recomputing them."),
     )
     parser.add_argument(
-        "--drop_hard_character_tags",
-        action="store_true",
+        "--drop_difficulty",
+        type=int,
+        default=2,
         help=(
-            "Experimental. Whether to drop 'more difficult' character "
-            "core tags or not. Ear, horn, and halo related tags are "
-            "considered difficult for the moment."
+            "The difficulty level up to which tags should be dropped. Tags with "
+            "difficulty less than this value will be added to the drop lists. "
+            "0: nothing is dropped; 1: human-related tag; 2: furry, demon, mecha, etc."
+            "Defaults to 2."
+        ),
+    )
+    parser.add_argument(
+        "--emb_min_difficulty",
+        type=int,
+        default=1,
+        help=(
+            "The difficulty level from which tags should be used for embedding "
+            "initialization. Defaults to 1."
+        ),
+    )
+    parser.add_argument(
+        "--emb_max_difficulty",
+        type=int,
+        default=2,
+        help=(
+            "The difficulty level up to which tags should be used for embedding "
+            "initialization. Defaults to 2."
         ),
     )
 
     # Arguments for captioning
     parser.add_argument(
-        "--separator",
+        "--caption_separator",
         type=str,
         default=",",
         help="Character used to separate items in captions",
-    )
-    parser.add_argument(
-        "--caption_no_underscore",
-        action="store_true",
-        help="Do not include any underscore in captions",
     )
     parser.add_argument(
         "--use_npeople_prob",
@@ -836,6 +873,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    if args.image_type is None:
+        args.image_type = args.pipeline_type
 
     start_stage = args.start_stage
     end_stage = args.end_stage

@@ -123,14 +123,17 @@ def merge_class_names(
         ] = characters_per_image
 
         for new_label in range(characters_per_image.shape[1], n_existing_labels):
-            # Get the first word of the new class name
-            new_class_first_word = updated_class_names[new_label].split()[0]
-            # Find an old label with the same first word in the class name
+            new_class_name = updated_class_names[new_label]
+
+            # Find an existing label whose name matches the new class name exactly or
+            # is a prefix of it
             old_label = next(
                 (
                     label
                     for label, name in class_names.items()
-                    if name.split()[0] == new_class_first_word
+                    if new_class_name == name
+                    or new_class_name.startswith(name + " ")
+                    or new_class_name.startswith(name + "_")
                 ),
                 None,
             )

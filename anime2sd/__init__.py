@@ -4,9 +4,9 @@ from .extract_and_remove_similar import (
     remove_similar_from_dir,
 )
 from .classif.classify_characters import classify_from_directory
+from .emb_utils import update_trigger_word_info
 from .image_selection import (
     save_characters_to_meta,
-    update_trigger_word_info,
     resize_character_images,
 )
 from .tagging_basics import parse_overlap_tags
