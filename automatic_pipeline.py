@@ -12,6 +12,7 @@ from waifuc.action import MinSizeFilterAction
 from waifuc.action import TaggingAction
 from waifuc.action import ThreeStageSplitAction
 
+from anime2sd.basics import remove_empty_folders
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import classify_from_directory
 from anime2sd import rearrange_related_files
@@ -231,6 +232,7 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         n_nocharacter_frames=n_reg,
         to_resize=not args.no_resize,
     )
+    remove_empty_folders(dst_dir)
 
     if args.filter_again:
         logging.info(f"Removing duplicates from {dst_dir} ...")
@@ -604,7 +606,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--same_threshold_abs",
         type=int,
-        default=10,
+        default=20,
         help=(
             "The absolute threshold for determining whether images belong to "
             "the same cluster for noise extraction and filtering"
