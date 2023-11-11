@@ -18,7 +18,7 @@ def copy_files(src_dir, dst_dir):
         shutil.copy(os.path.join(src_dir, file), os.path.join(dst_dir, file))
 
 
-def get_emb_names_and_inits(filepath, n_rand_tokens=4, std=0.017):
+def get_emb_names_and_inits(filepath, n_rand_tokens=10, std=0.017):
     """
     Read a CSV file to extract embedding names and their initialization texts.
 
@@ -29,24 +29,24 @@ def get_emb_names_and_inits(filepath, n_rand_tokens=4, std=0.017):
     - Dictionary with names as keys and initialization texts as values.
     """
     name_init_map = {}
-    init_text_pre = f"*[{std}, {n_rand_tokens}]"
+    init_text_end = f"*[{std}, {n_rand_tokens}]"
 
     if filepath.endswith(".csv"):
         with open(filepath, "r") as file:
             reader = csv.reader(file)
             for row in reader:
                 if len(row) >= 1:
-                    init_text = init_text_pre
+                    init_text = init_text_end
                     name = row[0]
                     if len(row) >= 2 and row[1]:
-                        init_text += " " + row[1]
+                        init_text = row[1] + " " + init_text_end
                     name_init_map[name] = init_text
     elif filepath.endswith(".json"):
         with open(filepath, "r") as file:
             name_init_map = json.load(file)
             for embedding_name, init_text_list in name_init_map.items():
                 name_init_map[embedding_name] = (
-                    init_text_pre + " " + " ".join(init_text_list)
+                    " ".join(init_text_list) + " " + init_text_end
                 )
     else:
         raise ValueError(
@@ -228,7 +228,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n_rand_tokens",
         type=int,
-        default=4,
+        default=10,
         help="Number of random tokens for each embedding.",
     )
     parser.add_argument(
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n_max_tokens",
         type=int,
-        default=10,
+        default=8,
         help="Maximum number of random tokens for each embedding.",
     )
 

@@ -14,9 +14,9 @@ from anime2sd.classif.imagewise import extract_from_noise, filter_characters_fro
 from anime2sd.classif.file_utils import load_image_features_and_characters
 from anime2sd.classif.file_utils import parse_ref_dir, save_to_dir
 
-from anime2sd.classif.merge_cluster import merge_clusters
-from anime2sd.classif.merge_cluster import map_clusters_to_existing
-from anime2sd.classif.merge_cluster import map_clusters_to_reference
+from anime2sd.classif.merge_clusters import merge_clusters
+from anime2sd.classif.merge_clusters import map_clusters_to_existing
+from anime2sd.classif.merge_clusters import map_clusters_to_reference
 
 
 def cluster_characters_basics(

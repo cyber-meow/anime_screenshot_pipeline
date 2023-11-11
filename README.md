@@ -96,6 +96,7 @@ Contributions are welcome
 - [x] Improved classification workflow that takes existing character metadata into account [2023.11.10]
 - [x] Embedding initialization with hard tags [2023.11.11]
 - [ ] Do not crop images that are already cropped before unless otherwise specified
+- [ ] Prepare HCP with multiple datasets
 - [ ] Arguments to optionally remove character combinations with too few images
 - [ ] Replace ffmpeg command by built-in python functions
 - [ ] Compute repeat based on metadata and trainer-dependent folder organization in the same script
