@@ -45,7 +45,9 @@ def get_emb_names_and_inits(filepath, n_rand_tokens=4, std=0.017):
         with open(filepath, "r") as file:
             name_init_map = json.load(file)
             for embedding_name, init_text_list in name_init_map.items():
-                name_init_map[embedding_name] = init_text_pre + " " + " ".join(init_text_list)
+                name_init_map[embedding_name] = (
+                    init_text_pre + " " + " ".join(init_text_list)
+                )
     else:
         raise ValueError(
             f"Unsupported file format: {filepath}, "
@@ -72,7 +74,9 @@ def modify_main_config_file(filepath, args):
     # Update the tokenizer_pt section
     if args.pivotal:
         # Read the embedding names from trigger_word_file
-        names = get_emb_names_and_inits(args.trigger_word_file, args.n_rand_tokens).keys()
+        names = get_emb_names_and_inits(
+            args.trigger_word_file, args.n_rand_tokens
+        ).keys()
         content.tokenizer_pt = {
             "emb_dir": "${emb_dir}",
             "replace": False,
@@ -167,6 +171,7 @@ def create_embeddings(args):
     names_inits = get_emb_names_and_inits(
         args.trigger_word_file, args.n_rand_tokens, args.std
     )
+    print("Embeddings initialized with:")
     print(names_inits)
     for name in names_inits:
         pt_creator.creat_word_pt(

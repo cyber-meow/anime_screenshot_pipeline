@@ -24,9 +24,9 @@ data:
 
         word_names: {}
 
-        tag_transforms:
+        text_transforms:
           _target_: torchvision.transforms.Compose
-          text_transforms:
+          transforms:
           #   - _target_: hcpdiff.utils.caption_tools.TagDropout
           #     p: 0.1
           #   - _target_: hcpdiff.utils.caption_tools.TagShuffle
