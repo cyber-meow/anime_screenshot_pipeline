@@ -23,6 +23,7 @@ python automatic_pipeline.py \
     --image_type screenshots \
     --crop_with_head \
     --image_prefix my_favorite_anime \
+    --ep_init 3 \
     --log_prefix my_favorite_anime
 ```
 
