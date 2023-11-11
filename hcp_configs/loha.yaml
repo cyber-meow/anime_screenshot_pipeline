@@ -28,6 +28,8 @@ train:
 
 unet: null
 text_encoder: null
+lora_unet: null
+lora_text_encoder: null
 
 plugin_unet:
   loha:
