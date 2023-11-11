@@ -2,9 +2,10 @@
 
 A 99% automatized pipeline to construct training set from anime and more for text-to-image model training
 
-The old scripts and readme have been moved into [scripts_v1](scripts_v1)
+The old scripts and readme have been moved into [scripts_v1](scripts_v1).
 
-Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version. I may add a script for batch renaming for compatibility later.
+Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version.
+For conversion please use [utilities/convert_metadata.py](utilities/convert_metadata.py).
 
 **Ensure that you run this script on gpu to have reasonable processing time.**
 
@@ -22,6 +23,7 @@ python automatic_pipeline.py \
     --image_type screenshots \
     --crop_with_head \
     --image_prefix my_favorite_anime \
+    --ep_init 3 \
     --log_prefix my_favorite_anime
 ```
 
@@ -33,7 +35,7 @@ The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipe
 - `--character_ref_dir`: Optional. A folder containing some example images for characters you want to train for. There are two ways to organize
     - With sub-folders: You can put character images in different sub-folders. Sub-folder names are then used as character names.
     - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
-- `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`)
+- `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`).
 
 :bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.  
 :bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 3 to 7 with `--character_ref_dir` now given. See [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.
@@ -83,16 +85,18 @@ Contributions are welcome
 ### Main
 
 - [x] Readme and Requirements.txt
+- [x] HCP-diffusion compatibility [2023.10.08]
 - [ ] .toml support
 - [ ] Fanart support
-- [x] HCP-diffusion compatibility
 
 ### Secondary
 
-- [x] Configurable FaceCountAction and HeadCountAction
-- [ ] Two-stage classification with small clusters and large clusters
+- [x] Add size to metadata to avoid opening images for size comparison [2023.10.14]
+- [x] Core tag-based pruning [2023.10.15]
+- [x] Improved classification workflow that takes existing character metadata into account [2023.11.10]
+- [x] Embedding initialization with hard tags [2023.11.11]
+- [ ] Do not crop images that are already cropped before unless otherwise specified
 - [ ] Arguments to optionally remove character combinations with too few images
-- [x] Add size to metadata to avoid opening images for size comparison
 - [ ] Replace ffmpeg command by built-in python functions
 - [ ] Compute repeat based on metadata and trainer-dependent folder organization in the same script
 - [ ] Improved tag pruning (with tag tree?)

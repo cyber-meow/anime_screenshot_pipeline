@@ -22,8 +22,8 @@ def construct_aux_files_dict(paths):
 
     for path in tqdm(paths):
         dirname, filename = os.path.split(path)
-        if filename.startswith('.'):
-            file_base = re.sub(r"\_meta.json$", "", filename).lstrip('.')
+        if filename.startswith("."):
+            file_base = re.sub(r"\_meta.json$", "", filename).lstrip(".")
         else:
             file_base = os.path.splitext(filename)[0]
         file_base = os.path.join(dirname, file_base)
@@ -51,56 +51,55 @@ def move_img_with_aux(img_path, dst_dir, aux_dict):
             shutil.move(path, dst_dir)
 
 
-def get_folder_name(folder_type, info_dict, max_character_number):
-
+def get_folder_name(folder_type, info_dict, max_character_number) -> str:
     valid_folder_types = [
-        'n_people',
-        'n_characters',
-        'character',
+        "n_people",
+        "n_characters",
+        "character",
     ]
-    assert folder_type in valid_folder_types,\
-        f'invalid folder type {folder_type}'
-    if folder_type == 'n_people':
-        count = info_dict['n_people']
-        suffix = 'person' if count == 1 else 'people'
-        return f'{count}_{suffix}'
-    elif folder_type == 'n_characters':
-        characters = info_dict.get('characters', [])
+    assert folder_type in valid_folder_types, f"invalid folder type {folder_type}"
+    if folder_type == "n_people":
+        count = info_dict["n_people"]
+        suffix = "person" if count == 1 else "people"
+        return f"{count}_{suffix}"
+    elif folder_type == "n_characters":
+        characters = info_dict.get("characters", [])
         if len(characters) > 0 and type(characters[0]) is list:
             characters = [character[0] for character in characters]
         characters = sorted(list(set(characters)))
         n_character = len(characters)
         if n_character >= max_character_number:
-            return f'{max_character_number}+_characters'
-        suffix = 'character' if n_character == 1 else 'characters'
-        return f'{n_character}_{suffix}'
-    elif folder_type == 'character':
-        characters = info_dict.get('characters', [])
+            return f"{max_character_number}+_characters"
+        suffix = "character" if n_character == 1 else "characters"
+        return f"{n_character}_{suffix}"
+    elif folder_type == "character":
+        characters = info_dict.get("characters", [])
         if len(characters) > 0 and type(characters[0]) is list:
             characters = [character[0] for character in characters]
         characters = sorted(list(set(characters)))
         if len(characters) == 0:
-            return 'character_others'
-        character_folder = '+'.join(sorted(characters))
+            return "character_others"
+        character_folder = "+".join(sorted(characters))
         # Cannot have folder of too long name
         if len(character_folder) >= 100:
-            return 'character_others'
+            return "character_others"
         else:
-            return character_folder.replace('.', '')
+            return character_folder.replace(".", "")
+    # This cannot happen
+    else:
+        exit(1)
 
 
 def get_dst_dir(info_dict, dst_dir, arrange_format, max_character_number):
-
-    if arrange_format == '':
+    if arrange_format == "":
         return dst_dir, None
 
-    folder_types = arrange_format.split('/')
+    folder_types = arrange_format.split("/")
     character_folder = None
     for folder_type in folder_types:
-        folder_name = get_folder_name(
-            folder_type, info_dict, max_character_number)
+        folder_name = get_folder_name(folder_type, info_dict, max_character_number)
         dst_dir = os.path.join(dst_dir, folder_name)
-        if folder_type == 'character':
+        if folder_type == "character":
             character_folder = folder_name
 
     return dst_dir, character_folder
@@ -125,10 +124,11 @@ def merge_folder(character_comb_dict, min_images_per_comb, aux_dict):
         n_images = count_n_images(files)
         if n_images < min_images_per_comb:
             logging.info(
-                f'{comb} has fewer than {min_images_per_comb} images; '
-                + 'renamed as character_others')
+                f"{comb} has fewer than {min_images_per_comb} images; "
+                + "renamed as character_others"
+            )
             for file in files:
-                new_path = file.replace(comb, 'character_others')
+                new_path = file.replace(comb, "character_others")
                 dst_dir = os.path.dirname(new_path)
                 move_img_with_aux(file, dst_dir, aux_dict)
 
@@ -140,32 +140,29 @@ def remove_empty_folders(path_abs):
             os.rmdir(path)
 
 
-def arrange_folder(src_dir,
-                   dst_dir,
-                   arrange_format,
-                   max_character_number,
-                   min_images_per_combination):
-
+def arrange_folder(
+    src_dir, dst_dir, arrange_format, max_character_number, min_images_per_combination
+):
     img_paths = get_images_recursively(src_dir)
     file_paths = get_files_recursively(src_dir)
 
-    logging.info('Constructing dictionary for auxiliary files...')
+    logging.info("Constructing dictionary for auxiliary files...")
     aux_dict = construct_aux_files_dict(file_paths)
     character_combination_dict = dict()
 
-    logging.info('Rearranging...')
+    logging.info("Rearranging...")
     for img_path in tqdm(img_paths):
-
         meta_file_path, _ = get_corr_meta_names(img_path)
 
         if os.path.exists(meta_file_path):
-            with open(meta_file_path, 'r') as meta_file:
+            with open(meta_file_path, "r") as meta_file:
                 meta_data = json.load(meta_file)
         else:
-            raise ValueError(f'Metadata unfound for {img_path}')
+            raise ValueError(f"Metadata unfound for {img_path}")
 
         img_dst_dir, character_folder = get_dst_dir(
-            meta_data, dst_dir, arrange_format, max_character_number)
+            meta_data, dst_dir, arrange_format, max_character_number
+        )
 
         move_img_with_aux(img_path, img_dst_dir, aux_dict)
 
@@ -177,12 +174,11 @@ def arrange_folder(src_dir,
                 character_combination_dict[character_folder] = [new_path]
 
     # We need to cosntruct the dictionary again after moving the files
-    logging.info('Constructing dictionary for auxiliary files...')
+    logging.info("Constructing dictionary for auxiliary files...")
     file_paths = get_files_recursively(src_dir)
     aux_dict = construct_aux_files_dict(file_paths)
-    logging.info('Merging folders...')
+    logging.info("Merging folders...")
     if min_images_per_combination > 1:
-        merge_folder(
-            character_combination_dict, min_images_per_combination, aux_dict)
+        merge_folder(character_combination_dict, min_images_per_combination, aux_dict)
     remove_empty_folders(src_dir)
     remove_empty_folders(dst_dir)

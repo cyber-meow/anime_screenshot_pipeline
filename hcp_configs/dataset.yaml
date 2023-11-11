@@ -1,4 +1,5 @@
 config_dir: 'hcp_configs'
+dataset_dir: 'data'
 
 data:
   dataset1:
@@ -8,9 +9,11 @@ data:
     cache_latents: True
     att_mask_encode: False
     loss_weight: 1.0
+    cache_path: '${dataset_dir}/latent_cache.pth'
 
     source:
       data_source_1:
+        _target_: hcpdiff.data.source.Text2ImageAttMapSource
         img_root: 'imgs/'
         repeat: 1
         prompt_template: '${config_dir}/caption.txt'
@@ -23,14 +26,7 @@ data:
 
         word_names: {}
 
-        image_transforms:
-          _target_: torchvision.transforms.Compose # "_target_" for hydra.utils.instantiate
-          transforms:
-            - _target_: torchvision.transforms.ToTensor
-            - _target_: torchvision.transforms.Normalize
-              mean: [ 0.5 ]
-              std: [ 0.5 ]
-        tag_transforms:
+        text_transforms:
           _target_: torchvision.transforms.Compose
           transforms:
           #   - _target_: hcpdiff.utils.caption_tools.TagDropout
@@ -44,3 +40,4 @@ data:
       _target_: hcpdiff.data.bucket.RatioBucket.from_ratios # aspect ratio bucket with fixed ratios
       target_area: ${hcp.eval:"512*512"}
       num_bucket: 10
+      pre_build_bucket: '${dataset_dir}/bucket_cache.pkl'

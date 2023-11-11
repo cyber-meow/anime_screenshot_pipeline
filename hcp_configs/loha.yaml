@@ -28,21 +28,27 @@ train:
 
 unet: null
 text_encoder: null
-plugin_unet: null
-plugin_TE: null
+lora_unet: null
+lora_text_encoder: null
 
-lora_unet:
-  - lr: 2e-4
-    rank: 16
-    alpha: 8
+plugin_unet:
+  loha:
+    _target_: lycoris.hcp.LohaBlock.wrap_model
+    _partial_: True
+    lr: 2e-4
+    dim: 8
+    alpha: 4
     layers:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
-lora_text_encoder:
-  - lr: 6e-5
-    rank: 8
-    alpha: 4
+plugin_TE:
+  loha:
+    _target_: lycoris.hcp.LohaBlock.wrap_model
+    _partial_: True
+    lr: 6e-5
+    dim: 4
+    alpha: 1
     layers:
       - 're:.*self_attn$'
       - 're:.*mlp$'
