@@ -105,6 +105,7 @@ def modify_dataset_file(filepath, args):
 
     # Update the config_dir
     content.config_dir = os.path.abspath(args.config_dst_dir)
+    content.dataset_dir = os.path.abspath(args.dataset_dir)
 
     # Get the dataset in question
     dataset = content.data.dataset1
@@ -129,7 +130,7 @@ def modify_dataset_file(filepath, args):
         if any(file.lower().endswith(img_exts) for file in img_files):
             # Update fields using the template
             new_data_source = OmegaConf.create(template)
-            new_data_source.img_root = os.path.join(args.dataset_dir, subdir)
+            new_data_source.img_root = os.path.join("${dataset_dir}", subdir)
 
             # Update repeat based on multiply.txt
             multiply_file = os.path.join(args.dataset_dir, subdir, "multiply.txt")

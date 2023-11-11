@@ -1,4 +1,5 @@
 config_dir: 'hcp_configs'
+dataset_dir: 'data'
 
 data:
   dataset1:
@@ -8,6 +9,7 @@ data:
     cache_latents: True
     att_mask_encode: False
     loss_weight: 1.0
+    cache_path: '${dataset_dir}/latent_cache.pth'
 
     source:
       data_source_1:
@@ -34,7 +36,8 @@ data:
               word_names: ${....word_names}
 
     bucket:
-      _target_: hcpdiff.data.bucket.RatioBucket.from_files # the buckets are automatically selected but this would require recaching latents when dataset changes
-      # _target_: hcpdiff.data.bucket.RatioBucket.from_ratios # aspect ratio bucket with fixed ratios
+      # _target_: hcpdiff.data.bucket.RatioBucket.from_files # the buckets are automatically selected but this would require recaching latents when dataset changes
+      _target_: hcpdiff.data.bucket.RatioBucket.from_ratios # aspect ratio bucket with fixed ratios
       target_area: ${hcp.eval:"512*512"}
       num_bucket: 10
+      pre_build_bucket: '${dataset_dir}/bucket_cache.pkl'
