@@ -34,7 +34,7 @@ data:
               word_names: ${....word_names}
 
     bucket:
-      # _target_: hcpdiff.data.bucket.RatioBucket.from_files # the buckets are automatically selected but this would require recaching latents when dataset changes
-      _target_: hcpdiff.data.bucket.RatioBucket.from_ratios # aspect ratio bucket with fixed ratios
+      _target_: hcpdiff.data.bucket.RatioBucket.from_files # the buckets are automatically selected but this would require recaching latents when dataset changes
+      # _target_: hcpdiff.data.bucket.RatioBucket.from_ratios # aspect ratio bucket with fixed ratios
       target_area: ${hcp.eval:"512*512"}
       num_bucket: 10
