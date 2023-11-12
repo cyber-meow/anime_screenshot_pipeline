@@ -191,11 +191,6 @@ def save_to_dir(
             img_path_dst = os.path.join(
                 dst_dir, folder_name, os.path.basename(img_path)
             )
-            if move:
-                shutil.move(img_path, img_path_dst)
-            else:
-                shutil.copy(img_path, img_path_dst)
-
             # Handle metadata files
             meta_path, meta_filename = get_corr_meta_names(img_path)
             meta_path_dst = os.path.join(dst_dir, folder_name, meta_filename)
@@ -210,6 +205,7 @@ def save_to_dir(
                 with open(meta_path_dst, "w") as meta_file:
                     json.dump(meta_data, meta_file, indent=4)
 
+            # Handle ccip embeddings
             ccip_path, ccip_filename = get_corr_ccip_names(img_path)
             ccip_path_dst = os.path.join(dst_dir, folder_name, ccip_filename)
             if os.path.exists(ccip_path):
@@ -219,3 +215,9 @@ def save_to_dir(
                     shutil.copy(ccip_path, ccip_path_dst)
             else:
                 np.save(ccip_path_dst, img)
+
+            # Handle images
+            if move:
+                shutil.move(img_path, img_path_dst)
+            else:
+                shutil.copy(img_path, img_path_dst)

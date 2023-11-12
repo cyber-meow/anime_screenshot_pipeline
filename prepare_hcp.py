@@ -45,9 +45,12 @@ def get_emb_names_and_inits(filepath, n_rand_tokens=10, std=0.017):
         with open(filepath, "r") as file:
             name_init_map = json.load(file)
             for embedding_name, init_text_list in name_init_map.items():
-                name_init_map[embedding_name] = (
-                    " ".join(init_text_list) + " " + init_text_end
-                )
+                init_text = " ".join(init_text_list)
+                if init_text:
+                    init_text = init_text + " " + init_text_end
+                else:
+                    init_text = init_text_end
+                name_init_map[embedding_name] = init_text
     else:
         raise ValueError(
             f"Unsupported file format: {filepath}, "

@@ -473,10 +473,10 @@ if __name__ == "__main__":
         "--pipeline_type",
         type=str,
         default="screenshots",
-        choices=["screenshots", "fanart"],
+        choices=["screenshots", "booru"],
         help=(
             "Pipeline type that is used to construct dataset ",
-            "Options are 'screenshots' and 'fanart'",
+            "Options are 'screenshots' and 'booru'",
         ),
     )
     parser.add_argument(
@@ -560,7 +560,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Whether to ignore existing character metadata during classification ",
-            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "(only meaning ful for 'booru' pipeline as this is always the case "
             "for 'screenshots' pipeline)",
         ),
     )
@@ -624,7 +624,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Overwrite existing character metadata for uncropped images "
-            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "(only meaning ful for 'booru' pipeline as this is always the case "
             "for 'screenshots' pipeline)"
         ),
     )
