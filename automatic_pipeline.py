@@ -254,8 +254,6 @@ def tag_and_caption(args, src_dir, is_start_stage):
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(src_dir)
 
-    dst_dir = os.path.join(args.dst_dir, "training", args.image_type)
-
     if "character" in args.pruned_mode:
         char_tag_proc = CharacterTagProcessor(
             drop_difficulty=args.drop_difficulty,
@@ -264,9 +262,9 @@ def tag_and_caption(args, src_dir, is_start_stage):
         )
     else:
         char_tag_proc = None
-    core_tag_path = os.path.join(dst_dir, "core_tags.json")
-    wildcard_path = os.path.join(dst_dir, "wildcard.txt")
-    emb_init_filepath = os.path.join(dst_dir, "emb_init.json")
+    core_tag_path = os.path.join(src_dir, "core_tags.json")
+    wildcard_path = os.path.join(src_dir, "wildcard.txt")
+    emb_init_filepath = os.path.join(src_dir, "emb_init.json")
 
     if args.process_from_original_tags or args.overwrite_tags:
         tags_attribute = "tags"
@@ -473,10 +471,10 @@ if __name__ == "__main__":
         "--pipeline_type",
         type=str,
         default="screenshots",
-        choices=["screenshots", "fanart"],
+        choices=["screenshots", "booru"],
         help=(
             "Pipeline type that is used to construct dataset ",
-            "Options are 'screenshots' and 'fanart'",
+            "Options are 'screenshots' and 'booru'",
         ),
     )
     parser.add_argument(
@@ -560,7 +558,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Whether to ignore existing character metadata during classification ",
-            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "(only meaning ful for 'booru' pipeline as this is always the case "
             "for 'screenshots' pipeline)",
         ),
     )
@@ -624,7 +622,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Overwrite existing character metadata for uncropped images "
-            "(only meaning ful for 'fanart' pipeline as this is always the case "
+            "(only meaning ful for 'booru' pipeline as this is always the case "
             "for 'screenshots' pipeline)"
         ),
     )

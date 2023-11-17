@@ -26,7 +26,7 @@ def update_emb_init_info(
         characters (List[str]):
             List of character names to add.
         image_type (str):
-            Type of the image ("screenshots", "fanart", or other).
+            Type of the image ("screenshots", "booru", or other).
         emb_init_dict (Optional[Dict[str, List[str]]]):
             Optional dictionary for embedding initializations.
         overwrite (bool):
@@ -49,7 +49,7 @@ def update_emb_init_info(
     if image_type not in name_init_map:
         if image_type == "screenshots":
             default_init_text = "anime screencap"
-        elif image_type == "fanart":
+        elif image_type == "booru":
             default_init_text = "masterpiece"
         else:
             default_init_text = ""

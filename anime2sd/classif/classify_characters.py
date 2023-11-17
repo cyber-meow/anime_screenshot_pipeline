@@ -271,7 +271,7 @@ def classify_from_directory(
             ref_images,
             ref_labels,
             cluster_ids=labels,
-            same_threshold=0.1,
+            same_threshold=0.01,
             characters_per_image=characters_per_image,
         )
 
