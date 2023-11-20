@@ -259,6 +259,8 @@ def tag_and_caption(args, src_dir, is_start_stage):
             drop_difficulty=args.drop_difficulty,
             emb_min_difficulty=args.emb_min_difficulty,
             emb_max_difficutly=args.emb_max_difficulty,
+            drop_all=args.drop_all_core,
+            emb_init_all=args.emb_init_all_core,
         )
     else:
         char_tag_proc = None
@@ -768,6 +770,11 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
+        "--drop_all_core",
+        action="store_true",
+        help=("Whether to drop all core tags or not. Overwrites --drop_difficulty."),
+    )
+    parser.add_argument(
         "--emb_min_difficulty",
         type=int,
         default=1,
@@ -783,6 +790,14 @@ if __name__ == "__main__":
         help=(
             "The difficulty level up to which tags should be used for embedding "
             "initialization. Defaults to 2."
+        ),
+    )
+    parser.add_argument(
+        "--emb_init_all_core",
+        action="store_true",
+        help=(
+            "Whether to use all core tags for embedding initialization. "
+            "Overwrites --emb_min_difficulty and --emb_max_difficulty."
         ),
     )
 

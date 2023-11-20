@@ -1,0 +1,75 @@
+exp_dir_base: 'hcp_exps'
+config_dir: 'hcp_configs'
+emb_dir: 'embs'
+emb_lr: 1e-2
+
+_base_:
+  - ${config_dir}/train_base.yaml
+  - ${config_dir}/dataset.yaml
+  
+exp_dir: ${exp_dir_base}/${hcp.time:}
+
+model:
+  pretrained_model_name_or_path: 'deepghs/animefull-latest' # JosephusCheung/ACertainty, Crosstyan/BPModel
+  tokenizer_repeats: 1
+  clip_skip: 1
+  ema_unet: 0
+  ema_text_encoder: 0
+
+train:
+  train_steps: 50000
+  save_step: 5000
+  gradient_accumulation_steps: 1
+
+  scheduler:
+    name: 'constant_with_warmup'
+    num_warmup_steps: 1000
+    num_training_steps: 50000
+
+unet: null
+text_encoder: null
+lora_unet: null
+lora_text_encoder: null
+
+plugin_unet:
+  lokr:
+    _target_: lycoris.hcp.LoKrBlock.wrap_model
+    _partial_: True
+    lr: 1e-4
+    dim: 100000
+    alpha: 1
+    factor: 2
+    layers:
+      - 're:.*\.attn.?$'
+      - 're:.*\.ff$'
+
+plugin_TE:
+  lokr:
+    _target_: lycoris.hcp.LoKrBlock.wrap_model
+    _partial_: True
+    lr: 1e-5
+    dim: 10000
+    alpha: 1
+    factor: 8
+    layers:
+      - 're:.*self_attn$'
+      - 're:.*mlp$'
+
+tokenizer_pt:
+  emb_dir: '${emb_dir}'
+  replace: False
+  train:
+    - name: pt1
+      lr: ${emb_lr}
+
+logger:
+  - _target_: hcpdiff.loggers.CLILogger
+    _partial_: True
+    out_path: 'train.log'
+    log_step: 20
+    enable_log_image: False
+  - _target_: hcpdiff.loggers.TBLogger
+    _partial_: True
+    out_path: 'tblog/'
+    log_step: 5
+    enable_log_image: False

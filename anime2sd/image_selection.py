@@ -1,11 +1,11 @@
 import os
-import cv2
 import json
 import random
 import logging
 import shutil
 from tqdm import tqdm
 from typing import List
+from PIL import Image
 
 from anime2sd.basics import get_images_recursively
 from anime2sd.basics import get_corr_meta_names, get_or_generate_metadata
@@ -118,17 +118,17 @@ def save_characters_to_meta(
 
 
 def resize_image(image, max_size):
-    height, width = image.shape[:2]
+    width, height = image.size
     if max_size > min(height, width):
         return image
 
     # Calculate the scaling factor
     scaling_factor = max_size / min(height, width)
+    new_width = int(width * scaling_factor)
+    new_height = int(height * scaling_factor)
 
     # Resize the image
-    return cv2.resize(
-        image, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_AREA
-    )
+    return image.resize((new_width, new_height), Image.ANTIALIAS)
 
 
 def save_image_and_meta(img, img_path, save_dir, ext, image_type):
@@ -145,19 +145,13 @@ def save_image_and_meta(img, img_path, save_dir, ext, image_type):
     adjusted_filename = base_filename + ext
     adjusted_path = os.path.join(save_dir, adjusted_filename)
 
-    # Save the image
-    if ext == ".webp":
-        try:
-            _, buf = cv2.imencode(ext, img, [cv2.IMWRITE_WEBP_QUALITY, 95])
-        except cv2.error as e:
-            print(f"Error encoding the image {adjusted_path}: {e}")
-            return
-        # Save the encoded image
-        with open(adjusted_path, "wb") as f:
-            buf.tofile(f)
-    else:
-        # For other formats, we can use imwrite directly
-        cv2.imwrite(adjusted_path, img)
+    try:
+        if ext == ".webp":
+            img.save(adjusted_path, format="WEBP", quality=95)
+        else:
+            img.save(adjusted_path)
+    except IOError as e:
+        print(f"Error saving the image {adjusted_path}: {e}")
 
     # Copy the corresponding metadata file
     meta_path, meta_filename = get_corr_meta_names(img_path)
@@ -169,7 +163,7 @@ def save_image_and_meta(img, img_path, save_dir, ext, image_type):
         _, ext_orig = os.path.splitext(meta_data["filename"])
         meta_data["filename"] = meta_data["filename"].replace(ext_orig, ext)
         meta_data["type"] = image_type
-        meta_data["image_size"] = img.shape[:2]
+        meta_data["image_size"] = img.size
 
         # Save the updated metadata with new extension
         with open(os.path.join(save_dir, meta_filename), "w") as meta_file:
@@ -231,7 +225,10 @@ def resize_character_images(
                         img_path = original_path
 
                 if to_resize:
-                    img = cv2.imread(img_path)
+                    try:
+                        img = Image.open(img_path)
+                    except IOError:
+                        raise ValueError(f"Error reading image: {img_path}")
                     resized_img = resize_image(img, max_size)
                     save_image_and_meta(
                         resized_img, img_path, save_dir, ext, image_type
@@ -255,7 +252,10 @@ def resize_character_images(
 
     for img_path in tqdm(selected_frames):
         if to_resize:
-            img = cv2.imread(img_path)
+            try:
+                img = Image.open(img_path)
+            except IOError:
+                raise ValueError(f"Error reading image: {img_path}")
             resized_img = resize_image(img, max_size)
             save_image_and_meta(resized_img, img_path, save_dir, ext, image_type)
         else:

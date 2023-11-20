@@ -130,6 +130,8 @@ class CharacterTagProcessor(object):
         drop_difficulty: int = 2,
         emb_min_difficulty: int = 1,
         emb_max_difficutly: int = 2,
+        drop_all: bool = False,
+        emb_init_all: bool = False,
     ):
         """
         Generates default character tag lists based on the specified
@@ -144,14 +146,18 @@ class CharacterTagProcessor(object):
                 The difficulty level up to which tags should be dropped. Tags with
                 difficulty less than this value will be added to the drop lists.
                 Defaults to 2.
-            emb_min_difficulty:
+            emb_min_difficulty (int):
                 The difficulty level from which tags should be used for embedding
                 initialization.
                 Defaults to 1.
-            emb_max_difficutly (int, optional):
+            emb_max_difficutly (int):
                 The difficulty level up to which tags should be used for embedding
                 initialization.
                 Defaults to 2.
+            drop_all (bool):
+                Whether to drop all core tags.
+            emb_init_all (bool):
+                Whether to use all core tags for embedding initialization.
 
         Initialize:
             tuple: A tuple containing five lists:
@@ -171,8 +177,10 @@ class CharacterTagProcessor(object):
         self.whitelist = get_all_singular_plural_forms(self._CHAR_WHITELIST)
         self.drop_prefixes = []
         self.drop_suffixes = []
+        self.drop_all = drop_all
         self.emb_init_prefixes = []
         self.emb_init_suffixes = []
+        self.emb_init_all = emb_init_all
         for difficulty in range(0, min(drop_difficulty, self._MAX_DIFFICULTY)):
             self.drop_prefixes.extend(self._CHAR_PREFIXES[difficulty])
             self.drop_suffixes.extend(self._CHAR_SUFFIXES[difficulty])
@@ -195,6 +203,10 @@ class CharacterTagProcessor(object):
         :rtype: bool
         """
         assert mode in ["drop", "emb_init"]
+        if mode == "drop" and self.drop_all:
+            return True
+        if mode == "emb_init" and self.emb_init_all:
+            return True
         if tag in self.whitelist:
             return False
         else:
