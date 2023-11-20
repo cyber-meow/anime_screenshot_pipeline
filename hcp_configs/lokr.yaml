@@ -33,7 +33,7 @@ lora_text_encoder: null
 
 plugin_unet:
   lokr:
-    _target_: lycoris.hcp.LoKrBlock.wrap_model
+    _target_: lycoris.hcp.LokrBlock.wrap_model
     _partial_: True
     lr: 1e-4
     dim: 100000
@@ -45,7 +45,7 @@ plugin_unet:
 
 plugin_TE:
   lokr:
-    _target_: lycoris.hcp.LoKrBlock.wrap_model
+    _target_: lycoris.hcp.LokrBlock.wrap_model
     _partial_: True
     lr: 1e-5
     dim: 10000
