@@ -1,4 +1,4 @@
-# TODO: Refactor, deal with base type in from_webui
+# TODO: Refactor, deal with base type in from_webui, sdxl
 
 import os
 import math
@@ -280,7 +280,7 @@ class BaseConverter(object):
     prefix_unet = "lora_unet_"
     prefix_TE = "lora_te_"
 
-    def __init__(self, base_model_path):
+    def __init__(self, base_model_path, device):
         unet_path = os.path.join(
             base_model_path, "unet", "diffusion_pytorch_model.safetensors"
         )
@@ -290,20 +290,20 @@ class BaseConverter(object):
 
         # Load models from safetensors if it exists, if it doesn't pytorch
         if os.path.exists(unet_path):
-            self.unet_state_dict = load_file(unet_path, device="cuda")
+            self.unet_state_dict = load_file(unet_path, device=device)
         else:
             unet_path = os.path.join(
                 base_model_path, "unet", "diffusion_pytorch_model.bin"
             )
-            self.unet_state_dict = torch.load(unet_path, map_location="cuda")
+            self.unet_state_dict = torch.load(unet_path, map_location=device)
 
         if os.path.exists(text_enc_path):
-            self.text_enc_dict = load_file(text_enc_path, device="cuda")
+            self.text_enc_dict = load_file(text_enc_path, device=device)
         else:
             text_enc_path = os.path.join(
                 base_model_path, "text_encoder", "pytorch_model.bin"
             )
-            self.text_enc_dict = torch.load(text_enc_path, map_location="cuda")
+            self.text_enc_dict = torch.load(text_enc_path, map_location=device)
 
     def convert_to_webui(
         self,
@@ -401,6 +401,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--auto_scale_alpha", action="store_true", help="Automatically scale alpha."
     )
+    parser.add_argument(
+        "--device", help="Which device to use for conversion", default="cpu", type=str
+    )
     parser.add_argument("--sdxl", action="store_true", help="Enable SDXL conversion.")
     args = parser.parse_args()
 
@@ -414,7 +417,7 @@ if __name__ == "__main__":
                 if filename.endswith(".safetensors"):
                     file_path = os.path.join(args.lora_path, filename)
                     print(f"Converting {file_path}")
-                    state = ckpt_manager.load_ckpt(file_path, map_location="cuda")
+                    state = ckpt_manager.load_ckpt(file_path, map_location=args.device)
                     sd_unet, sd_TE = lora_converter.convert_from_webui(
                         state,
                         network_type=args.save_network_type,
@@ -432,8 +435,12 @@ if __name__ == "__main__":
 
             for name, paths in file_pairs.items():
                 if paths["TE"] and paths["unet"]:
-                    sd_unet = ckpt_manager.load_ckpt(paths["unet"], map_location="cuda")
-                    sd_TE = ckpt_manager.load_ckpt(paths["TE"], map_location="cuda")
+                    sd_unet = ckpt_manager.load_ckpt(
+                        paths["unet"], map_location=args.device
+                    )
+                    sd_TE = ckpt_manager.load_ckpt(
+                        paths["TE"], map_location=args.device
+                    )
                     network_type = get_network_type(sd_unet, sd_TE)
                     if network_type is None:
                         print("no saved model found, skip")
@@ -444,7 +451,9 @@ if __name__ == "__main__":
                     )
                     if network_type == "base":
                         if base_converter is None:
-                            base_converter = BaseConverter(args.base_path)
+                            base_converter = BaseConverter(
+                                args.base_path, device=args.device
+                            )
                         state = base_converter.convert_to_webui(
                             sd_unet[network_type],
                             sd_TE[network_type],
@@ -467,7 +476,7 @@ if __name__ == "__main__":
         print("Converting model")
         ckpt_manager = auto_manager(args.lora_path)()
         if args.from_webui:
-            state = ckpt_manager.load_ckpt(args.lora_path, map_location="cuda")
+            state = ckpt_manager.load_ckpt(args.lora_path, map_location=args.device)
             sd_unet, sd_TE = lora_converter.convert_from_webui(
                 state,
                 network_type=args.save_network_type,
@@ -483,8 +492,8 @@ if __name__ == "__main__":
             save_and_print_path(sd_TE, TE_path)
             save_and_print_path(sd_unet, unet_path)
         elif args.to_webui:
-            sd_unet = ckpt_manager.load_ckpt(args.lora_path, map_location="cuda")
-            sd_TE = ckpt_manager.load_ckpt(args.lora_path_TE, map_location="cuda")
+            sd_unet = ckpt_manager.load_ckpt(args.lora_path, map_location=args.device)
+            sd_TE = ckpt_manager.load_ckpt(args.lora_path_TE, map_location=args.device)
             network_type = get_network_type(sd_unet, sd_TE)
             if network_type is None:
                 print("no saved lora/lycoris found, terminating")
@@ -492,7 +501,7 @@ if __name__ == "__main__":
             print(f'Converting with key "{network_type}"')
             if network_type == "base":
                 if base_converter is None:
-                    base_converter = BaseConverter(args.base_path)
+                    base_converter = BaseConverter(args.base_path, device=args.device)
                 state = base_converter.convert_to_webui(
                     sd_unet[network_type],
                     sd_TE[network_type],
