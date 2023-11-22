@@ -1,9 +1,13 @@
+# TODO: Refactor, deal with base type in from_webui
+
 import os
 import math
 import argparse
 from typing import List
 from collections import defaultdict
 
+import torch
+from safetensors.torch import load_file
 from hcpdiff.ckpt_manager import auto_manager
 
 
@@ -76,7 +80,7 @@ class LoraConverter(object):
         if auto_scale_alpha and network_type == "lora":
             sd_unet = self.alpha_scale_from_webui(sd_unet)
             sd_TE = self.alpha_scale_from_webui(sd_TE)
-        return {network_type: sd_TE}, {network_type: sd_unet}
+        return {network_type: sd_unet}, {network_type: sd_TE}
 
     def convert_to_webui(
         self, sd_unet, sd_TE, network_type="lora", auto_scale_alpha=False, sdxl=False
@@ -272,6 +276,63 @@ class LoraConverter(object):
         return state
 
 
+class BaseConverter(object):
+    prefix_unet = "lora_unet_"
+    prefix_TE = "lora_te_"
+
+    def __init__(self, base_model_path):
+        unet_path = os.path.join(
+            args.model_path, "unet", "diffusion_pytorch_model.safetensors"
+        )
+        text_enc_path = os.path.join(
+            args.model_path, "text_encoder", "model.safetensors"
+        )
+
+        # Load models from safetensors if it exists, if it doesn't pytorch
+        if os.path.exists(unet_path):
+            self.unet_state_dict = load_file(unet_path, device="cpu")
+        else:
+            unet_path = os.path.join(
+                args.model_path, "unet", "diffusion_pytorch_model.bin"
+            )
+            self.unet_state_dict = torch.load(unet_path, map_location="cpu")
+
+        if os.path.exists(text_enc_path):
+            self.text_enc_dict = load_file(text_enc_path, device="cpu")
+        else:
+            text_enc_path = os.path.join(
+                args.model_path, "text_encoder", "pytorch_model.bin"
+            )
+            self.text_enc_dict = torch.load(text_enc_path, map_location="cpu")
+
+    def convert_to_webui(
+        self,
+        sd_unet,
+        sd_TE,
+    ):
+        sd_unet = self.convert_to_webui_(
+            sd_unet, base=self.unet_state_dict, prefix=self.prefix_unet
+        )
+        sd_TE = self.convert_to_webui_(
+            sd_TE, base=self.text_enc_dict, prefix=self.prefix_TE
+        )
+        sd_unet.update(sd_TE)
+        return sd_unet
+
+    def convert_to_webui_(self, ft_state, base_state, prefix):
+        sd_covert = {}
+        for k, v in ft_state.items():
+            print(k)
+            v_base = base_state[k]
+            model_k, lora_k = k.rsplit(".", 1)
+            if lora_k == "weight":
+                lora_k = "diff"
+            else:
+                lora_k = "diff_b"
+            sd_covert[f"{prefix}{model_k.replace('.', '_')}.{lora_k}"] = v - v_base
+        return sd_covert
+
+
 def save_and_print_path(sd, path):
     os.makedirs(args.dump_path, exist_ok=True)
     ckpt_manager._save_ckpt(sd, save_path=path)
@@ -297,6 +358,8 @@ def get_network_type(sd_unet, sd_TE):
         return "lora"
     elif "plugin" in sd_unet.keys() and "plugin" in sd_TE.keys():
         return "plugin"
+    elif "base" in sd_unet.keys() and "base" in sd_TE.keys():
+        return "base"
     else:
         return None
 
@@ -311,6 +374,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--lora_path_TE", type=str, help="Path to the HCP Text Encoder LoRA."
+    )
+    parser.add_argument(
+        "--base_path",
+        type=str,
+        default=None,
+        help="Path to base model path. Used for full model conversion.",
     )
     parser.add_argument(
         "--dump_path",
@@ -336,7 +405,8 @@ if __name__ == "__main__":
     parser.add_argument("--sdxl", action="store_true", help="Enable SDXL conversion.")
     args = parser.parse_args()
 
-    converter = LoraConverter()
+    lora_converter = LoraConverter()
+    base_converter = None
 
     if os.path.isdir(args.lora_path):
         ckpt_manager = auto_manager(".safetensors")()
@@ -346,7 +416,7 @@ if __name__ == "__main__":
                     file_path = os.path.join(args.lora_path, filename)
                     print(f"Converting {file_path}")
                     state = ckpt_manager.load_ckpt(file_path)
-                    sd_TE, sd_unet = converter.convert_from_webui(
+                    sd_unet, sd_TE = lora_converter.convert_from_webui(
                         state,
                         network_type=args.save_network_type,
                         auto_scale_alpha=args.auto_scale_alpha,
@@ -367,19 +437,27 @@ if __name__ == "__main__":
                     sd_TE = ckpt_manager.load_ckpt(paths["TE"])
                     network_type = get_network_type(sd_unet, sd_TE)
                     if network_type is None:
-                        print("no saved lora/lycoris found, skip")
+                        print("no saved model found, skip")
                         continue
                     print(
                         f'Converting pair: {paths["TE"]} and {paths["unet"]}'
                         f' with key "{network_type}"'
                     )
-                    state = converter.convert_to_webui(
-                        sd_unet[network_type],
-                        sd_TE[network_type],
-                        network_type=network_type,
-                        auto_scale_alpha=args.auto_scale_alpha,
-                        sdxl=args.sdxl,
-                    )
+                    if network_type == "base":
+                        if base_converter is None:
+                            base_converter = BaseConverter(args.base_path)
+                        state = base_converter.convert_to_webui(
+                            sd_unet[network_type],
+                            sd_TE[network_type],
+                        )
+                    else:
+                        state = lora_converter.convert_to_webui(
+                            sd_unet[network_type],
+                            sd_TE[network_type],
+                            network_type=network_type,
+                            auto_scale_alpha=args.auto_scale_alpha,
+                            sdxl=args.sdxl,
+                        )
 
                     output_path = os.path.join(
                         args.dump_path, f"{args.output_prefix}-{name}.safetensors"
@@ -387,11 +465,11 @@ if __name__ == "__main__":
                     save_and_print_path(state, output_path)
 
     else:
-        print("Converting LoRA model")
+        print("Converting model")
         ckpt_manager = auto_manager(args.lora_path)()
         if args.from_webui:
             state = ckpt_manager.load_ckpt(args.lora_path)
-            sd_TE, sd_unet = converter.convert_from_webui(
+            sd_unet, sd_TE = lora_converter.convert_from_webui(
                 state,
                 network_type=args.save_network_type,
                 auto_scale_alpha=args.auto_scale_alpha,
@@ -413,13 +491,21 @@ if __name__ == "__main__":
                 print("no saved lora/lycoris found, terminating")
                 exit(1)
             print(f'Converting with key "{network_type}"')
-            state = converter.convert_to_webui(
-                sd_unet[network_type],
-                sd_TE[network_type],
-                network_type=network_type,
-                auto_scale_alpha=args.auto_scale_alpha,
-                sdxl=args.sdxl,
-            )
+            if network_type == "base":
+                if base_converter is None:
+                    base_converter = BaseConverter(args.base_path)
+                state = base_converter.convert_to_webui(
+                    sd_unet[network_type],
+                    sd_TE[network_type],
+                )
+            else:
+                state = lora_converter.convert_to_webui(
+                    sd_unet[network_type],
+                    sd_TE[network_type],
+                    network_type=network_type,
+                    auto_scale_alpha=args.auto_scale_alpha,
+                    sdxl=args.sdxl,
+                )
             lora_name = os.path.basename(args.lora_path)
             if "-" in lora_name:
                 lora_name = "-".join(lora_name.split("-")[1:])

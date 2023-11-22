@@ -35,10 +35,10 @@ plugin_unet:
   lokr:
     _target_: lycoris.hcp.LokrBlock.wrap_model
     _partial_: True
-    lr: 1e-4
-    dim: 100000
-    alpha: 1
-    factor: 2
+    lr: 2e-4
+    dim: 10000
+    alpha: 0
+    factor: 8
     layers:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
@@ -47,9 +47,9 @@ plugin_TE:
   lokr:
     _target_: lycoris.hcp.LokrBlock.wrap_model
     _partial_: True
-    lr: 1e-5
+    lr: 2e-5
     dim: 10000
-    alpha: 1
+    alpha: 0
     factor: 8
     layers:
       - 're:.*self_attn$'
