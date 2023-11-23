@@ -31,9 +31,10 @@ class LoraConverter(object):
     prefix_unet = "lora_unet_"
     prefix_TE = "lora_te_"
 
-    def __init__(self):
+    def __init__(self, save_fp16=False):
         self.com_name_unet_tmp = [x.replace("_", "%") for x in self.com_name_unet]
         self.com_name_TE_tmp = [x.replace("_", "%") for x in self.com_name_TE]
+        self.save_fp16 = save_fp16
 
     def convert_from_webui(
         self, state, network_type="lora", auto_scale_alpha=False, sdxl=False
@@ -113,6 +114,8 @@ class LoraConverter(object):
                 .replace("_", ".")
                 .replace("%", "_")
             )
+            if self.save_fp16:
+                v = v.half()
             if lora_k == "alpha" or network_type == "plugin":
                 sd_covert[f"{model_k}.___.{lora_k}"] = v
             else:
@@ -127,6 +130,8 @@ class LoraConverter(object):
             else:
                 separator = ".___.layer."
             model_k, lora_k = k.split(separator, 1)
+            if self.save_fp16:
+                v = v.half()
             sd_covert[f"{prefix}{model_k.replace('.', '_')}.{lora_k}"] = v
         return sd_covert
 
@@ -145,6 +150,8 @@ class LoraConverter(object):
                     if "clip_B" in new_k
                     else new_k.replace("_clip_bigG", "2")
                 )
+            if self.save_fp16:
+                v = v.half()
             sd_convert[new_k] = v
         return sd_convert
 
@@ -166,6 +173,9 @@ class LoraConverter(object):
                 model_k = f"clip_B.{model_k}"
             else:
                 model_k = f"clip_bigG.{model_k}"
+
+            if self.save_fp16:
+                v = v.half()
 
             if lora_k == "alpha" or network_type == "plugin":
                 sd_covert[f"{model_k}.___.{lora_k}"] = v
@@ -243,6 +253,9 @@ class LoraConverter(object):
             else:
                 raise NotImplementedError
 
+            if self.save_fp16:
+                v = v.half()
+
             if lora_k == "alpha" or network_type == "plugin":
                 sd_covert[f"{new_k}.___.{lora_k}"] = v
             else:
@@ -280,13 +293,14 @@ class BaseConverter(object):
     prefix_unet = "lora_unet_"
     prefix_TE = "lora_te_"
 
-    def __init__(self, base_model_path, device):
+    def __init__(self, base_model_path, device, save_fp16=False):
         unet_path = os.path.join(
             base_model_path, "unet", "diffusion_pytorch_model.safetensors"
         )
         text_enc_path = os.path.join(
             base_model_path, "text_encoder", "model.safetensors"
         )
+        self.save_fp16 = save_fp16
 
         # Load models from safetensors if it exists, if it doesn't pytorch
         if os.path.exists(unet_path):
@@ -328,7 +342,10 @@ class BaseConverter(object):
                 lora_k = "diff"
             else:
                 lora_k = "diff_b"
-            sd_covert[f"{prefix}{model_k.replace('.', '_')}.{lora_k}"] = v - v_base
+            v_diff = v - v_base
+            if self.save_fp16:
+                v_diff = v_diff.half()
+            sd_covert[f"{prefix}{model_k.replace('.', '_')}.{lora_k}"] = v_diff
         return sd_covert
 
 
@@ -404,10 +421,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--device", help="Which device to use for conversion", default="cpu", type=str
     )
+    parser.add_argument("--save_fp16", action="store_true", help="Save in FP16 format.")
     parser.add_argument("--sdxl", action="store_true", help="Enable SDXL conversion.")
     args = parser.parse_args()
 
-    lora_converter = LoraConverter()
+    lora_converter = LoraConverter(save_fp16=args.save_fp16)
     base_converter = None
 
     if os.path.isdir(args.lora_path):
@@ -452,7 +470,9 @@ if __name__ == "__main__":
                     if network_type == "base":
                         if base_converter is None:
                             base_converter = BaseConverter(
-                                args.base_path, device=args.device
+                                args.base_path,
+                                device=args.device,
+                                save_fp16=args.save_fp16,
                             )
                         state = base_converter.convert_to_webui(
                             sd_unet[network_type],
@@ -501,7 +521,9 @@ if __name__ == "__main__":
             print(f'Converting with key "{network_type}"')
             if network_type == "base":
                 if base_converter is None:
-                    base_converter = BaseConverter(args.base_path, device=args.device)
+                    base_converter = BaseConverter(
+                        args.base_path, device=args.device, save_fp16=args.save_fp16
+                    )
                 state = base_converter.convert_to_webui(
                     sd_unet[network_type],
                     sd_TE[network_type],
