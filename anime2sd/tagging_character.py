@@ -7,6 +7,7 @@ from typing import List, Dict
 
 from anime2sd.basics import get_images_recursively, get_corr_meta_names
 from anime2sd.tagging_basics import get_all_singular_plural_forms
+from anime2sd.character import Character
 
 
 def _split_to_words(text: str):
@@ -291,7 +292,7 @@ class CharacterTagProcessor(object):
         # Group characters by embedding
         embedding_dict = {}
         for character, categorized_tags in categorized_character_tags.items():
-            embedding = character.split()[0]
+            embedding = Character.from_string(character).embedding_name
             if embedding not in embedding_dict:
                 embedding_dict[embedding] = {"characters": [], "tags": []}
             embedding_dict[embedding]["characters"].append(character)
@@ -372,12 +373,14 @@ def contains_blacklisted_word_core(tag: str):
     return any((word in _BLACKLISTED_WORDS_CORE) for word in words)
 
 
-def update_character_tag_dict(character, tags, character_tag_dict):
+def update_character_tag_dict(
+    character: str, tags: List[str], character_tag_dict: Dict[str, List[str]]
+):
     """
     Update the tag dictionary for a given character.
 
     Args:
-        character (str): The character's name.
+        character (str): The character string representation.
         tags (list): A list of tags associated with the character.
         character_tag_dict (dict): The dictionary to update.
 
@@ -460,24 +463,39 @@ def get_character_core_tags(folder_path, frequency_threshold):
     return frequent_tag_dict
 
 
-def save_core_tag_info(data, json_output, wildcard_ouput):
+def save_core_tag_info(
+    data,
+    json_output,
+    wildcard_ouput,
+    separators,
+):
     with open(json_output, "w") as f:
         json.dump(data, f, indent=4)
     with open(wildcard_ouput, "w") as f:
         for character, tags in data.items():
+            character = Character.from_string(character).to_string(
+                inner_sep=separators["character_inner"],
+                outer_sep=separators["character_outer"],
+                caption_style=True,
+            )
             f.write(character + "\n")
             # The case where we split into kept, dropped, and emb_init
             if isinstance(tags, dict):
                 tags = tags["kept"]
             if len(tags) > 0:
-                f.write(character + ", " + ", ".join(tags) + "\n")
+                f.write(
+                    character
+                    + separators["caption_outer"]
+                    + separators["caption_inner"].join(tags)
+                    + "\n"
+                )
 
 
 def get_character_core_tags_and_save(
-    folder_path, core_tag_output, wildcard_output, frequency_threshold
+    folder_path, core_tag_output, wildcard_output, frequency_threshold, separators
 ):
     frequent_tags_dict = get_character_core_tags(folder_path, frequency_threshold)
-    save_core_tag_info(frequent_tags_dict, core_tag_output, wildcard_output)
+    save_core_tag_info(frequent_tags_dict, core_tag_output, wildcard_output, separators)
     return frequent_tags_dict
 
 

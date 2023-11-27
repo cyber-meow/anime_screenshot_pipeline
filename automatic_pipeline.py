@@ -192,13 +192,13 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
         args.pipeline_type == "screenshots" or args.character_overwrite_uncropped
     )
     # update metadata using folder name
-    characters = save_characters_to_meta(classified_dir, overwrite_uncropped)
+    character_embeddings = save_characters_to_meta(classified_dir, overwrite_uncropped)
 
     # save trigger word info
     emb_init_filepath = os.path.join(dst_dir, "emb_init.json")
     update_emb_init_info(
         emb_init_filepath,
-        characters,
+        character_embeddings,
         args.image_type,
         overwrite=args.overwrite_emb_init_info,
     )
@@ -282,6 +282,24 @@ def tag_and_caption(args, src_dir, is_start_stage):
     overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
     overwrite_path = is_start_stage and args.overwrite_path
 
+    separators = {
+        "character": args.character_sep,
+        "character_inner": args.character_inner_sep,
+        "character_outer": args.character_outer_sep,
+        "caption_inner": args.caption_inner_sep,
+        "caption_outer": args.caption_outer_sep,
+    }
+
+    use_probs = {
+        "n_people": args.use_npeople_prob,
+        "characters": args.use_character_prob,
+        "copyright": args.use_copyright_prob,
+        "type": args.use_image_type_prob,
+        "artist": args.use_artist_prob,
+        "rating": args.use_rating_prob,
+        "tags": args.use_tags_prob,
+    }
+
     source = LocalSource(src_dir, load_aux=args.load_aux, overwrite_path=overwrite_path)
     source = source.attach(
         TaggingAction(
@@ -317,7 +335,12 @@ def tag_and_caption(args, src_dir, is_start_stage):
                 character_core_tags,
                 emb_init_dict,
             ) = char_tag_proc.categorize_character_tag_dict(character_core_tags)
-            save_core_tag_info(character_core_tags, core_tag_path, wildcard_path)
+            save_core_tag_info(
+                character_core_tags,
+                core_tag_path,
+                wildcard_path,
+                separators=separators,
+            )
             update_emb_init_info(
                 emb_init_filepath,
                 emb_init_dict.keys(),
@@ -336,12 +359,13 @@ def tag_and_caption(args, src_dir, is_start_stage):
             core_tag_path,
             wildcard_path,
             frequency_threshold=args.core_frequency_thresh,
+            separators=separators,
         )
     characters = list(character_core_tags.keys())
 
     source = source.attach(
         TagSortingAction(args.sort_mode, max_tag_number=args.max_tag_number),
-        CaptioningAction(args, characters),
+        CaptioningAction(use_probs, separators, characters),
     )
     source.export(
         SaveExporter(
@@ -803,10 +827,34 @@ if __name__ == "__main__":
 
     # Arguments for captioning
     parser.add_argument(
-        "--caption_separator",
+        "--caption_inner_sep",
         type=str,
-        default=",",
-        help="Character used to separate items in captions",
+        default=", ",
+        help="For separating items of a single field of caption",
+    )
+    parser.add_argument(
+        "--caption_outer_sep",
+        type=str,
+        default=", ",
+        help="For separating different fields of caption",
+    )
+    parser.add_argument(
+        "--character_sep",
+        type=str,
+        default=", ",
+        help="For separating characters",
+    )
+    parser.add_argument(
+        "--character_inner_sep",
+        type=str,
+        default=" ",
+        help="For separating items of a single field of character",
+    )
+    parser.add_argument(
+        "--character_outer_sep",
+        type=str,
+        default=", ",
+        help="For separating different fields of character",
     )
     parser.add_argument(
         "--use_npeople_prob",

@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from anime2sd.basics import get_images_recursively, get_files_recursively
 from anime2sd.basics import get_corr_meta_names
+from anime2sd.character import Character
 
 
 def construct_aux_files_dict(paths):
@@ -73,9 +74,10 @@ def get_folder_name(folder_type, info_dict, max_character_number) -> str:
         suffix = "character" if n_character == 1 else "characters"
         return f"{n_character}_{suffix}"
     elif folder_type == "character":
-        characters = info_dict.get("characters", [])
-        if len(characters) > 0 and type(characters[0]) is list:
-            characters = [character[0] for character in characters]
+        characters = [
+            Character.from_string(character).character_name
+            for character in info_dict.get("characters", [])
+        ]
         characters = sorted(list(set(characters)))
         if len(characters) == 0:
             return "character_others"

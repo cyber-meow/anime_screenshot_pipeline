@@ -7,8 +7,9 @@ from tqdm import tqdm
 from typing import List
 from PIL import Image
 
-from anime2sd.basics import get_images_recursively
+from anime2sd.basics import get_images_recursively, get_folders_recursively
 from anime2sd.basics import get_corr_meta_names, get_or_generate_metadata
+from anime2sd.character import Character
 
 
 def parse_char_name(folder_name: str) -> str:
@@ -39,7 +40,7 @@ def save_characters_to_meta(
             Whether to overwrite the character metadata of uncropped images or not
 
     Returns:
-        List[str]: Set of character names
+        List[str]: List of character embedding names
     """
 
     # To keep track of paths encountered in this run
@@ -49,16 +50,14 @@ def save_characters_to_meta(
 
     logging.info("Saving characters to metadata ...")
     # Iterate over each folder in the classified directory
-    for folder_name in tqdm(os.listdir(classified_dir)):
+    for folder_name in tqdm(get_folders_recursively(classified_dir)):
+        folder_name = os.path.relpath(folder_name, classified_dir)
         char_name = parse_char_name(folder_name)
+        character = Character.from_string(char_name, outer_sep=os.path.sep)
 
         if not char_name.lower().startswith("noise"):
-            characters.add(char_name)
+            characters.add(character.embedding_name)
         folder_path = os.path.join(classified_dir, folder_name)
-
-        # Ensure it's a directory
-        if not os.path.isdir(folder_path):
-            continue
 
         # Iterate over each image file in the folder
         for img_file in os.listdir(folder_path):
@@ -77,7 +76,7 @@ def save_characters_to_meta(
                 # This ensures that we overwrite old information
                 meta_data["characters"] = []
             else:
-                meta_data["characters"] = [char_name]
+                meta_data["characters"] = [character.to_string()]
 
             # Save the updated metadata for the cropped image
             with open(meta_file_path, "w") as meta_file:
@@ -106,10 +105,10 @@ def save_characters_to_meta(
 
                 # Append the character name if it's not already in the list
                 # and is not noise
-                if char_name not in orig_meta_data[
+                if character not in orig_meta_data[
                     "characters"
                 ] and not char_name.lower().startswith("noise"):
-                    orig_meta_data["characters"].append(char_name)
+                    orig_meta_data["characters"].append(character.to_string())
 
                 # Save the updated original metadata
                 with open(original_meta_path, "w") as orig_meta_file:
@@ -151,7 +150,7 @@ def save_image_and_meta(img, img_path, save_dir, ext, image_type):
         else:
             img.save(adjusted_path)
     except IOError as e:
-        print(f"Error saving the image {adjusted_path}: {e}")
+        logging.error(f"Error saving the image {adjusted_path}: {e}")
 
     # Copy the corresponding metadata file
     meta_path, meta_filename = get_corr_meta_names(img_path)

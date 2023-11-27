@@ -10,6 +10,7 @@ from imgutils.metrics import ccip_extract_feature, ccip_default_threshold
 from imgutils.metrics import ccip_batch_differences
 
 from anime2sd.basics import remove_empty_folders
+from anime2sd.character import Character
 from anime2sd.classif.imagewise import extract_from_noise, filter_characters_from_images
 from anime2sd.classif.file_utils import load_image_features_and_characters
 from anime2sd.classif.file_utils import parse_ref_dir, save_to_dir
@@ -67,53 +68,57 @@ def cluster_characters_basics(
     return labels, batch_diff, batch_same
 
 
-def merge_class_names(
-    class_names: Dict[int, str],
-    ref_class_names: Dict[int, str],
+def merge_characters(
+    characters: Dict[int, Character],
+    ref_characters: Dict[int, Character],
     ref_labels: np.ndarray,
     characters_per_image: Optional[np.ndarray],
-) -> Tuple[Dict[int, str], np.ndarray, Optional[np.ndarray]]:
+) -> Tuple[Dict[int, Character], np.ndarray, Optional[np.ndarray]]:
     """
     Merge reference class names into existing class names, update labels,
     and adjust characters_per_image.
 
     Args:
-        class_names (Dict[int, str]):
-            Existing class names with labels as keys.
-        ref_class_names (Dict[int, str]):
-            Reference class names with labels as keys.
+        characters (Dict[int, Character]):
+            Existing characters with labels as keys.
+        ref_characters (Dict[int, Character]):
+            Reference characters with labels as keys.
         ref_labels (np.ndarray):
             Array of labels corresponding to reference images.
         characters_per_image (Optional[np.ndarray]):
             Array indicating presence of characters in images.
 
     Returns:
-        Tuple[Dict[int, str], np.ndarray, Optional[np.ndarray]]:
-            - Updated class names dictionary.
+        Tuple[Dict[int, Character], np.ndarray, Optional[np.ndarray]]:
+            - Updated character dictionary.
             - Updated reference labels.
             - Updated characters_per_image if provided.
     """
     # Create a new class_names dictionary to avoid modifying the original one
-    updated_class_names = class_names.copy()
+    updated_characters = characters.copy()
     updated_ref_labels = ref_labels.copy()
-    n_existing_labels = max(class_names.keys()) + 1 if class_names else 0
+    n_existing_labels = max(characters.keys()) + 1 if characters else 0
 
-    # Update the class_names with ref_class_names
-    for ref_label, ref_name in ref_class_names.items():
+    # Compute updated ref_labels and characters
+    for ref_label, ref_character in ref_characters.items():
         existing_label = next(
-            (label for label, name in class_names.items() if name == ref_name), None
+            (
+                label
+                for label, character in characters.items()
+                if character == ref_character
+            ),
+            None,
         )
         if existing_label is not None:
-            # Update ref_labels with the existing label from class_names
+            # Update ref_labels with the existing label from characters
             updated_ref_labels[ref_labels == ref_label] = existing_label
         else:
-            # Add new entry to class_names if it doesn't exist
-            updated_class_names[n_existing_labels] = ref_name
+            # Add new entry to updated_characters if it doesn't exist
+            updated_characters[n_existing_labels] = ref_character
             updated_ref_labels[ref_labels == ref_label] = n_existing_labels
             n_existing_labels += 1
 
-    # Update characters_per_image for new labels based on the first word of the
-    # class name
+    # Update characters_per_image for new labels
     if characters_per_image is not None:
         new_characters_per_image = np.zeros(
             (characters_per_image.shape[0], n_existing_labels), dtype=bool
@@ -123,17 +128,14 @@ def merge_class_names(
         ] = characters_per_image
 
         for new_label in range(characters_per_image.shape[1], n_existing_labels):
-            new_class_name = updated_class_names[new_label]
+            new_character = updated_characters[new_label]
 
-            # Find an existing label whose name matches the new class name exactly or
-            # is a prefix of it
+            # Find an existing label whose character name matches the new class
             old_label = next(
                 (
                     label
-                    for label, name in class_names.items()
-                    if new_class_name == name
-                    or new_class_name.startswith(name + " ")
-                    or new_class_name.startswith(name + "_")
+                    for label, character in characters.items()
+                    if character.character_name == new_character.character_name
                 ),
                 None,
             )
@@ -146,7 +148,7 @@ def merge_class_names(
 
         characters_per_image = new_characters_per_image
 
-    return updated_class_names, updated_ref_labels, characters_per_image
+    return updated_characters, updated_ref_labels, characters_per_image
 
 
 def classify_from_directory(
@@ -211,12 +213,12 @@ def classify_from_directory(
         image_files,
         images,
         characters_per_image,
-        class_names,
+        character_mapping,
     ) = load_image_features_and_characters(src_dir)
 
     if ignore_character_metadata:
         characters_per_image = None
-        class_names = dict()
+        character_mapping = dict()
 
     labels, batch_diff, batch_same = cluster_characters_basics(
         images,
@@ -224,10 +226,10 @@ def classify_from_directory(
     )
 
     # The number of known character names from metadata
-    n_meta_labels = len(class_names)
+    n_meta_labels = len(character_mapping)
 
     if ref_dir is not None:
-        ref_image_files, ref_labels, ref_class_names = parse_ref_dir(ref_dir)
+        ref_image_files, ref_labels, ref_characters = parse_ref_dir(ref_dir)
         logging.info(
             "Extracting feature of "
             + f'{plural_word(len(ref_image_files), "images")} ...'
@@ -239,14 +241,14 @@ def classify_from_directory(
             ]
         )
         # Merge class names and update ref_labels and characters_per_image
-        class_names, ref_labels, characters_per_image = merge_class_names(
-            class_names, ref_class_names, ref_labels, characters_per_image
+        character_mapping, ref_labels, characters_per_image = merge_characters(
+            character_mapping, ref_characters, ref_labels, characters_per_image
         )
     else:
         ref_images, ref_labels = None, None
 
     # The number of known character names from either reference or metadata
-    n_pre_labels = len(class_names)
+    n_pre_labels = len(character_mapping)
     labels[labels >= 0] += n_pre_labels
 
     if to_extract_from_noise:
@@ -263,6 +265,7 @@ def classify_from_directory(
             same_threshold_abs=same_threshold_abs,
         )
 
+    # TODO: Add possibility to add reference images automatically
     if ref_images is not None:
         # Use a low threshold here because cluster may represent
         # different forms of the same character
@@ -325,5 +328,5 @@ def classify_from_directory(
             same_threshold_abs=same_threshold_abs,
         )
 
-    save_to_dir(image_files, images, dst_dir, labels, class_names, move=move)
+    save_to_dir(image_files, images, dst_dir, labels, character_mapping, move=move)
     remove_empty_folders(src_dir)

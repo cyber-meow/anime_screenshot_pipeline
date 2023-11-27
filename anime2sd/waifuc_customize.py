@@ -189,13 +189,15 @@ class TagRemovingUnderscoreAction(ProcessAction):
 
 
 class CaptioningAction(ProcessAction):
-    def __init__(self, args, characters=None):
-        # TODO: write all the args
-        self.args = args
+    def __init__(self, use_probs, separators, characters=None):
+        self.use_probs = use_probs
+        self.separators = separators
         self.characters = characters
 
     def process(self, item: ImageItem) -> ImageItem:
-        caption = dict_to_caption(item.meta, self.args, self.characters)
+        caption = dict_to_caption(
+            item.meta, self.use_probs, self.separators, self.characters
+        )
         return ImageItem(item.image, {**item.meta, "caption": caption})
 
 
