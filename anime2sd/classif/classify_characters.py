@@ -127,24 +127,17 @@ def merge_characters(
             :, : characters_per_image.shape[1]
         ] = characters_per_image
 
+        # The following assumes that old labels are always correct and new labels
+        # are refinement of them
         for new_label in range(characters_per_image.shape[1], n_existing_labels):
             new_character = updated_characters[new_label]
 
-            # Find an existing label whose character name matches the new class
-            old_label = next(
-                (
-                    label
-                    for label, character in characters.items()
-                    if character.character_name == new_character.character_name
-                ),
-                None,
-            )
-            if old_label is not None:
-                # Copy the character presence data from the old label column to
-                # the new label column
-                new_characters_per_image[:, new_label] = new_characters_per_image[
-                    :, old_label
-                ]
+            # Find existing labels whose character name matches the new class
+            for label, character in characters.items():
+                if character.character_name == new_character.character_name:
+                    new_characters_per_image[:, new_label] |= new_characters_per_image[
+                        :, label
+                    ]
 
         characters_per_image = new_characters_per_image
 
