@@ -4,7 +4,7 @@ import random
 import logging
 import shutil
 from tqdm import tqdm
-from typing import List
+from typing import List, Dict, Set
 from PIL import Image
 
 import fiftyone.zoo as foz
@@ -39,99 +39,294 @@ def parse_char_name(folder_name: str) -> str:
     return folder_name
 
 
+def initialize_character_for_original(
+    original_img_path: str,
+    encountered_paths: Dict[str, bool],
+    overwrite_characters: bool,
+    remove_unclassified: bool,
+    character_names: Set[str],
+):
+    """
+    Initialize character metadata for an image.
+
+    Args:
+        original_img_path (str):
+            The original image path.
+        encountered_paths (dict):
+            A dictionary that keeps track of the paths that have been encountered.
+            The value is True when we should force update of metadata.
+            The value is False when we should ensure consistency.
+            It is updated in place.
+        overwrite_characters (bool):
+            Whether to overwrite the character metadata of original images or not.
+        remove_unclassified (bool):
+            Whether to remove characters that do not belong to "character_names"
+            when overwrite_characters is False.
+        character_names (set):
+            Set of character names obtained from the classified directory
+
+    Raises:
+        IOError: If there is an issue in reading or writing the metadata file.
+    """
+    original_meta_path, _ = get_corr_meta_names(original_img_path)
+    orig_meta_data = get_or_generate_metadata(original_img_path, warn=False)
+    updated = False
+
+    # Initialize characters list if the path hasn't been encountered yet
+    if original_img_path not in encountered_paths.keys():
+        if "characters" not in orig_meta_data or overwrite_characters:
+            encountered_paths[original_img_path] = True
+            orig_meta_data["characters"] = []
+            updated = True
+        else:
+            encountered_paths[original_img_path] = False
+            # Remove characters that do not belong to "character_names" unless
+            # "remove_unclassified" is True
+            if remove_unclassified:
+                orig_meta_data["characters"] = [
+                    char
+                    for char in orig_meta_data["characters"]
+                    if Character.from_string(char).character_name in character_names
+                ]
+                updated = True
+
+    if updated:
+        # Save the updated original metadata
+        with open(original_meta_path, "w") as orig_meta_file:
+            json.dump(orig_meta_data, orig_meta_file, indent=4)
+
+
+def update_character_for_original(
+    character: Character,
+    original_img_path: str,
+    encountered_paths: Dict[str, bool],
+    overwrite_characters: bool,
+    remove_unclassified: bool,
+    character_names: Set[str],
+):
+    """
+    Update character metadata for the original image.
+
+    Args:
+        character (Character):
+            The candidate character to add to metadata.
+        original_img_path (str):
+            The original image path.
+        encountered_paths (dict):
+            A dictionary that keeps track of the paths that have been encountered.
+            The value is True when we should force update of metadata.
+            The value is False when we should ensure consistency with existing metadata.
+            It is updated in place.
+        overwrite_characters (bool):
+            Whether to overwrite the character metadata of original images or not.
+        remove_unclassified (bool):
+            Whether to remove characters that do not belong to "character_names"
+            when overwrite_characters is False.
+        character_names (set):
+            Set of character names obtained from the classified directory
+
+    Raises:
+        IOError: If there is an issue in reading or writing the metadata file.
+    """
+    original_meta_path, _ = get_corr_meta_names(original_img_path)
+    orig_meta_data = get_or_generate_metadata(original_img_path, warn=False)
+    updated = False
+    character_string = character.to_string()
+
+    initialize_character_for_original(
+        original_img_path,
+        encountered_paths,
+        overwrite_characters,
+        remove_unclassified,
+        character_names,
+    )
+
+    # No need to add this character if it's noise
+    if character_string.lower().startswith("noise"):
+        return
+
+    if encountered_paths[original_img_path]:
+        # Append the character name if it's not already in the list
+        # and is not noise
+        if character_string not in orig_meta_data["characters"]:
+            orig_meta_data["characters"].append(character_string)
+            updated = True
+    else:
+        # Ensure consistency with existing metadata
+        new_characters_strings = []
+        for char in orig_meta_data["characters"]:
+            if Character.from_string(char).character_name == character.character_name:
+                new_characters_strings.append(character_string)
+                updated = True
+            else:
+                new_characters_strings.append(char)
+        orig_meta_data["characters"] = new_characters_strings
+
+    if updated:
+        # Save the updated original metadata
+        with open(original_meta_path, "w") as orig_meta_file:
+            json.dump(orig_meta_data, orig_meta_file, indent=4)
+
+
+def save_characters_to_meta_single(
+    folder_path: str,
+    character: Character,
+    encountered_paths: Dict[str, bool],
+    character_names: Set[str],
+    overwrite_path: bool = False,
+    overwrite_uncropped: bool = True,
+    remove_unclassified: bool = False,
+):
+    """
+    Save character information to metadata files for each image in a single folder.
+
+    Args:
+        folder_path (str):
+            The path to the folder containing images.
+        character (Character):
+            The character object representing the character name.
+        encountered_paths (dict):
+            A dictionary to keep track of encountered paths and whether to force
+            update their metadata.
+        character_names (set):
+            Set of character names obtained from the classified directory.
+        overwrite_path (bool, optional):
+            Whether to overwrite the path in metadata. Defaults to False.
+        overwrite_uncropped (bool, optional):
+            Whether to overwrite the character metadata of original images or not.
+        remove_unclassified (bool, optional):
+            Whether to remove characters that do not belong to "character_names".
+            Defaults to False.
+
+    Raises:
+        IOError: If there is an issue in reading or writing the metadata file.
+    """
+    character_string = character.to_string()
+
+    # Iterate over each image file in the folder
+    for img_file in os.listdir(folder_path):
+        img_name, img_ext = os.path.splitext(img_file)
+
+        # Ensure it's an image file
+        if img_ext.lower() not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
+            continue
+
+        img_path = os.path.join(folder_path, img_file)
+        meta_file_path, _ = get_corr_meta_names(img_path)
+        meta_data = get_or_generate_metadata(
+            img_path, warn=True, overwrite_path=overwrite_path
+        )
+
+        # Update the characters field
+        if character_string.lower().startswith("noise"):
+            # This ensures that we overwrite old information
+            meta_data["characters"] = []
+        else:
+            meta_data["characters"] = [character_string]
+
+        # Save the updated metadata for the cropped image
+        with open(meta_file_path, "w") as meta_file:
+            json.dump(meta_data, meta_file, indent=4)
+
+        # Check for the 'path' field and update it
+        if "path" in meta_data:
+            original_path = meta_data["path"]
+            if original_path == img_path:
+                continue
+
+            # Note that if we are here overwrite_path must be False
+            update_character_for_original(
+                character,
+                original_path,
+                encountered_paths,
+                overwrite_uncropped,
+                remove_unclassified,
+                character_names,
+            )
+
+
 def save_characters_to_meta(
     classified_dir: str,
-    overwrite_uncropped: bool = True,
+    raw_dir: str,
     overwrite_path: bool = False,
+    overwrite_uncropped: bool = True,
+    remove_unclassified: bool = False,
 ) -> List[str]:
-    """Save character information to metadata files
+    """
+    Save character information to metadata files across multiple folders.
+
+    This function iterates through each folder in the classified directory, extracts
+    character information, and saves it to metadata files.
+    It also updates the metadata of raw images.
 
     Args:
         classified_dir (str):
-            Directory containing classified character folders
-        overwrite_raw (bool):
-            Whether to overwrite the character metadata of uncropped images or not
-        overwrite_path (bool):
-            Whether to overwrite the path of the character metadata
+            Directory containing classified character folders.
+        raw_dir (str):
+            Directory containing raw images.
+        overwrite_path (bool, optional):
+            Whether to overwrite the path in metadata. Defaults to False.
+        overwrite_uncropped (bool, optional):
+            Whether to overwrite the character metadata for uncropped/original images.
+            Defaults to True.
+        remove_unclassified (bool, optional):
+            Whether to remove characters not in "character_names" for the original
+            image. Defaults to False.
 
     Returns:
-        List[str]: List of character embedding names
+        List[str]: A list of character embedding names.
+
+    Raises:
+        IOError: If there is an issue in reading or writing the metadata file.
     """
 
     # To keep track of paths encountered in this run
     # Value set to True if the character list is to be updated
     encountered_paths = dict()
-    characters = set()
+    character_embeddings = set()
+    character_names = set()
 
-    logging.info("Saving characters to metadata ...")
-    # Iterate over each folder in the classified directory
-    for folder_name in tqdm(get_folders_recursively(classified_dir)):
+    # Iterate over each folder in the classified directory to get character names
+    for folder_name in get_folders_recursively(classified_dir):
         folder_name = os.path.relpath(folder_name, classified_dir)
         char_name = parse_char_name(folder_name)
         character = Character.from_string(char_name, outer_sep=os.path.sep)
 
         if not char_name.lower().startswith("noise"):
-            characters.add(character.embedding_name)
+            character_embeddings.add(character.embedding_name)
+            character_names.add(character.character_name)
+
+    logging.info("Initialize metadata for raw images ...")
+
+    # Iterate over each image in the raw directory to initialize character metadata
+    for img_path in tqdm(get_images_recursively(raw_dir)):
+        initialize_character_for_original(
+            os.path.abspath(img_path),
+            encountered_paths,
+            overwrite_uncropped,
+            remove_unclassified,
+            character_names,
+        )
+
+    logging.info("Saving characters to metadata ...")
+
+    # Iterate over each folder in the classified directory to update metadata
+    for folder_name in tqdm(get_folders_recursively(classified_dir)):
+        folder_name = os.path.relpath(folder_name, classified_dir)
+        char_name = parse_char_name(folder_name)
+        character = Character.from_string(char_name, outer_sep=os.path.sep)
         folder_path = os.path.join(classified_dir, folder_name)
+        save_characters_to_meta_single(
+            folder_path,
+            character,
+            encountered_paths,
+            character_names,
+            overwrite_path=overwrite_path,
+            overwrite_uncropped=overwrite_uncropped,
+            remove_unclassified=remove_unclassified,
+        )
 
-        # Iterate over each image file in the folder
-        for img_file in os.listdir(folder_path):
-            img_name, img_ext = os.path.splitext(img_file)
-
-            # Ensure it's an image file
-            if img_ext.lower() not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
-                continue
-
-            img_path = os.path.join(folder_path, img_file)
-            meta_file_path, _ = get_corr_meta_names(img_path)
-            meta_data = get_or_generate_metadata(
-                img_path, warn=True, overwrite_path=overwrite_path
-            )
-
-            # Update the characters field
-            if char_name.startswith("noise") or char_name.startswith("Noise"):
-                # This ensures that we overwrite old information
-                meta_data["characters"] = []
-            else:
-                meta_data["characters"] = [character.to_string()]
-
-            # Save the updated metadata for the cropped image
-            with open(meta_file_path, "w") as meta_file:
-                json.dump(meta_data, meta_file, indent=4)
-
-            # Check for the 'path' field and update it
-            if "path" in meta_data:
-                original_path = meta_data["path"]
-                if original_path == img_path:
-                    continue
-
-                original_meta_path, _ = get_corr_meta_names(original_path)
-                # Note that if we are here overwrite_path must be False
-                orig_meta_data = get_or_generate_metadata(original_path, warn=False)
-
-                # Initialize characters list if the path hasn't been encountered
-                # yet in this run and overwrite_uncropped is True
-                if original_path not in encountered_paths.keys():
-                    if "characters" not in orig_meta_data or overwrite_uncropped:
-                        orig_meta_data["characters"] = []
-                        encountered_paths[original_path] = True
-                    else:
-                        encountered_paths[original_path] = False
-                # Go to next image if we do not update
-                if not encountered_paths[original_path]:
-                    continue
-
-                # Append the character name if it's not already in the list
-                # and is not noise
-                if character not in orig_meta_data[
-                    "characters"
-                ] and not char_name.lower().startswith("noise"):
-                    orig_meta_data["characters"].append(character.to_string())
-
-                # Save the updated original metadata
-                with open(original_meta_path, "w") as orig_meta_file:
-                    json.dump(orig_meta_data, orig_meta_file, indent=4)
-    return list(characters)
+    return list(character_embeddings)
 
 
 def resize_image(image: Image, max_size: int) -> Image:
@@ -293,6 +488,7 @@ def resize_character_images(
         os.makedirs(save_dir, exist_ok=True)
 
         for img_path in tqdm(get_images_recursively(src_dir)):
+            img_path = os.path.abspath(img_path)
             if img_path in processed_img_paths:
                 continue
             processed_img_paths.add(img_path)
@@ -365,6 +561,7 @@ def select_dataset_images_from_directory(
     # For saving embedding initialization information
     image_type: str,
     overwrite_emb_init_info: bool,
+    character_remove_unclassified: bool,
     # For 3 stage cropping
     use_3stage_crop: bool,
     detect_level: str,
@@ -391,6 +588,8 @@ def select_dataset_images_from_directory(
         pipeline_type (str): Type of the processing pipeline.
         character_overwrite_uncropped (bool):
             Flag to overwrite character metadata of uncropped images.
+        character_remove_unclassified (bool):
+            Flag to remove unclassified characters in the metadata.
         image_type (str): Type of the images for metadata and embedding initialization.
         overwrite_emb_init_info (bool): Flag to overwrite embedding initialization info.
         use_3stage_crop (bool): Flag to use three-stage cropping.
@@ -415,7 +614,11 @@ def select_dataset_images_from_directory(
     )
     # update metadata using folder name
     character_embeddings = save_characters_to_meta(
-        classified_dir, overwrite_uncropped, overwrite_path=overwrite_path
+        classified_dir,
+        full_dir,
+        overwrite_path=overwrite_path,
+        overwrite_uncropped=overwrite_uncropped,
+        remove_unclassified=character_remove_unclassified,
     )
 
     # save trigger word info

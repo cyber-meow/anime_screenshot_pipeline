@@ -196,6 +196,7 @@ def select_dataset_images(args, src_dir, is_start_stage):
         overwrite_path=overwrite_path,
         # For saving character to metadata
         character_overwrite_uncropped=args.character_overwrite_uncropped,
+        character_remove_unclassified=args.character_remove_unclassified,
         # For saving embedding initialization information
         image_type=args.image_type,
         overwrite_emb_init_info=args.overwrite_emb_init_info,
@@ -486,6 +487,19 @@ if __name__ == "__main__":
             "The 'n' model runs faster with smaller system overhead"
         ),
     )
+    parser.add_argument(
+        "--use_3stage_crop",
+        action="store",
+        type=int,
+        choices=[2, 4],
+        const=2,
+        nargs="?",
+        help=(
+            "Use 3 stage crop to get halfbody and head crops. "
+            "This is slow and should only be called once for a set of images. "
+            "Possible to use either at stage 2 or 4."
+        ),
+    )
 
     # Arguments for character clustering/classification
     # Most important
@@ -563,15 +577,21 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Overwrite existing character metadata for uncropped images "
-            "(only meaning ful for 'booru' pipeline as this is always the case "
+            "(only meaningful for 'booru' pipeline as this is always the case "
             "for 'screenshots' pipeline)"
         ),
     )
     parser.add_argument(
-        "--no_resize", action="store_true", help="Do not perform image resizing"
+        "--character_remove_unclassified",
+        action="store_true",
+        help=(
+            "Remove unclassified characters in the metadata field "
+            "(only has effect for 'booru' pipeline without "
+            "--character_overwrite_uncropped)"
+        ),
     )
     parser.add_argument(
-        "--filter_again", action="store_true", help="Filter repeated images again here"
+        "--no_resize", action="store_true", help="Do not perform image resizing"
     )
     parser.add_argument(
         "--max_size",
@@ -589,17 +609,7 @@ if __name__ == "__main__":
         help="Number of images with no characters to keep (for 'screenshots' pipeline)",
     )
     parser.add_argument(
-        "--use_3stage_crop",
-        action="store",
-        type=int,
-        choices=[2, 4],
-        const=2,
-        nargs="?",
-        help=(
-            "Use 3 stage crop to get halfbody and head crops. "
-            "This is slow and should only be called once for a set of images. "
-            "Possible to use either at stage 2 or 4."
-        ),
+        "--filter_again", action="store_true", help="Filter repeated images again here"
     )
 
     # Loading and saving of metadata for tagging and captioning stage
