@@ -210,7 +210,6 @@ def tag_and_caption_from_directory(
         tagging_manager.get_basic_tag_pruning_action(),
         TagRemovingUnderscoreAction(),
     )
-    logging.info(f"Tagging and captioning images in {dir} ...")
 
     if tagging_manager.pruned_mode == "character_core":
         source.export(

@@ -118,7 +118,7 @@ def get_default_metadata(img_path, warn=False):
     return meta_data
 
 
-def get_or_generate_metadata(img_path, warn=False):
+def get_or_generate_metadata(img_path, warn=False, overwrite_path=False):
     img_path = os.path.abspath(img_path)
     meta_path, _ = get_corr_meta_names(img_path)
     updated = False
@@ -129,11 +129,13 @@ def get_or_generate_metadata(img_path, warn=False):
             meta_data = json.load(meta_file)
 
         # Check for missing fields and update them
-        if "path" not in meta_data:
-            meta_data["path"] = get_default_path(img_path)
+        if "path" not in meta_data or (
+            overwrite_path and meta_data["path"] != img_path
+        ):
+            meta_data["path"] = img_path
             updated = True
-        if "current_path" not in meta_data:
-            meta_data["current_path"] = get_default_current_path(img_path)
+        if "current_path" not in meta_data or meta_data["current_path"] != img_path:
+            meta_data["current_path"] = img_path
             updated = True
         if "filename" not in meta_data:
             meta_data["filename"] = get_default_filename(img_path)

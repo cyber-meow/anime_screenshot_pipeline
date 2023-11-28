@@ -4,24 +4,19 @@ import logging
 import argparse
 from datetime import datetime
 
-import fiftyone.zoo as foz
-
 from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
-from anime2sd import extract_and_remove_similar, remove_similar_from_dir
+from anime2sd import extract_and_remove_similar
 from anime2sd import classify_from_directory
-from anime2sd import save_characters_to_meta
 from anime2sd import tag_and_caption_from_directory
+from anime2sd import select_dataset_images_from_directory
 from anime2sd import rearrange_related_files
-from anime2sd import update_emb_init_info
-from anime2sd import resize_character_images
 from anime2sd import arrange_folder, get_repeat
 from anime2sd import read_weight_mapping
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
-from anime2sd.basics import remove_empty_folders
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
 
@@ -169,74 +164,55 @@ def classify_characters(args, src_dir, is_start_stage):
     return os.path.dirname(dst_dir)
 
 
-def select_images_for_dataset(args, src_dir, is_start_stage):
+def select_dataset_images(args, src_dir, is_start_stage):
+    """Construct training set from classified images and raw images.
+
+    Args:
+        args: A Namespace object containing the command-line arguments.
+        src_dir: The path to the intermediate image type directory containing the
+                 two folders "raw" and "classified".
+        is_start_stage: Whether this is the start stage of the pipeline.
+
+    Returns:
+        The path to the training image type directory.
+    """
     classified_dir = os.path.join(src_dir, "classified")
     full_dir = os.path.join(src_dir, "raw")
     dst_dir = os.path.join(args.dst_dir, "training", args.image_type)
     os.makedirs(dst_dir, exist_ok=True)
 
-    logging.info(f"Preparing dataset images to {dst_dir} ...")
-
     if is_start_stage:
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(classified_dir)
+    overwrite_path = is_start_stage and args.overwrite_path
 
-    overwrite_uncropped = (
-        args.pipeline_type == "screenshots" or args.character_overwrite_uncropped
-    )
-    # update metadata using folder name
-    character_embeddings = save_characters_to_meta(classified_dir, overwrite_uncropped)
+    logging.info(f"Preparing dataset images to {dst_dir} ...")
 
-    # save trigger word info
-    emb_init_filepath = os.path.join(dst_dir, "emb_init.json")
-    update_emb_init_info(
-        emb_init_filepath,
-        character_embeddings,
-        args.image_type,
-        overwrite=args.overwrite_emb_init_info,
-    )
-
-    if args.use_3stage_crop == 4:
-        if args.detect_level in ["s", "n"]:
-            detect_level_head_halfbody = args.detect_level
-        else:
-            detect_level_head_halfbody = "n"
-        detect_config = {"level": detect_level_head_halfbody}
-        crop_action = ThreeStageSplitAction(
-            split_person=False,
-            head_conf=detect_config,
-            halfbody_conf=detect_config,
-        )
-        logging.info(f"Performing 3 stage cropping for {classified_dir} ...")
-        overwrite_path = is_start_stage and args.overwrite_path
-        source = LocalSource(classified_dir, overwrite_path=overwrite_path)
-        source.attach(
-            crop_action,
-        ).export(SaveExporter(classified_dir, in_place=True))
-
-    n_reg = args.n_anime_reg if args.pipeline_type == "screenshots" else 0
-    # select images, resize, and save to training
-    resize_character_images(
-        [classified_dir, full_dir],
+    select_dataset_images_from_directory(
+        classified_dir,
+        full_dir,
         dst_dir,
-        max_size=args.max_size,
-        ext=args.image_save_ext,
+        pipeline_type=args.pipeline_type,
+        overwrite_path=overwrite_path,
+        # For saving character to metadata
+        character_overwrite_uncropped=args.character_overwrite_uncropped,
+        # For saving embedding initialization information
         image_type=args.image_type,
-        n_nocharacter_frames=n_reg,
+        overwrite_emb_init_info=args.overwrite_emb_init_info,
+        # For 3 stage cropping
+        use_3stage_crop=args.use_3stage_crop == 4,
+        detect_level=args.detect_level,
+        # For resizing/copying images to destination
+        max_size=args.max_size,
+        image_save_ext=args.image_save_ext,
         to_resize=not args.no_resize,
+        n_anime_reg=args.n_anime_reg,
+        # For additional filtering after obtaining dataset images
+        filter_again=args.filter_again,
+        detect_duplicate_model=args.detect_duplicate_model,
+        similarity_threshold=args.similar_thresh,
     )
-    remove_empty_folders(dst_dir)
 
-    if args.filter_again:
-        logging.info(f"Removing duplicates from {dst_dir} ...")
-        model = foz.load_zoo_model(args.detect_duplicate_model)
-        for folder in os.listdir(dst_dir):
-            if os.path.isdir(os.path.join(dst_dir, folder)):
-                remove_similar_from_dir(
-                    os.path.join(dst_dir, folder),
-                    model=model,
-                    thresh=args.similar_thresh,
-                )
     if args.remove_intermediate:
         shutil.rmtree(classified_dir)
     return dst_dir
@@ -297,17 +273,22 @@ def tag_and_caption(args, src_dir, is_start_stage):
         use_tags_prob=args.use_tags_prob,
     )
 
+    logging.info(f"Tagging and captioning images in {src_dir} ...")
+
     tag_and_caption_from_directory(
-        args.src_dir,
+        src_dir,
         tagging_manager,
         caption_generator,
-        args.use_existing_core_tag_file,
-        args.core_frequency_thresh,
-        args.image_type,
-        args.overwrite_emb_init_info,
-        args.load_aux,
-        args.save_aux,
-        args.overwrite_path,
+        # For core tags
+        use_existing_core_tag_file=args.use_existing_core_tag_file,
+        core_frequency_threshold=args.core_frequency_thresh,
+        # For saving embedding initialization information
+        image_type=args.image_type,
+        overwrite_emb_init_info=args.overwrite_emb_init_info,
+        # For file io
+        load_aux=args.load_aux,
+        save_aux=args.save_aux,
+        overwrite_path=args.overwrite_path,
     )
     return src_dir
 
@@ -379,7 +360,7 @@ STAGE_FUNCTIONS = {
     1: extract_frames,
     2: crop_characters,
     3: classify_characters,
-    4: select_images_for_dataset,
+    4: select_dataset_images,
     5: tag_and_caption,
     6: rearrange,
     7: balance,
@@ -421,8 +402,10 @@ if __name__ == "__main__":
         "--overwrite_path",
         action="store_true",
         help=(
-            "Overwrite path in metadata if LocalSource is used "
-            "in the first stage. Should never be used in general"
+            "Overwrite path in metadata. It has effect at stage 2 and 4-7. "
+            "Using by starting at stage 4 will prevent from character information "
+            "from being written to the original images. "
+            "Should never be used in general."
         ),
     )
     parser.add_argument(
