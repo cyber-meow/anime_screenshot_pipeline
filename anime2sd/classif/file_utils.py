@@ -8,13 +8,16 @@ from natsort import natsorted
 from hbutils.string import plural_word
 
 import numpy as np
-
 from imgutils.metrics import ccip_extract_feature
-from anime2sd.basics import random_string
-from anime2sd.basics import get_images_recursively
-from anime2sd.basics import get_corr_meta_names, get_corr_ccip_names
-from anime2sd.basics import get_default_metadata
-from anime2sd.character import Character
+
+from ..basics import (
+    random_string,
+    get_images_recursively,
+    get_corr_meta_names,
+    get_corr_ccip_names,
+    get_default_metadata,
+)
+from ..character import Character
 
 
 def load_image_features_and_characters(

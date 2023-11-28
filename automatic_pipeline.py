@@ -1,5 +1,4 @@
 import os
-import json
 import shutil
 import logging
 import argparse
@@ -9,27 +8,21 @@ import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
-from waifuc.action import TaggingAction
 from waifuc.action import ThreeStageSplitAction
 
-from anime2sd.basics import remove_empty_folders
 from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import classify_from_directory
-from anime2sd import rearrange_related_files
 from anime2sd import save_characters_to_meta
+from anime2sd import tag_and_caption_from_directory
+from anime2sd import rearrange_related_files
 from anime2sd import update_emb_init_info
 from anime2sd import resize_character_images
-from anime2sd import parse_overlap_tags, read_weight_mapping
-from anime2sd import CharacterTagProcessor
-from anime2sd import get_character_core_tags, get_character_core_tags_and_save
-from anime2sd import save_core_tag_info
 from anime2sd import arrange_folder, get_repeat
+from anime2sd import read_weight_mapping
+from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
+from anime2sd.basics import remove_empty_folders
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
-from anime2sd.waifuc_customize import TagPruningAction, TagSortingAction
-from anime2sd.waifuc_customize import CoreCharacterTagPruningAction
-from anime2sd.waifuc_customize import TagRemovingUnderscoreAction
-from anime2sd.waifuc_customize import CaptioningAction
 from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
 
 
@@ -250,12 +243,23 @@ def select_images_for_dataset(args, src_dir, is_start_stage):
 
 
 def tag_and_caption(args, src_dir, is_start_stage):
+    """Perform in-place tagging and captioning.
+
+    Args:
+        args: A Namespace object containing the command-line arguments.
+        src_dir: The path to the source directory containing images to be classified.
+        is_start_stage: Whether this is the start stage of the pipeline.
+
+    Returns:
+        The path to the input directory.
+    """
     if is_start_stage:
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(src_dir)
 
     if "character" in args.pruned_mode:
         char_tag_proc = CharacterTagProcessor(
+            tag_list_path=args.character_tags_file,
             drop_difficulty=args.drop_difficulty,
             emb_min_difficulty=args.emb_min_difficulty,
             emb_max_difficutly=args.emb_max_difficulty,
@@ -264,119 +268,47 @@ def tag_and_caption(args, src_dir, is_start_stage):
         )
     else:
         char_tag_proc = None
-    core_tag_path = os.path.join(src_dir, "core_tags.json")
-    wildcard_path = os.path.join(src_dir, "wildcard.txt")
-    emb_init_filepath = os.path.join(src_dir, "emb_init.json")
 
-    if args.process_from_original_tags or args.overwrite_tags:
-        tags_attribute = "tags"
-    else:
-        tags_attribute = "processed_tags"
-    if args.pruned_mode == "character_core":
-        pruned_mode = "minimal"
-    else:
-        pruned_mode = args.pruned_mode
-
-    with open(args.blacklist_tags_file, "r") as f:
-        blacklisted_tags = {line.strip() for line in f}
-    overlap_tags_dict = parse_overlap_tags(args.overlap_tags_file)
-    overwrite_path = is_start_stage and args.overwrite_path
-
-    separators = {
-        "character": args.character_sep,
-        "character_inner": args.character_inner_sep,
-        "character_outer": args.character_outer_sep,
-        "caption_inner": args.caption_inner_sep,
-        "caption_outer": args.caption_outer_sep,
-    }
-
-    use_probs = {
-        "n_people": args.use_npeople_prob,
-        "characters": args.use_character_prob,
-        "copyright": args.use_copyright_prob,
-        "type": args.use_image_type_prob,
-        "artist": args.use_artist_prob,
-        "rating": args.use_rating_prob,
-        "tags": args.use_tags_prob,
-    }
-
-    source = LocalSource(src_dir, load_aux=args.load_aux, overwrite_path=overwrite_path)
-    source = source.attach(
-        TaggingAction(
-            force=args.overwrite_tags,
-            method=args.tagging_method,
-            general_threshold=args.tag_threshold,
-            character_threshold=1.01,
-        ),
-        TagPruningAction(
-            blacklisted_tags,
-            overlap_tags_dict,
-            pruned_mode=pruned_mode,
-            tags_attribute=tags_attribute,
-            character_tag_processor=char_tag_proc,
-        ),
-        TagRemovingUnderscoreAction(),
-    )
-    logging.info(f"Tagging and captioning images in {src_dir} ...")
-
-    if args.pruned_mode == "character_core":
-        source.export(
-            SaveExporter(src_dir, no_meta=False, save_caption=False, in_place=True)
-        )
-        if args.use_existing_core_tag_file:
-            with open(core_tag_path, "r") as f:
-                character_core_tags = json.load(f)
-        else:
-            assert char_tag_proc is not None
-            character_core_tags = get_character_core_tags(
-                src_dir, frequency_threshold=args.core_frequency_thresh
-            )
-            (
-                character_core_tags,
-                emb_init_dict,
-            ) = char_tag_proc.categorize_character_tag_dict(character_core_tags)
-            save_core_tag_info(
-                character_core_tags,
-                core_tag_path,
-                wildcard_path,
-                separators=separators,
-            )
-            update_emb_init_info(
-                emb_init_filepath,
-                emb_init_dict.keys(),
-                args.image_type,
-                emb_init_dict=emb_init_dict,
-                overwrite=args.overwrite_emb_init_info,
-            )
-        source = source.attach(
-            CoreCharacterTagPruningAction(
-                character_core_tags, tags_attribute="processed_tags"
-            )
-        )
-    else:
-        character_core_tags = get_character_core_tags_and_save(
-            src_dir,
-            core_tag_path,
-            wildcard_path,
-            frequency_threshold=args.core_frequency_thresh,
-            separators=separators,
-        )
-    characters = list(character_core_tags.keys())
-
-    source = source.attach(
-        TagSortingAction(args.sort_mode, max_tag_number=args.max_tag_number),
-        CaptioningAction(use_probs, separators, characters),
-    )
-    source.export(
-        SaveExporter(
-            src_dir,
-            no_meta=False,
-            save_caption=True,
-            save_aux=args.save_aux,
-            in_place=True,
-        )
+    tagging_manager = TaggingManager(
+        tagging_method=args.tagging_method,
+        tag_threshold=args.tag_threshold,
+        overwrite_tags=args.overwrite_tags,
+        pruned_mode=args.pruned_mode,
+        blacklist_tags_file=args.blacklist_tags_file,
+        overlap_tags_file=args.overlap_tags_file,
+        character_tag_processor=char_tag_proc,
+        process_from_original_tags=args.process_from_original_tags,
+        sort_mode=args.sort_mode,
+        max_tag_number=args.max_tag_number,
     )
 
+    caption_generator = CaptionGenerator(
+        character_sep=args.character_sep,
+        character_inner_sep=args.character_inner_sep,
+        character_outer_sep=args.character_outer_sep,
+        caption_inner_sep=args.caption_inner_sep,
+        caption_outer_sep=args.caption_outer_sep,
+        use_npeople_prob=args.use_npeople_prob,
+        use_character_prob=args.use_character_prob,
+        use_copyright_prob=args.use_copyright_prob,
+        use_image_type_prob=args.use_image_type_prob,
+        use_artist_prob=args.use_artist_prob,
+        use_rating_prob=args.use_rating_prob,
+        use_tags_prob=args.use_tags_prob,
+    )
+
+    tag_and_caption_from_directory(
+        args.src_dir,
+        tagging_manager,
+        caption_generator,
+        args.use_existing_core_tag_file,
+        args.core_frequency_thresh,
+        args.image_type,
+        args.overwrite_emb_init_info,
+        args.load_aux,
+        args.save_aux,
+        args.overwrite_path,
+    )
     return src_dir
 
 
@@ -717,7 +649,11 @@ if __name__ == "__main__":
         "--tagging_method",
         type=str,
         default="wd14_convnextv2",
-        help="Method used for tagging.",
+        help=(
+            "Method used for tagging. "
+            "Options are 'deepdanbooru', 'wd14_vit', 'wd14_convnext', "
+            "'wd14_convnextv2', 'wd14_swinv2', 'mldanbooru'."
+        ),
     )
     parser.add_argument(
         "--tag_threshold", type=float, default=0.35, help="Threshold for tagging."
@@ -752,6 +688,12 @@ if __name__ == "__main__":
         type=str,
         default="tag_filtering/overlap_tags.json",
         help="Path to the file containing overlap tag information.",
+    )
+    parser.add_argument(
+        "--character_tags_file",
+        type=str,
+        default="tag_filtering/character_tags.json",
+        help="Path to the file containing character tag information.",
     )
     parser.add_argument(
         "--process_from_original_tags",

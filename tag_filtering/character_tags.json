@@ -1,0 +1,74 @@
+{
+    "whitelist": [
+        "drill",
+        "pubic hair",
+        "closed eyes",
+        "half-closed eyes",
+        "empty eyes",
+        "fake tail"
+    ],
+    "suffixes": [
+        [
+            "man",
+            "woman",
+            "eyes",
+            "skin",
+            "hair",
+            "bun",
+            "bangs",
+            "cut",
+            "sidelocks",
+            "twintails",
+            "braid",
+            "braids",
+            "afro",
+            "ahoge",
+            "drill",
+            "bald",
+            "dreadlocks",
+            "side up",
+            "ponytail",
+            "updo",
+            "beard",
+            "mustache",
+            "goatee",
+            "hair intake",
+            "thick eyebrows",
+            "otoko no ko",
+            "bishounen",
+            "short hair with long locks",
+            "one eye covered"
+        ],
+        [
+            "fang",
+            "mark",
+            "freckles",
+            "elf",
+            "ear",
+            "horn",
+            "fur",
+            "halo",
+            "wings",
+            "heterochromia",
+            "tail",
+            "animal ear fluff",
+            "girl",
+            "boy"
+        ]
+    ],
+    "prefixes": [
+        [
+            "hair over",
+            "hair between",
+            "dark-skinned",
+            "mature",
+            "old"
+        ],
+        [
+            "mole",
+            "scar",
+            "furry",
+            "muscular"
+        ]
+    ]
+}

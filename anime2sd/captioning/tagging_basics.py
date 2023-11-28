@@ -31,50 +31,32 @@ def sort_tags(tags, sort_mode):
     :param sort_mode: Sorting mode ('original', 'shuffle', 'score').
     :return: Sorted tags.
     """
-    assert sort_mode in ['original', 'shuffle', 'score']
+    assert sort_mode in ["original", "shuffle", "score"]
     npeople_tags = []
     remaining_tags = []
 
-    if 'solo' in tags:
-        npeople_tags.append('solo')
+    if "solo" in tags:
+        npeople_tags.append("solo")
 
     for tag in tags:
-        if tag == 'solo':
+        if tag == "solo":
             continue
-        if 'girls' in tag or 'boys' in tag or tag in ['1girl', '1boy']:
+        if "girls" in tag or "boys" in tag or tag in ["1girl", "1boy"]:
             npeople_tags.append(tag)
         else:
             remaining_tags.append(tag)
 
-    if sort_mode == 'score' and isinstance(tags, dict):
+    if sort_mode == "score" and isinstance(tags, dict):
         # Sorting remaining_tags by score in descending order
         remaining_tags = sorted(
             remaining_tags,
             key=lambda tag: tags[tag],
-            reverse=True  # Higher scores first
+            reverse=True,  # Higher scores first
         )
-    elif sort_mode == 'shuffle':
+    elif sort_mode == "shuffle":
         random.shuffle(remaining_tags)
 
     return npeople_tags + remaining_tags
-
-
-def parse_overlap_tags(json_file):
-    """
-    Parses a JSON file to extract the 'query' and 'has_overlap' fields.
-
-    :param json_file: Path to the JSON file.
-    :return: A dictionary with 'query' as keys and 'has_overlap' as values.
-    """
-    with open(json_file, 'r') as file:
-        data = json.load(file)
-
-    overlap_tags_dict = {
-        entry['query']: entry['has_overlap']
-        for entry in data if 'has_overlap' in entry and entry['has_overlap']
-    }
-
-    return overlap_tags_dict
 
 
 def drop_blacklisted_tags(tags, blacklisted_tags):
@@ -86,20 +68,26 @@ def drop_blacklisted_tags(tags, blacklisted_tags):
     :return: List or dictionary of tags after removing blacklisted tags.
     """
     # Handle both underscore and whitespace in tags
-    blacklist = set(tag.replace(' ', '_') for tag in blacklisted_tags)
-    blacklist_update = set(tag.replace('_', ' ') for tag in blacklist)
+    blacklist = set(tag.replace(" ", "_") for tag in blacklisted_tags)
+    blacklist_update = set(tag.replace("_", " ") for tag in blacklist)
     blacklist.update(blacklist_update)
 
     if isinstance(tags, dict):
-        return {tag: value for tag, value in tags.items()
-                if tag not in blacklisted_tags and
-                tag.replace(' ', '_') not in blacklisted_tags and
-                tag.replace('_', ' ') not in blacklisted_tags}
+        return {
+            tag: value
+            for tag, value in tags.items()
+            if tag not in blacklisted_tags
+            and tag.replace(" ", "_") not in blacklisted_tags
+            and tag.replace("_", " ") not in blacklisted_tags
+        }
     elif isinstance(tags, list):
-        return [tag for tag in tags
-                if tag not in blacklisted_tags and
-                tag.replace(' ', '_') not in blacklisted_tags and
-                tag.replace('_', ' ') not in blacklisted_tags]
+        return [
+            tag
+            for tag in tags
+            if tag not in blacklisted_tags
+            and tag.replace(" ", "_") not in blacklisted_tags
+            and tag.replace("_", " ") not in blacklisted_tags
+        ]
     else:
         raise ValueError(f"Unsuppored types {type(tags)} for {tags}")
 
@@ -110,7 +98,7 @@ def drop_overlap_tags(tags, overlap_tags_dict, check_superword=True):
 
     :param tags: List or Dictionary of tags.
     :param overlap_tags_dict: Dictionary with overlap tag information.
-        Assume here to take the underscore format
+        Assume here to take the underscore format.
     :return: A list or dictionary with overlap tags removed.
     """
     # If tags is a dictionary, extract the keys for processing
@@ -122,17 +110,15 @@ def drop_overlap_tags(tags, overlap_tags_dict, check_superword=True):
         tags = list(tags.keys())
 
     result_tags = []
-    tags_underscore = [tag.replace(' ', '_') for tag in tags]
+    tags_underscore = [tag.replace(" ", "_") for tag in tags]
 
     for tag, tag_ in zip(tags, tags_underscore):
-
         to_remove = False
 
         # Case 1: If the tag is a key and some of
         # the associated values are in tags
         if tag_ in overlap_tags_dict:
-            overlap_values = set(
-                val for val in overlap_tags_dict[tag_])
+            overlap_values = set(val for val in overlap_tags_dict[tag_])
             if overlap_values.intersection(set(tags_underscore)):
                 to_remove = True
 

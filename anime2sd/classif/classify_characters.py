@@ -9,15 +9,16 @@ from sklearn.cluster import OPTICS
 from imgutils.metrics import ccip_extract_feature, ccip_default_threshold
 from imgutils.metrics import ccip_batch_differences
 
-from anime2sd.basics import remove_empty_folders
-from anime2sd.character import Character
-from anime2sd.classif.imagewise import extract_from_noise, filter_characters_from_images
-from anime2sd.classif.file_utils import load_image_features_and_characters
-from anime2sd.classif.file_utils import parse_ref_dir, save_to_dir
+from ..basics import remove_empty_folders
+from ..character import Character
 
-from anime2sd.classif.merge_clusters import merge_clusters
-from anime2sd.classif.merge_clusters import map_clusters_to_existing
-from anime2sd.classif.merge_clusters import map_clusters_to_reference
+from .file_utils import load_image_features_and_characters, parse_ref_dir, save_to_dir
+from .imagewise import extract_from_noise, filter_characters_from_images
+from .merge_clusters import (
+    merge_clusters,
+    map_clusters_to_existing,
+    map_clusters_to_reference,
+)
 
 
 def cluster_characters_basics(

@@ -9,12 +9,12 @@ from .image_selection import (
     save_characters_to_meta,
     resize_character_images,
 )
-from .tagging_basics import parse_overlap_tags
-from .tagging_character import (
+from .captioning import tag_and_caption_from_directory
+from .captioning import (
+    TaggingManager,
+    CaptionGenerator,
+    CoreTagProcessor,
     CharacterTagProcessor,
-    get_character_core_tags,
-    get_character_core_tags_and_save,
-    save_core_tag_info,
 )
 from .arrange import arrange_folder
 from .balancing import read_weight_mapping, get_repeat
