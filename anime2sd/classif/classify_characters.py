@@ -222,24 +222,26 @@ def classify_from_directory(
     # The number of known character names from metadata
     n_meta_labels = len(character_mapping)
 
+    ref_images, ref_labels = None, None
+
     if ref_dir is not None:
-        ref_image_files, ref_labels, ref_characters = parse_ref_dir(ref_dir)
-        logging.info(
-            "Extracting feature of "
-            + f'{plural_word(len(ref_image_files), "images")} ...'
-        )
-        ref_images = np.array(
-            [
-                ccip_extract_feature(img)
-                for img in tqdm(ref_image_files, desc="Extract reference features")
-            ]
-        )
-        # Merge class names and update ref_labels and characters_per_image
-        character_mapping, ref_labels, characters_per_image = merge_characters(
-            character_mapping, ref_characters, ref_labels, characters_per_image
-        )
-    else:
-        ref_images, ref_labels = None, None
+        ref_image_files, ref_labels_tmp, ref_characters = parse_ref_dir(ref_dir)
+        if ref_image_files:
+            logging.info(
+                "Extracting feature of "
+                + f'{plural_word(len(ref_image_files), "images")} ...'
+            )
+            ref_images = np.array(
+                [
+                    ccip_extract_feature(img)
+                    for img in tqdm(ref_image_files, desc="Extract reference features")
+                ]
+            )
+            ref_labels = ref_labels_tmp
+            # Merge class names and update ref_labels and characters_per_image
+            character_mapping, ref_labels, characters_per_image = merge_characters(
+                character_mapping, ref_characters, ref_labels, characters_per_image
+            )
 
     # The number of known character names from either reference or metadata
     n_pre_labels = len(character_mapping)

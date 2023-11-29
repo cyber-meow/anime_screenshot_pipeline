@@ -424,9 +424,6 @@ def launch_pipeline(args):
         7: ["balance"],
     }
 
-    if args.image_type is None:
-        args.image_type = args.pipeline_type
-
     start_stage = args.start_stage
     end_stage = args.end_stage
 
@@ -990,10 +987,22 @@ if __name__ == "__main__":
 
     if args.base_config_file or args.config_file:
         # Overwrite args with explicitly set command line arguments
-        for config_args in configs:
+        for config in configs:
             for key, value in explicit_args.items():
-                setattr(config_args, key, value)
+                setattr(config, key, value)
 
+    # A set to record dst_dir and image_type in configs
+    dst_image_type_pairs = set()
+
+    # Process each configuration
     for config in configs:
-        # Process each configuration
+        if config.image_type is None:
+            config.image_type = args.pipeline_type
+        dst_image_type = (config.dst_dir, config.image_type)
+        if dst_image_type in dst_image_type_pairs:
+            raise ValueError(
+                "Duplicate dst_dir and image_type are not supported: "
+                f"{config.dst_dir}, {config.image_type}"
+            )
+        dst_image_type_pairs.add(dst_image_type)
         launch_pipeline(config)
