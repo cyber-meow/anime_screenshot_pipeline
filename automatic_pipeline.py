@@ -1,4 +1,5 @@
 import os
+import sys
 import toml
 import copy
 import shutil
@@ -458,18 +459,20 @@ if __name__ == "__main__":
         "--base_config_file",
         nargs="?",
         help=(
-            "Path to base TOML configuration file. Configurations from the "
-            "TOML file will override default and command-line arguments."
+            "Path to base TOML configuration file. "
+            "Configurations from the TOML file override default arguments and "
+            "are written by command-line arguments."
         ),
     )
     parser.add_argument(
         "--config_file",
         nargs="*",
         help=(
-            "Path to TOML configuration files. Configurations from the "
-            "TOML files will override default and command-line arguments. "
+            "Path to TOML configuration files. "
+            "Configurations from the TOML files override default arguments and "
+            "are written by command-line arguments."
             "Multiple files can be specified by repeating the argument, in which case "
-            "multiple pipelines will be executed in parallel."
+            "multiple pipelines are executed in parallel."
         ),
     )
 
@@ -970,6 +973,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    explicit_args = {
+        key: value for key, value in vars(args).items() if sys.argv.count("--" + key)
+    }
 
     if args.base_config_file:
         args = update_args_from_toml(args, args.base_config_file)
@@ -981,6 +987,12 @@ if __name__ == "__main__":
             configs.append(config_args)
     else:
         configs.append(args)
+
+    if args.base_config_file or args.config_file:
+        # Overwrite args with explicitly set command line arguments
+        for config_args in configs:
+            for key, value in explicit_args.items():
+                setattr(config_args, key, value)
 
     for config in configs:
         # Process each configuration

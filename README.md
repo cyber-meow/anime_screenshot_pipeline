@@ -22,7 +22,7 @@ python automatic_pipeline.py \
 An example base_config_file is provided in [configs/pipelines/base.toml](configs/pipelines/base.toml).
 Config files for `screenshots` and `booru` pipelines can be found in the same folder.
 
-Alternatively, you can directly specify the arguments in command line.
+Alternatively, you can directly specify the arguments in command line (these arguments have higher priority than the ones in the configuration files).
 
 ```bash
 python automatic_pipeline.py \
