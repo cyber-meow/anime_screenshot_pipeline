@@ -12,12 +12,12 @@ from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
 from anime2sd import extract_and_remove_similar
-from anime2sd import rearrange_related_files
 from anime2sd import classify_from_directory
 from anime2sd import select_dataset_images_from_directory
 from anime2sd import tag_and_caption_from_directory
 from anime2sd import arrange_folder, get_repeat
 from anime2sd import read_weight_mapping
+from anime2sd import rearrange_related_files, load_metadata_from_aux
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
@@ -63,15 +63,13 @@ def update_args_from_toml(
     return new_args
 
 
-def setup_logging(log_dir, log_prefix):
+def setup_logging(log_dir: str, log_prefix: str):
     """
     Set up logging to file and stdout with specified directory and prefix.
 
     Args:
-        log_dir: Directory to save the log file.
-        log_prefix: Prefix for the log file name.
-
-    Returns: None
+        log_dir (str): Directory to save the log file.
+        log_prefix (str): Prefix for the log file name.
     """
 
     # Create logger
@@ -102,10 +100,122 @@ def setup_logging(log_dir, log_prefix):
         fh.setFormatter(formatter)
 
 
-def extract_frames(args, src_dir, is_start_stage):
-    dst_dir = os.path.join(args.dst_dir, "intermediate", args.image_type, "raw")
-    os.makedirs(dst_dir, exist_ok=True)
+def setup_args(args):
+    """
+    Sets up the start and end stages for the pipeline based on the provided arguments.
+    If the 'image_type' is not specified, it defaults to the 'pipeline_type'.
+    """
+    # Mapping stage numbers to their aliases
+    STAGE_ALIASES = {
+        1: ["extract"],
+        2: ["crop"],
+        3: ["classify"],
+        4: ["select"],
+        5: ["tag", "caption", "tag_and_caption"],
+        6: ["arrange"],
+        7: ["balance"],
+    }
+    if not config.image_type:
+        config.image_type = args.pipeline_type
+
+    start_stage = args.start_stage
+    end_stage = args.end_stage
+
+    # Convert stage aliases to numbers if provided
+    for stage_number in STAGE_ALIASES:
+        if args.start_stage in STAGE_ALIASES[stage_number]:
+            start_stage = stage_number
+        if args.end_stage in STAGE_ALIASES[stage_number]:
+            end_stage = stage_number
+
+    args.start_stage = int(start_stage)
+    args.end_stage = int(end_stage)
+
+
+def get_and_create_dst_dir(
+    args: argparse.Namespace,
+    mode: str,
+    sub_dir: str = "",
+    makedirs: bool = True,
+) -> str:
+    """
+    Constructs the destination directory path based on the mode, subdirectory,
+    and additional arguments.
+
+    If 'makedirs' is True, the function also creates the directory if it doesn't exist.
+
+    Args:
+        args (argparse.Namespace):
+            The namespace object containing the command-line arguments.
+        mode (str):
+            The mode specifying the main directory under the destination directory.
+        sub_dir (str, optional):
+            An additional subdirectory to put at the end.
+            Defaults to an empty string.
+        makedirs (bool, optional):
+            Whether to create the directory if it doesn't exist. Defaults to True.
+
+    Returns:
+        str: The path to the constructed destination directory.
+    """
+    dst_dir = os.path.join(
+        args.dst_dir, mode, args.extra_path_component, args.image_type, sub_dir
+    )
+    if makedirs:
+        os.makedirs(dst_dir, exist_ok=True)
+    return dst_dir
+
+
+def get_src_dir(args, stage):
+    """
+    Determines the source directory for a given stage of the pipeline.
+
+    Args:
+        args (argparse.Namespace):
+            The namespace object containing the command-line arguments.
+        stage (int): The current stage of the pipeline.
+
+    Returns:
+        str: The path to the source directory for the given stage.
+
+    Raises:
+        ValueError: If the provided stage number is invalid.
+    """
+    if stage == args.start_stage or stage == 1:
+        return args.src_dir
+    elif stage == 2:
+        return get_and_create_dst_dir(args, "intermediate", "raw", makedirs=False)
+    elif stage == 3:
+        return get_and_create_dst_dir(args, "intermediate", "cropped", makedirs=False)
+    elif stage == 4:
+        return get_and_create_dst_dir(args, "intermediate", makedirs=False)
+    elif stage == 5:
+        return get_and_create_dst_dir(args, "training", makedirs=False)
+    elif stage == 6:
+        dst_dir = get_src_dir(args, 5)
+        for _ in range(args.rearrange_up_levels):
+            dst_dir = os.path.dirname(dst_dir)
+        return dst_dir
+    elif stage == 7:
+        dst_dir = get_src_dir(args, 6)
+        for _ in range(args.compute_multiply_up_levels):
+            dst_dir = os.path.dirname(dst_dir)
+        return dst_dir
+    else:
+        raise ValueError(f"Invalid stage: {stage}")
+
+
+def extract_frames(args, stage):
+    """
+    Extracts frames from videos and saves them to the destination directory.
+    This function also handles duplicate detection and removal.
+    """
+    # Get the path to the source directory containing the videos
+    src_dir = get_src_dir(args, stage)
+    # Get the path to the destination directory for the extracted frames
+    dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
     logging.info(f"Extracting frames to {dst_dir} ...")
+
     extract_and_remove_similar(
         src_dir,
         dst_dir,
@@ -116,12 +226,19 @@ def extract_frames(args, src_dir, is_start_stage):
         thresh=args.similar_thresh,
         to_remove_similar=not args.no_remove_similar,
     )
-    return dst_dir
 
 
-def crop_characters(args, src_dir, is_start_stage):
-    # TODO: Avoid cropping for already cropped data
-    overwrite_path = is_start_stage and args.overwrite_path
+# TODO: Avoid cropping for already cropped data
+def crop_characters(args, stage):
+    """Crops individual characters from images in the source directory."""
+    # Get the path to the source directory containing the images to crop from
+    src_dir = get_src_dir(args, stage)
+    # Get the path to the destination directory for the cropped images
+    dst_dir = get_and_create_dst_dir(args, "intermediate", "cropped")
+    logging.info(f"Cropping individual characters to {dst_dir} ...")
+
+    overwrite_path = args.start_stage == stage and args.overwrite_path
+
     source = LocalSource(src_dir, overwrite_path=overwrite_path)
     detect_config_person = {"level": args.detect_level}
     if args.detect_level in ["s", "n"]:
@@ -157,28 +274,16 @@ def crop_characters(args, src_dir, is_start_stage):
             MinFaceCountAction(1, level="n"),
         )
 
-    dst_dir = os.path.join(args.dst_dir, "intermediate", args.image_type, "cropped")
-    os.makedirs(dst_dir, exist_ok=True)
-    logging.info(f"Cropping individual characters to {dst_dir} ...")
     source.export(SaveExporter(dst_dir, no_meta=False, save_caption=False))
 
-    return dst_dir
 
+def classify_characters(args, stage):
+    """Classifies characters in the given source directory."""
 
-def classify_characters(args, src_dir, is_start_stage):
-    """Classifies characters in the given source directory.
-
-    Args:
-        args: A Namespace object containing the command-line arguments.
-        src_dir: The path to the source directory containing images to be classified.
-        is_start_stage: Whether this is the start stage of the pipeline.
-
-    Returns:
-        The path to the directory containing the classified images.
-    """
-
-    dst_dir = os.path.join(args.dst_dir, "intermediate", args.image_type, "classified")
-    os.makedirs(dst_dir, exist_ok=True)
+    # Get the path to the source directory containing images to be classified
+    src_dir = get_src_dir(args, stage)
+    # Get the path to the distination directory containing the classified images
+    dst_dir = get_and_create_dst_dir(args, "intermediate", "classified")
 
     # Determine whether to move or copy files to the destination directory.
     move = args.remove_intermediate or (src_dir == dst_dir)
@@ -206,26 +311,18 @@ def classify_characters(args, src_dir, is_start_stage):
         move=move,
     )
 
-    return os.path.dirname(dst_dir)
 
-
-def select_dataset_images(args, src_dir, is_start_stage):
-    """Construct training set from classified images and raw images.
-
-    Args:
-        args: A Namespace object containing the command-line arguments.
-        src_dir: The path to the intermediate image type directory containing the
-                 two folders "raw" and "classified".
-        is_start_stage: Whether this is the start stage of the pipeline.
-
-    Returns:
-        The path to the training image type directory.
-    """
+def select_dataset_images(args, stage):
+    """Construct training set from classified images and raw images."""
+    # Get the path to the intermediate directory containing the
+    # two folders "raw" and "classified".
+    src_dir = get_src_dir(args, stage)
     classified_dir = os.path.join(src_dir, "classified")
     full_dir = os.path.join(src_dir, "raw")
-    dst_dir = os.path.join(args.dst_dir, "training", args.image_type)
-    os.makedirs(dst_dir, exist_ok=True)
+    # Get the path to the image_type subfolder of the training directory
+    dst_dir = get_and_create_dst_dir(args, "training")
 
+    is_start_stage = args.start_stage == stage
     if is_start_stage:
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(classified_dir)
@@ -261,21 +358,13 @@ def select_dataset_images(args, src_dir, is_start_stage):
 
     if args.remove_intermediate:
         shutil.rmtree(classified_dir)
-    return dst_dir
 
 
-def tag_and_caption(args, src_dir, is_start_stage):
-    """Perform in-place tagging and captioning.
-
-    Args:
-        args: A Namespace object containing the command-line arguments.
-        src_dir: The path to the source directory containing images to be classified.
-        is_start_stage: Whether this is the start stage of the pipeline.
-
-    Returns:
-        The path to the input directory.
-    """
-    if is_start_stage:
+def tag_and_caption(args, stage):
+    """Perform in-place tagging and captioning."""
+    # Get path to the directiry containing images to be tagged and captioned
+    src_dir = get_src_dir(args, stage)
+    if args.start_stage == stage:
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(src_dir)
 
@@ -336,24 +425,16 @@ def tag_and_caption(args, src_dir, is_start_stage):
         save_aux=args.save_aux,
         overwrite_path=args.overwrite_path,
     )
-    return src_dir
 
 
-def rearrange(args, src_dir, is_start_stage):
+def rearrange(args, stage):
+    """Rearrange the images in the directory."""
+    # Get path to the directiry containing images to be rearranged
+    src_dir = get_src_dir(args, stage)
     logging.info(f"Rearranging {src_dir} ...")
-    if is_start_stage and args.load_aux:
-        logging.info("Load metadata from auxiliary data ...")
-        source = LocalSource(
-            src_dir, load_aux=args.load_aux, overwrite_path=args.overwrite_path
-        )
-        source.export(
-            SaveExporter(
-                src_dir,
-                no_meta=False,
-                save_caption=True,
-                save_aux=args.save_aux,
-                in_place=True,
-            )
+    if args.start_stage == stage and args.load_aux:
+        load_metadata_from_aux(
+            src_dir, args.load_aux, args.save_aux, args.overwrite_path
         )
         rearrange_related_files(src_dir)
     arrange_folder(
@@ -363,26 +444,18 @@ def rearrange(args, src_dir, is_start_stage):
         args.max_character_number,
         args.min_images_per_combination,
     )
-    return os.path.join(args.dst_dir, "training")
 
 
-def balance(args, src_dir, is_start_stage):
-    training_dir = src_dir
-    logging.info(f"Computing repeat for {training_dir} ...")
-    if is_start_stage and args.load_aux:
-        logging.info("Load metadata from auxiliary data ...")
-        source = LocalSource(
-            src_dir, load_aux=args.load_aux, overwrite_path=args.overwrite_path
+def balance(args, stage):
+    """Compute the repeat for the images in the directory."""
+    # Get path to the directiry containing images for which repeat needs to be computed
+    src_dir = get_src_dir(args, stage)
+    if args.start_stage == stage and args.load_aux:
+        load_metadata_from_aux(
+            src_dir, args.load_aux, args.save_aux, args.overwrite_path
         )
-        source.export(
-            SaveExporter(
-                src_dir,
-                no_meta=False,
-                save_caption=True,
-                save_aux=args.save_aux,
-                in_place=True,
-            )
-        )
+        rearrange_related_files(src_dir)
+    logging.info(f"Computing repeat for {src_dir} ...")
     if args.weight_csv is not None:
         weight_mapping = read_weight_mapping(args.weight_csv)
     else:
@@ -395,10 +468,7 @@ def balance(args, src_dir, is_start_stage):
         log_file = os.path.join(
             args.log_dir, f"{args.log_prefix}_weighting_{str_current_time}.log"
         )
-    get_repeat(
-        training_dir, weight_mapping, args.min_multiply, args.max_multiply, log_file
-    )
-    return training_dir
+    get_repeat(src_dir, weight_mapping, args.min_multiply, args.max_multiply, log_file)
 
 
 def launch_pipeline(args):
@@ -413,39 +483,12 @@ def launch_pipeline(args):
         7: balance,
     }
 
-    # Mapping stage numbers to their aliases
-    STAGE_ALIASES = {
-        1: ["extract"],
-        2: ["crop"],
-        3: ["classify"],
-        4: ["select"],
-        5: ["tag", "caption", "tag_and_caption"],
-        6: ["arrange"],
-        7: ["balance"],
-    }
-
-    start_stage = args.start_stage
-    end_stage = args.end_stage
-
-    # Convert stage aliases to numbers if provided
-    for stage_number in STAGE_ALIASES:
-        if args.start_stage in STAGE_ALIASES[stage_number]:
-            start_stage = stage_number
-        if args.end_stage in STAGE_ALIASES[stage_number]:
-            end_stage = stage_number
-
-    start_stage = int(start_stage)
-    end_stage = int(end_stage)
-
-    src_dir = args.src_dir
-
     setup_logging(args.log_dir, f"{args.pipeline_type}_{args.log_prefix}")
 
     # Loop through the stages and execute them
-    for stage_num in range(start_stage, end_stage + 1):
+    for stage_num in range(args.start_stage, args.end_stage + 1):
         logging.info(f"-------------Start stage {stage_num}-------------")
-        is_start_stage = stage_num == start_stage
-        src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir, is_start_stage)
+        STAGE_FUNCTIONS[stage_num](args, stage_num)
 
 
 if __name__ == "__main__":
@@ -475,10 +518,22 @@ if __name__ == "__main__":
 
     # General arguments
     parser.add_argument(
-        "--src_dir", default="animes", help="Directory containing source files"
+        "--src_dir",
+        type=str,
+        default="animes",
+        help="Directory containing source files",
     )
     parser.add_argument(
-        "--dst_dir", default="data", help="Directory to save output files"
+        "--dst_dir", type=str, default="data", help="Directory to save output files"
+    )
+    parser.add_argument(
+        "--extra_path_component",
+        type=str,
+        default="",
+        help=(
+            "Extra path component to add between dst_dir/[training|intermediate] "
+            "and image type."
+        ),
     )
     parser.add_argument(
         "--start_stage", default="1", help="Stage numbeer or alias to start from"
@@ -935,6 +990,16 @@ if __name__ == "__main__":
 
     # Arguments for folder organization
     parser.add_argument(
+        "--rearrange_up_levels",
+        type=int,
+        default=0,
+        help=(
+            "Number of directory levels to go up from the captioned directory when "
+            "setting the source directory for the rearrange stage."
+            "Defaults to 0."
+        ),
+    )
+    parser.add_argument(
         "--arrange_format",
         type=str,
         default="n_characters/character",
@@ -956,7 +1021,17 @@ if __name__ == "__main__":
         ),
     )
 
-    # For balancing
+    # For dataset balancing
+    parser.add_argument(
+        "--compute_multiply_up_levels",
+        type=int,
+        default=1,
+        help=(
+            "Number of directory levels to go up from the rearranged directory when "
+            "setting the source directory for the compute multiply stage. "
+            "Defaults to 1."
+        ),
+    )
     parser.add_argument(
         "--min_multiply", type=float, default=1, help="Minimum multiply of each image"
     )
@@ -992,17 +1067,17 @@ if __name__ == "__main__":
                 setattr(config, key, value)
 
     # A set to record dst_dir and image_type in configs
-    dst_image_type_pairs = set()
+    dst_folder_set = set()
 
     # Process each configuration
     for config in configs:
-        if config.image_type is None:
-            config.image_type = args.pipeline_type
-        dst_image_type = (config.dst_dir, config.image_type)
-        if dst_image_type in dst_image_type_pairs:
+        setup_args(config)
+        dst_folder = (config.dst_dir, config.extra_path_component, config.image_type)
+        if dst_folder in dst_folder_set:
             raise ValueError(
-                "Duplicate dst_dir and image_type are not supported: "
-                f"{config.dst_dir}, {config.image_type}"
+                "Duplicate (dst_dir, extra_path_component, image_type) "
+                "is not supported: "
+                f"{config.dst_dir}, {config.extra_path_component}, {config.image_type}"
             )
-        dst_image_type_pairs.add(dst_image_type)
+        dst_folder_set.add(dst_folder)
         launch_pipeline(config)

@@ -7,6 +7,9 @@ import string
 from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
+from typing import List
+
+from anime2sd.waifuc_customize import LocalSource, SaveExporter
 
 
 def random_string(length=6):
@@ -169,12 +172,14 @@ def get_related_paths(img_path):
     return [meta_path, ccip_path]
 
 
-def construct_file_list(src_dir):
+def construct_file_list(src_dir: str):
     """
     Construct a list of all files in the directory and checks for duplicates.
 
-    :param classified_dir: The directory to search.
-    :return: A list of all file paths in the directory.
+    Args:
+        src_dir (str): The directory to search.
+    Reurns:
+        A list of all file paths in the directory.
     """
     all_files = {}
     for root, _, filenames in os.walk(src_dir):
@@ -186,12 +191,12 @@ def construct_file_list(src_dir):
     return all_files
 
 
-def rearrange_related_files(src_dir):
+def rearrange_related_files(src_dir: str):
     """
     Rearrange related files in some directory.
 
-    :param src_dir: The directory containing images
-        and other files to rearrange.
+    Args:
+        src_dir (src): The directory containing images and other files to rearrange.
     """
     all_files = construct_file_list(src_dir)
     image_files = get_images_recursively(src_dir)
@@ -216,3 +221,33 @@ def rearrange_related_files(src_dir):
                     logging.info(
                         f"Moved related file from {found_path} " f"to {related_path}"
                     )
+
+
+def load_metadata_from_aux(
+    src_dir: str, load_aux: List[str], save_aux: List[str], overwrite_path: bool
+) -> None:
+    """
+    Load metadata from auxiliary data and export it with potential modifications.
+
+    This function loads metadata from a source directory, potentially modifies it,
+    and then saves it back to the same directory.
+    It utilizes auxiliary data specified in 'load_aux' and 'save_aux' lists.
+
+    Args:
+        src_dir (str): The source directory from which to load the metadata.
+        load_aux (List[str]): A list of auxiliary data attributes to be loaded.
+        save_aux (List[str]): A list of auxiliary data attributes to be saved.
+        overwrite_path (bool):
+            Flag to indicate if the path in the metadata should be overwritten.
+    """
+    logging.info("Load metadata from auxiliary data ...")
+    source = LocalSource(src_dir, load_aux=load_aux, overwrite_path=overwrite_path)
+    source.export(
+        SaveExporter(
+            src_dir,
+            no_meta=False,
+            save_caption=True,
+            save_aux=save_aux,
+            in_place=True,
+        )
+    )

@@ -4,6 +4,8 @@
 src_dir = "data/intermediate/animes"
 # Directory to save output files
 dst_dir = "data"
+# Extra path component to add between dst_dir/[training|intermediate] and image type
+extra_path_component = ""
 # Stage number or alias to start from
 start_stage = 1
 # Stage number or alias to end at
@@ -28,7 +30,7 @@ ep_init = 1
 
 # Character Cropping Configuration
 [character_cropping]
-# Use 3 stage crop to get halfbody and head crops.
+# Use 3 stage crop to get halfbody and head crops
 # Set to {} or comment it to disable
 use_3stage_crop = {}
 

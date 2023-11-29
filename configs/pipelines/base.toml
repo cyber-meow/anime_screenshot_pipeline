@@ -4,6 +4,8 @@
 src_dir = "path/to/src_dir"
 # Directory to save output files
 dst_dir = "path/to/dst_dir"
+# Extra path component to add between dst_dir/[training|intermediate] and image type
+extra_path_component = ""
 # Stage number or alias to start from
 start_stage = 1
 # Stage number or alias to end at
@@ -12,9 +14,9 @@ end_stage = 7
 log_dir = "logs"
 # Prefix for log files
 log_prefix = "logfile"
-# Overwrite path in metadata. It has effect at stage 2 and 4-7.
-# Using by starting at stage 4 will prevent character information from being written to the original images.
-# Should never be used in general.
+# Overwrite path in metadata. It has effect at stage 2 and 4-7
+# Using by starting at stage 4 will prevent character information from being written to the original images
+# Should never be used in general
 overwrite_path = false
 # Pipeline type that is used to construct dataset
 remove_intermediate = false
@@ -38,7 +40,7 @@ crop_with_head = true
 crop_with_face = false
 # The detection model level being used. The 'n' model runs faster with smaller system overhead
 detect_level = "n"
-# Use 3 stage crop to get halfbody and head crops.
+# Use 3 stage crop to get halfbody and head crops
 # This is slow and should only be called once for a set of images. Possible to use either at stage 2 or 4.
 # Set to {} or comment it to disable
 use_3stage_crop = {}
@@ -156,6 +158,8 @@ use_tags_prob = 1
 
 # Folder Organization Configuration
 [folder_organization]
+# Number of directory levels to go up from the captioned directory when setting the source directory for the rearrange stage
+rearrange_up_levels = 0
 # Description of the concept balancing directory hierarchy
 arrange_format = "n_characters/character"
 # If have more than X characters put X+
@@ -165,6 +169,8 @@ min_images_per_combination = 10
 
 # Balancing Configuration
 [balancing]
+# Number of directory levels to go up from the rearranged directory when setting the source directory for the compute multiply stage
+compute_multiply_up_levels = 1
 # Minimum multiply of each image
 min_multiply = 1
 # Maximum multiply of each image
