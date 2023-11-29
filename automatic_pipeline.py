@@ -5,6 +5,7 @@ import shutil
 import logging
 import asyncio
 import argparse
+import concurrent.futures
 from datetime import datetime
 
 from waifuc.action import PersonSplitAction
@@ -468,7 +469,7 @@ def identify_dependencies(configs):
     return stage3_dependencies
 
 
-async def run_stage(config, config_index, stage_num, stage_events, logger):
+async def run_stage(config, config_index, stage_num, stage_events, logger, executor):
     # Mapping stage numbers to their respective function names
     STAGE_FUNCTIONS = {
         1: extract_frames,
@@ -479,11 +480,18 @@ async def run_stage(config, config_index, stage_num, stage_events, logger):
         6: rearrange,
         7: balance,
     }
-    STAGE_FUNCTIONS[stage_num](config, stage_num, logger)
+
+    logger.info(f"-------------Start stage {stage_num}-------------")
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(
+        executor, STAGE_FUNCTIONS[stage_num], config, stage_num, logger
+    )
     stage_events[config_index][stage_num].set()
 
 
-async def run_pipeline(config, config_index, stage_events, stage3_dependencies):
+async def run_pipeline(
+    config, config_index, stage_events, stage3_dependencies, executor
+):
     logger = setup_logging(
         config.log_dir,
         f"{config.pipeline_type}_{config.log_prefix}",
@@ -501,8 +509,7 @@ async def run_pipeline(config, config_index, stage_events, stage3_dependencies):
                 )
             )
 
-        logger.info(f"-------------Start stage {stage_num}-------------")
-        await run_stage(config, config_index, stage_num, stage_events, logger)
+        await run_stage(config, config_index, stage_num, stage_events, logger, executor)
 
 
 async def main(configs):
@@ -514,13 +521,15 @@ async def main(configs):
         for config in configs
     ]
 
-    # Run pipelines asynchronously with dependencies
-    await asyncio.gather(
-        *(
-            run_pipeline(config, i, stage_events, stage3_dependencies)
-            for i, config in enumerate(configs)
+    # Create a ThreadPoolExecutor
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Run pipelines asynchronously with dependencies
+        await asyncio.gather(
+            *(
+                run_pipeline(config, i, stage_events, stage3_dependencies, executor)
+                for i, config in enumerate(configs)
+            )
         )
-    )
 
 
 if __name__ == "__main__":
