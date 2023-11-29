@@ -276,7 +276,9 @@ class CoreTagProcessor(object):
         "curtains",
     ]
 
-    def __init__(self, folder_path=None, core_tag_path=None, frequency_threshold=0.4):
+    def __init__(
+        self, folder_path=None, core_tag_path=None, frequency_threshold=0.4, logger=None
+    ):
         """
         For each character in the given folder, find the tags whose appearance
         frequency is higher than a certain threshold.
@@ -289,8 +291,11 @@ class CoreTagProcessor(object):
                 The path to a pre-existing file of core tags.
             frequency_threshold (float):
                 The minimum frequency for a tag to be considered core tag.
+            logger (Logger):
+                The logger to use. Defaults to None, which uses the default logger.
         """
         assert folder_path is not None or core_tag_path is not None
+        self.logger = logging.getLogger() if logger is None else logger
 
         self.frequency_threshold = frequency_threshold
         if core_tag_path:
@@ -299,7 +304,7 @@ class CoreTagProcessor(object):
         else:
             img_paths = get_images_recursively(folder_path)
             self.character_tag_dict = dict()
-            logging.info("Search for core tags...")
+            self.logger.info("Search for core tags...")
             for img_path in tqdm(img_paths):
                 meta_file_path, _ = get_corr_meta_names(img_path)
                 if not os.path.exists(meta_file_path):
@@ -431,7 +436,7 @@ class CoreTagProcessor(object):
         to_drop = []
         for character in characters:
             if character not in self.core_tags:
-                logging.warning(
+                self.logger.warning(
                     f"Character '{character}' not found in core tag dictionary."
                 )
                 continue

@@ -4,7 +4,7 @@ import random
 import logging
 import shutil
 from tqdm import tqdm
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
 from PIL import Image
 
 import fiftyone.zoo as foz
@@ -251,6 +251,7 @@ def save_characters_to_meta(
     overwrite_path: bool = False,
     overwrite_uncropped: bool = True,
     remove_unclassified: bool = False,
+    logger: Optional[logging.Logger] = None,
 ) -> List[str]:
     """
     Save character information to metadata files across multiple folders.
@@ -272,6 +273,9 @@ def save_characters_to_meta(
         remove_unclassified (bool, optional):
             Whether to remove characters not in "character_names" for the original
             image. Defaults to False.
+        logger (Optional[Logger], optional):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         List[str]: A list of character embedding names.
@@ -279,6 +283,8 @@ def save_characters_to_meta(
     Raises:
         IOError: If there is an issue in reading or writing the metadata file.
     """
+    if logger is None:
+        logger = logging.getLogger()
 
     # To keep track of paths encountered in this run
     # Value set to True if the character list is to be updated
@@ -296,7 +302,7 @@ def save_characters_to_meta(
             character_embeddings.add(character.embedding_name)
             character_names.add(character.character_name)
 
-    logging.info("Initialize metadata for raw images ...")
+    logger.info("Initialize metadata for raw images ...")
 
     # Iterate over each image in the raw directory to initialize character metadata
     for img_path in tqdm(get_images_recursively(raw_dir)):
@@ -308,7 +314,7 @@ def save_characters_to_meta(
             character_names,
         )
 
-    logging.info("Saving characters to metadata ...")
+    logger.info("Saving characters to metadata ...")
 
     # Iterate over each folder in the classified directory to update metadata
     for folder_name in tqdm(get_folders_recursively(classified_dir)):
@@ -354,7 +360,12 @@ def resize_image(image: Image, max_size: int) -> Image:
 
 
 def save_image_and_meta(
-    img: Image, img_path: str, save_dir: str, ext: str, image_type: str
+    img: Image,
+    img_path: str,
+    save_dir: str,
+    ext: str,
+    image_type: str,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Save the image with the specified extension and
@@ -366,11 +377,14 @@ def save_image_and_meta(
         save_dir (str): The directory where the image will be saved.
         ext (str): The extension to be used for saving the image.
         image_type (str): The type of the image to be recorded in the metadata.
+        logger (Logger): A logger to use for logging.
 
     Raises:
         IOError: If there is an error saving the image.
         ValueError: If metadata file does not exist.
     """
+    if logger is None:
+        logger = logging.getLogger()
     # Extract the filename from the original image path
     filename = os.path.basename(img_path)
     base_filename = os.path.splitext(filename)[0]
@@ -385,7 +399,7 @@ def save_image_and_meta(
         else:
             img.save(adjusted_path)
     except IOError as e:
-        logging.error(f"Error saving the image {adjusted_path}: {e}")
+        logger.error(f"Error saving the image {adjusted_path}: {e}")
 
     # Copy the corresponding metadata file
     meta_path, meta_filename = get_corr_meta_names(img_path)
@@ -448,6 +462,7 @@ def resize_character_images(
     n_nocharacter_frames: int,
     to_resize: bool = True,
     overwrite_path: bool = False,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Process images from source directories, resize them if needed,
@@ -471,11 +486,16 @@ def resize_character_images(
         overwrite_path (bool, optional):
             Flag to determine if existing paths should be overwritten.
             Defaults to False.
+        logger (logging.Logger, optional):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Raises:
         ValueError: If there is an error reading an image.
         IOError: If there is an error processing an image.
     """
+    if logger is None:
+        logger = logging.getLogger()
     nocharacter_frames = []
     processed_img_paths = set()
     for src_dir in src_dirs:
@@ -483,7 +503,7 @@ def resize_character_images(
             warn = False
         else:
             warn = True
-        logging.info(f"Processing images from {src_dir} ...")
+        logger.info(f"Processing images from {src_dir} ...")
         save_dir = os.path.join(dst_dir, os.path.basename(src_dir))
         os.makedirs(save_dir, exist_ok=True)
 
@@ -519,7 +539,7 @@ def resize_character_images(
                         raise ValueError(f"Error reading image: {img_path}")
                     resized_img = resize_image(img, max_size)
                     save_image_and_meta(
-                        resized_img, img_path, save_dir, ext, image_type
+                        resized_img, img_path, save_dir, ext, image_type, logger
                     )
                 else:
                     copy_image_and_meta(img_path, save_dir, image_type)
@@ -536,7 +556,7 @@ def resize_character_images(
     else:
         selected_frames = nocharacter_frames
 
-    logging.info(f"Copying {len(selected_frames)} no character images ...")
+    logger.info(f"Copying {len(selected_frames)} no character images ...")
 
     for img_path in tqdm(selected_frames):
         if to_resize:
@@ -545,7 +565,9 @@ def resize_character_images(
             except IOError:
                 raise ValueError(f"Error reading image: {img_path}")
             resized_img = resize_image(img, max_size)
-            save_image_and_meta(resized_img, img_path, save_dir, ext, image_type)
+            save_image_and_meta(
+                resized_img, img_path, save_dir, ext, image_type, logger
+            )
         else:
             copy_image_and_meta(img_path, save_dir, image_type)
 
@@ -574,6 +596,7 @@ def select_dataset_images_from_directory(
     filter_again: bool,
     detect_duplicate_model: str,
     similarity_threshold: float,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Select and process images from the specified directories for dataset creation.
@@ -602,6 +625,7 @@ def select_dataset_images_from_directory(
         filter_again (bool): Flag to filter similar images again after processing.
         detect_duplicate_model (str): Model used for duplicate detection.
         similarity_threshold (float): Threshold for similarity in duplicate detection.
+        logger (Optional[Logger]): A logger to use for logging.
 
     Raises:
         ValueError: If there is an error in processing the images.
@@ -619,6 +643,7 @@ def select_dataset_images_from_directory(
         overwrite_path=overwrite_path,
         overwrite_uncropped=overwrite_uncropped,
         remove_unclassified=character_remove_unclassified,
+        logger=logger,
     )
 
     # save trigger word info
@@ -628,6 +653,7 @@ def select_dataset_images_from_directory(
         character_embeddings,
         image_type,
         overwrite=overwrite_emb_init_info,
+        logger=logger,
     )
 
     if use_3stage_crop:
@@ -642,7 +668,7 @@ def select_dataset_images_from_directory(
             head_conf=detect_config,
             halfbody_conf=detect_config,
         )
-        logging.info(f"Performing 3 stage cropping for {classified_dir} ...")
+        logger.info(f"Performing 3 stage cropping for {classified_dir} ...")
         source = LocalSource(classified_dir)
         source.attach(
             crop_action,
@@ -659,11 +685,12 @@ def select_dataset_images_from_directory(
         n_nocharacter_frames=n_reg,
         to_resize=to_resize,
         overwrite_path=overwrite_path,
+        logger=logger,
     )
     remove_empty_folders(dst_dir)
 
     if filter_again:
-        logging.info(f"Removing duplicates from {dst_dir} ...")
+        logger.info(f"Removing duplicates from {dst_dir} ...")
         model = foz.load_zoo_model(detect_duplicate_model)
         for folder in os.listdir(dst_dir):
             if os.path.isdir(os.path.join(dst_dir, folder)):
@@ -671,4 +698,5 @@ def select_dataset_images_from_directory(
                     os.path.join(dst_dir, folder),
                     model=model,
                     thresh=similarity_threshold,
+                    logger=logger,
                 )

@@ -65,6 +65,7 @@ def merge_clusters(
     min_merge_id: int = 0,
     merge_threshold: float = 0.85,
     characters_per_image: Optional[np.ndarray] = None,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Merges clusters based on a similarity score threshold. Clusters with a similarity
@@ -92,12 +93,17 @@ def merge_clusters(
         characters_per_image (np.ndarray):
             A boolean array (num_images x num_characters) indicating the presence of
             characters in each image.
+        logger (Optional[logging.Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         None: The function performs in-place operations and does not return a value.
     """
+    if logger is None:
+        logger = logging.getLogger()
     # Perform in-place operations to merge clusters
-    logging.info("Merging clusters ...")
+    logger.info("Merging clusters ...")
     while True:
         _round_merged = False
         for xi in range(1, max_clu_id + 1):
@@ -108,7 +114,7 @@ def merge_clusters(
                     continue
 
                 score = (batch_same[labels == xi][:, labels == yi]).mean()
-                logging.info(f"Label {xi} and {yi}'s similarity score: {score}")
+                logger.info(f"Label {xi} and {yi}'s similarity score: {score}")
                 if score >= merge_threshold:
                     image_indices_to_update = np.where(labels == yi)[0]
                     assign_if_consistent(
@@ -117,20 +123,20 @@ def merge_clusters(
                         characters_per_image=characters_per_image,
                         image_indices=image_indices_to_update,
                     )
-                    logging.info(f"Merging label {yi} into {xi} ...")
+                    logger.info(f"Merging label {yi} into {xi} ...")
                     exist_ids.remove(yi)
                     _round_merged = True
 
         if not _round_merged:
             break
 
-    logging.info("Merge complete, remained cluster ids: " + f"{sorted(exist_ids)}.")
+    logger.info("Merge complete, remained cluster ids: " + f"{sorted(exist_ids)}.")
     label_cnt = {
         i: (labels == i).sum()
         for i in range(-1, max_clu_id + 1)
         if (labels == i).sum() > 0
     }
-    logging.info(f"Current label count: {label_cnt}")
+    logger.info(f"Current label count: {label_cnt}")
 
 
 def map_clusters_to_reference(
@@ -141,8 +147,10 @@ def map_clusters_to_reference(
     mode: Literal["min", "avg"] = "min",
     same_threshold: float = 0.5,
     characters_per_image: Optional[np.ndarray] = None,
+    logger: Optional[logging.Logger] = None,
 ) -> np.ndarray:
-    """Map cluster IDs of images to the labels of reference images based on similarity.
+    """
+    Map cluster IDs of images to the labels of reference images based on similarity.
 
     This function classifies each cluster of images by comparing it to a set of
     reference images and assigning the reference label that best matches the cluster
@@ -168,6 +176,9 @@ def map_clusters_to_reference(
         characters_per_image (np.ndarray):
             A boolean array (num_images x num_characters) indicating the presence of
             characters in each image.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         np.ndarray:
@@ -177,7 +188,9 @@ def map_clusters_to_reference(
     Raises:
         ValueError: If an invalid mode is provided.
     """
-    logging.info("Classifying using reference images ...")
+    if logger is None:
+        logger = logging.getLogger()
+    logger.info("Classifying using reference images ...")
 
     cls_labels = cluster_ids.copy()
     max_label = np.max(ref_labels)
@@ -243,6 +256,7 @@ def map_clusters_to_existing(
     characters_per_image: np.ndarray,
     n_pre_labels: int,
     min_proportion: float = 0.6,
+    logger: Optional[logging.Logger] = None,
 ) -> np.ndarray:
     """Maps cluster labels to the most frequent character ID in characters_per_image,
     ensuring that the character ID meets a minimum proportion within the cluster.
@@ -258,6 +272,9 @@ def map_clusters_to_existing(
         min_proportion (float):
             The minimum proportion for the most frequent character ID to be considered
             as the representative for the cluster.
+        logger (logging.Logger):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         np.ndarray:
@@ -268,7 +285,9 @@ def map_clusters_to_existing(
     Raises:
         Warning: If there are multiple character IDs that can represent a cluster.
     """
-    logging.info("Classifying using existing metadata characters ...")
+    if logger is None:
+        logger = logging.getLogger()
+    logger.info("Classifying using existing metadata characters ...")
 
     updated_labels = labels.copy()  # Create a copy of the labels to update
     unique_labels = np.unique(labels)
@@ -295,7 +314,7 @@ def map_clusters_to_existing(
         max_characters = np.nonzero(character_sums == max_count)[0]
         if len(max_characters) > 1:
             # Warn if there are multiple characters with the same count
-            logging.warning(
+            logger.warning(
                 f"Label {label} has multiple potential representative characters: "
                 f"{max_characters}."
             )

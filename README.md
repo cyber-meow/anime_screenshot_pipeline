@@ -96,6 +96,7 @@ Contributions are welcome
 - [x] HCP-diffusion compatibility [2023.10.08]
 - [x] .toml support [2023.11.29]
 - [ ] Fanart support
+- [ ] Multi-anime support
 
 ### Secondary
 

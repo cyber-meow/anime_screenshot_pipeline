@@ -4,10 +4,11 @@ import shutil
 import logging
 import random
 import string
-from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
-from typing import List
+from typing import List, Optional
+from pathlib import Path
+from datetime import datetime
 
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
 
@@ -191,17 +192,20 @@ def construct_file_list(src_dir: str):
     return all_files
 
 
-def rearrange_related_files(src_dir: str):
+def rearrange_related_files(src_dir: str, logger: Optional[logging.Logger] = None):
     """
     Rearrange related files in some directory.
 
     Args:
         src_dir (src): The directory containing images and other files to rearrange.
+        logger (Logger): A logger to use for logging.
     """
+    if logger is None:
+        logger = logging.getLogger()
     all_files = construct_file_list(src_dir)
     image_files = get_images_recursively(src_dir)
 
-    logging.info("Arranging related files ...")
+    logger.info("Arranging related files ...")
     for img_path in tqdm(image_files, desc="Rearranging related files"):
         related_paths = get_related_paths(img_path)
         for related_path in related_paths:
@@ -211,20 +215,24 @@ def rearrange_related_files(src_dir: str):
                 found_path = all_files.get(os.path.basename(related_path))
                 if found_path is None:
                     if related_path.endswith("json"):
-                        logging.warning(f"No related file found for {related_path}")
+                        logger.warning(f"No related file found for {related_path}")
                         meta_data = get_default_metadata(img_path)
                         with open(related_path, "w") as f:
                             json.dump(meta_data, f)
                 else:
                     # Move the found file to the expected location
                     shutil.move(found_path, related_path)
-                    logging.info(
+                    logger.info(
                         f"Moved related file from {found_path} " f"to {related_path}"
                     )
 
 
 def load_metadata_from_aux(
-    src_dir: str, load_aux: List[str], save_aux: List[str], overwrite_path: bool
+    src_dir: str,
+    load_aux: List[str],
+    save_aux: List[str],
+    overwrite_path: bool,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Load metadata from auxiliary data and export it with potential modifications.
@@ -239,8 +247,11 @@ def load_metadata_from_aux(
         save_aux (List[str]): A list of auxiliary data attributes to be saved.
         overwrite_path (bool):
             Flag to indicate if the path in the metadata should be overwritten.
+        logger (Logger): Logger to use for logging.
     """
-    logging.info("Load metadata from auxiliary data ...")
+    if logger is None:
+        logger = logging.getLogger()
+    logger.info("Load metadata from auxiliary data ...")
     source = LocalSource(src_dir, load_aux=load_aux, overwrite_path=overwrite_path)
     source.export(
         SaveExporter(
@@ -251,3 +262,43 @@ def load_metadata_from_aux(
             in_place=True,
         )
     )
+
+
+def setup_logging(log_dir: str, log_prefix: str, logger_name: str):
+    """
+    Set up logging to file and stdout with specified directory and prefix.
+
+    Args:
+        log_dir (str): Directory to save the log file.
+        log_prefix (str): Prefix for the log file name.
+        logger_name (str): Unique name for the logger.
+    """
+
+    # Create logger
+    logger = logging.getLogger(logger_name)
+    original_handlers = logger.handlers[:]
+    for handler in original_handlers:
+        logger.removeHandler(handler)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    # Stop propagation to parent loggers
+    # logger.propagate = False
+
+    # Create console handler and set level to info
+    # ch = logging.StreamHandler()
+    # ch.setLevel(logger.info)
+    # logger.addHandler(ch)
+    # ch.setFormatter(formatter)
+
+    # Create file handler and set level to info
+    if log_dir.lower() != "none":
+        os.makedirs(log_dir, exist_ok=True)
+        current_time = datetime.now()
+        str_current_time = current_time.strftime("%Y-%m-%d%H-%M-%S")
+        log_file = os.path.join(log_dir, f"{log_prefix}_{str_current_time}.log")
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(logging.INFO)
+        logger.addHandler(fh)
+        fh.setFormatter(formatter)
+    return logger

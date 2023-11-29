@@ -22,13 +22,18 @@ from ..character import Character
 
 def load_image_features_and_characters(
     src_dir: str,
+    logger: Optional[logging.Logger] = None,
 ) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Dict[int, Character]]:
     """Load image features and associated character information
     from a given source directory.
 
     Args:
-        src_dir (str): The source directory where image files and
-                       their corresponding metadata are stored.
+        src_dir (str):
+            The source directory where image files and their corresponding
+            metadata are stored.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[int, str]]:
@@ -38,8 +43,12 @@ def load_image_features_and_characters(
               None if no characters are found.
             - A dictionary mapping label indices to character information.
     """
+    if logger is None:
+        logger = logging.getLogger()
+
     image_files = np.array(natsorted(get_images_recursively(src_dir)))
-    logging.info(f'Extracting feature of {plural_word(len(image_files), "image")} ...')
+    logger.info(f'Extracting feature of {plural_word(len(image_files), "image")} ...')
+
     images = []
     characters_list = []
     character_to_index = {}  # Mapping from character name to label index
@@ -82,7 +91,7 @@ def load_image_features_and_characters(
             for character_index in character_indices:
                 characters_per_image[i, character_index] = True
     else:
-        logging.info(
+        logger.info(
             "No character metadata found; returning None for 'characters_per_image'."
         )
 
@@ -164,6 +173,7 @@ def save_to_dir(
     labels: np.ndarray,
     character_mapping: Optional[Dict[int, Character]] = None,
     move: bool = False,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Save or move image files to a destination directory, organized into
@@ -183,7 +193,12 @@ def save_to_dir(
             Defaults to None, in which case random strings will be used.
         move (bool):
             If True, move files instead of copying. Defaults to False.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
     """
+    if logger is None:
+        logger = logging.getLogger()
     unique_labels = sorted(set(labels))
     for label in unique_labels:
         if character_mapping and label in character_mapping:
@@ -198,7 +213,7 @@ def save_to_dir(
 
         os.makedirs(os.path.join(dst_dir, folder_name), exist_ok=True)
         total = (labels == label).sum()
-        logging.info(f'class {folder_name} has {plural_word(total, "image")} in total.')
+        logger.info(f'class {folder_name} has {plural_word(total, "image")} in total.')
 
         for img_path, img in zip(image_files[labels == label], images[labels == label]):
             img_path_dst = os.path.join(

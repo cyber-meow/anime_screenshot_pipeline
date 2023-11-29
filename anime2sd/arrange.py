@@ -120,12 +120,14 @@ def count_n_images(filenames):
     return count
 
 
-def merge_folder(character_comb_dict, min_images_per_comb, aux_dict):
+def merge_folder(character_comb_dict, min_images_per_comb, aux_dict, logger):
+    if logger is None:
+        logger = logging.getLogger()
     for comb in tqdm(character_comb_dict):
         files = character_comb_dict[comb]
         n_images = count_n_images(files)
         if n_images < min_images_per_comb:
-            logging.info(
+            logger.info(
                 f"{comb} has fewer than {min_images_per_comb} images; "
                 + "renamed as character_others"
             )
@@ -143,16 +145,23 @@ def remove_empty_folders(path_abs):
 
 
 def arrange_folder(
-    src_dir, dst_dir, arrange_format, max_character_number, min_images_per_combination
+    src_dir,
+    dst_dir,
+    arrange_format,
+    max_character_number,
+    min_images_per_combination,
+    logger=None,
 ):
+    if logger is None:
+        logger = logging.getLogger()
     img_paths = get_images_recursively(src_dir)
     file_paths = get_files_recursively(src_dir)
 
-    logging.info("Constructing dictionary for auxiliary files...")
+    logger.info("Constructing dictionary for auxiliary files...")
     aux_dict = construct_aux_files_dict(file_paths)
     character_combination_dict = dict()
 
-    logging.info("Rearranging...")
+    logger.info("Rearranging...")
     for img_path in tqdm(img_paths):
         meta_file_path, _ = get_corr_meta_names(img_path)
 
@@ -176,11 +185,16 @@ def arrange_folder(
                 character_combination_dict[character_folder] = [new_path]
 
     # We need to cosntruct the dictionary again after moving the files
-    logging.info("Constructing dictionary for auxiliary files...")
+    logger.info("Constructing dictionary for auxiliary files...")
     file_paths = get_files_recursively(src_dir)
     aux_dict = construct_aux_files_dict(file_paths)
-    logging.info("Merging folders...")
+    logger.info("Merging folders...")
     if min_images_per_combination > 1:
-        merge_folder(character_combination_dict, min_images_per_combination, aux_dict)
+        merge_folder(
+            character_combination_dict,
+            min_images_per_combination,
+            aux_dict,
+            logger=logger,
+        )
     remove_empty_folders(src_dir)
     remove_empty_folders(dst_dir)

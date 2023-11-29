@@ -28,6 +28,8 @@ use_3stage_crop = 2
 [character_classification]
 # Directory containing reference character images
 character_ref_dir = "path/to/reference/character/images"
+# The number of additional reference images to add to each character from classification result"
+n_add_to_ref_per_character = 15
 # Whether to ignore existing character metadata during classification
 ignore_character_metadata = false
 # Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata

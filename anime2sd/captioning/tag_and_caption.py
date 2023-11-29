@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from typing import List
+from typing import List, Optional
 
 from waifuc.action import TaggingAction
 
@@ -66,6 +66,7 @@ class TaggingManager(object):
         process_from_original_tags,
         sort_mode,
         max_tag_number,
+        logger,
     ):
         self.tagging_method = tagging_method
         self.tag_threshold = tag_threshold
@@ -75,6 +76,7 @@ class TaggingManager(object):
         self.process_from_original_tags = process_from_original_tags
         self.sort_mode = sort_mode
         self.max_tag_number = max_tag_number
+        self.logger = logging.getLogger() if logger is None else logger
 
         with open(blacklist_tags_file, "r") as f:
             self.blacklisted_tags = {line.strip() for line in f}
@@ -140,6 +142,7 @@ class TaggingManager(object):
             pruned_mode=pruned_mode,
             tags_attribute=tags_attribute,
             character_tag_processor=self.character_tag_processor,
+            logger=self.logger,
         )
 
     def get_tag_sorting_action(self):
@@ -151,7 +154,9 @@ class TaggingManager(object):
             TagSortingAction:
                 An instance for sorting tags as per the current settings.
         """
-        return TagSortingAction(self.sort_mode, max_tag_number=self.max_tag_number)
+        return TagSortingAction(
+            self.sort_mode, max_tag_number=self.max_tag_number, logger=self.logger
+        )
 
 
 def tag_and_caption_from_directory(
@@ -165,6 +170,7 @@ def tag_and_caption_from_directory(
     load_aux: List[str],
     save_aux: List[str],
     overwrite_path: bool,
+    logger: Optional[logging.Logger] = None,
 ):
     """
     Processes images in a directory for tagging and captioning.
@@ -196,6 +202,8 @@ def tag_and_caption_from_directory(
             List of auxiliary attributes to save.
         overwrite_path (bool):
             Whether to overwrite path in metadata or not.
+        logger (Logger):
+            Logger for logging. Defaults to None, which uses the default logger.
 
     Returns:
         None
@@ -218,11 +226,14 @@ def tag_and_caption_from_directory(
         if use_existing_core_tag_file:
             core_tag_processor = CoreTagProcessor(
                 core_tag_path=core_tag_path,
+                logger=logger,
             )
         else:
             assert tagging_manager.character_tag_processor is not None
             core_tag_processor = CoreTagProcessor(
-                folder_path=dir, frequency_threshold=core_frequency_threshold
+                folder_path=dir,
+                frequency_threshold=core_frequency_threshold,
+                logger=logger,
             )
             emb_init_dict = core_tag_processor.categorize_core_tags(
                 tagging_manager.character_tag_processor
@@ -238,10 +249,11 @@ def tag_and_caption_from_directory(
                 image_type,
                 emb_init_dict=emb_init_dict,
                 overwrite=overwrite_emb_init_info,
+                logger=logger,
             )
         source = source.attach(
             CoreCharacterTagPruningAction(
-                core_tag_processor, tags_attribute="processed_tags"
+                core_tag_processor, tags_attribute="processed_tags", logger=logger
             )
         )
         characters = list(core_tag_processor.get_core_tags().keys())
@@ -264,7 +276,7 @@ def tag_and_caption_from_directory(
 
     if tagging_manager.pruned_mode != "character_core":
         core_tag_processor = CoreTagProcessor(
-            dir, frequency_threshold=core_frequency_threshold
+            dir, frequency_threshold=core_frequency_threshold, logger=logger
         )
         core_tag_processor.save_core_tags(
             core_tag_path,

@@ -17,7 +17,9 @@ class TagPruningAction(ProcessAction):
         pruned_mode="character",
         tags_attribute="processed_tags",
         character_tag_processor: Optional[CharacterTagProcessor] = None,
+        logger: Optional[logging.Logger] = None,
     ):
+        self.logger = logging.getLogger() if logger is None else logger
         assert pruned_mode in ["none", "minimal", "character"]
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
@@ -36,7 +38,7 @@ class TagPruningAction(ProcessAction):
         elif "tags" in item.meta:
             tags = item.meta["tags"]
         else:
-            logging.warning(
+            self.logger.warning(
                 f"{self.tags_attribute} unfound ",
                 f"for {item.meta['current_path']}, skip",
             )
@@ -56,7 +58,9 @@ class CoreCharacterTagPruningAction(ProcessAction):
         self,
         core_tag_processor: CoreTagProcessor,
         tags_attribute: str = "processed_tags",
+        logger: Optional[logging.Logger] = None,
     ):
+        self.logger = logging.getLogger() if logger is None else logger
         self.tags_attribute = tags_attribute
         self.core_tag_processor = core_tag_processor
 
@@ -67,7 +71,7 @@ class CoreCharacterTagPruningAction(ProcessAction):
         elif "tags" in item.meta:
             tags = item.meta["tags"]
         else:
-            logging.warning(
+            self.logger.warning(
                 f"{self.tags_attribute} unfound ",
                 f"for {item.meta['current_path']}, skip",
             )
@@ -82,9 +86,14 @@ class CoreCharacterTagPruningAction(ProcessAction):
 
 class TagSortingAction(ProcessAction):
     def __init__(
-        self, sort_mode="score", max_tag_number=None, tags_attribute="processed_tags"
+        self,
+        sort_mode="score",
+        max_tag_number=None,
+        tags_attribute="processed_tags",
+        logger: Optional[logging.Logger] = None,
     ):
         assert sort_mode in ["original", "shuffle", "score"]
+        self.logger = logging.getLogger() if logger is None else logger
         self.sort_mode = sort_mode
         self.max_tag_number = max_tag_number
         self.tags_attribute = tags_attribute
@@ -96,7 +105,7 @@ class TagSortingAction(ProcessAction):
         elif "tags" in item.meta:
             tags = item.meta["tags"]
         else:
-            logging.warning(
+            self.logger.warning(
                 f"{self.tags_attribute} unfound ",
                 f"for {item.meta['current_path']}, skip",
             )
@@ -108,7 +117,10 @@ class TagSortingAction(ProcessAction):
 
 
 class TagRemovingUnderscoreAction(ProcessAction):
-    def __init__(self, tags_attribute="processed_tags"):
+    def __init__(
+        self, tags_attribute="processed_tags", logger: Optional[logging.Logger] = None
+    ):
+        self.logger = logging.getLogger() if logger is None else logger
         self.tags_attribute = tags_attribute
 
     def process(self, item: ImageItem) -> ImageItem:
@@ -118,7 +130,7 @@ class TagRemovingUnderscoreAction(ProcessAction):
         elif "tags" in item.meta:
             tags = item.meta["tags"]
         else:
-            logging.warning(
+            self.logger.warning(
                 f"{self.tags_attribute} unfound ",
                 f"for {item.meta['current_path']}, skip",
             )

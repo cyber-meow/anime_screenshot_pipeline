@@ -14,6 +14,7 @@ def update_emb_init_info(
     image_type: str,
     emb_init_dict: Optional[Dict[str, List[str]]] = None,
     overwrite: bool = False,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Updates the JSON file with character names and optionally with embedding
@@ -31,7 +32,11 @@ def update_emb_init_info(
             Optional dictionary for embedding initializations.
         overwrite (bool):
             Whether to overwrite existing JSON content.
+        logger (Optional[logging.Logger]):
+            Optional logger to use. Defaults to None, which uses the default logger.
     """
+    if logger is None:
+        logger = logging.getLogger()
     name_init_map = {}
 
     # Read existing content if not overwriting
@@ -75,7 +80,7 @@ def update_emb_init_info(
 
     # Log warning for invalid embedding names
     if invalid_embedding_names:
-        logging.warning(
+        logger.warning(
             "Some embedding names may not be valid for HCP training: "
             + ", ".join(invalid_embedding_names)
         )

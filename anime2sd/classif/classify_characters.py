@@ -24,6 +24,7 @@ from .merge_clusters import (
 def cluster_characters_basics(
     images: np.ndarray,
     clu_min_samples: int = 5,
+    logger: Optional[logging.Logger] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Perform clustering on a set of images to group similar characters
@@ -35,6 +36,9 @@ def cluster_characters_basics(
         clu_min_samples (int):
             The number of samples in a neighborhood for a point to be considered as
             a core point.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -45,6 +49,8 @@ def cluster_characters_basics(
             A boolean array indicating if pairwise differences are below the threshold.
 
     """
+    if logger is None:
+        logger = logging.getLogger()
     batch_diff = ccip_batch_differences(images)
     batch_same = batch_diff <= ccip_default_threshold()
 
@@ -52,7 +58,7 @@ def cluster_characters_basics(
     def _metric(x, y):
         return batch_diff[int(x), int(y)].item()
 
-    logging.info("Clustering ...")
+    logger.info("Clustering ...")
     samples = np.arange(len(images)).reshape(-1, 1)
     # max_eps, _ = ccip_default_clustering_params(method='optics_best')
     clustering = OPTICS(min_samples=clu_min_samples, metric=_metric).fit(samples)
@@ -60,11 +66,11 @@ def cluster_characters_basics(
 
     max_clu_id = labels.max().item()
     all_label_ids = np.array([-1, *range(0, max_clu_id + 1)])
-    logging.info(f'Cluster complete, with {plural_word(max_clu_id, "cluster")}.')
+    logger.info(f'Cluster complete, with {plural_word(max_clu_id, "cluster")}.')
     label_cnt = {
         i: (labels == i).sum() for i in all_label_ids if (labels == i).sum() > 0
     }
-    logging.info(f"Current label count: {label_cnt}")
+    logger.info(f"Current label count: {label_cnt}")
 
     return labels, batch_diff, batch_same
 
@@ -158,6 +164,7 @@ def classify_from_directory(
     same_threshold_rel: float = 0.6,
     same_threshold_abs: int = 10,
     move: bool = False,
+    logger: Optional[logging.Logger] = None,
 ):
     """
     Classify images from src_dir to dst_dir
@@ -202,13 +209,18 @@ def classify_from_directory(
             The absolute threshold for determining whether images belong to the same
             cluster for noise extraction and filtering. Defaults to 10.
         move: Whether to move or copy files
+        logger (Optional[logging.Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
     """
+    if logger is None:
+        logger = logging.getLogger()
     (
         image_files,
         images,
         characters_per_image,
         character_mapping,
-    ) = load_image_features_and_characters(src_dir)
+    ) = load_image_features_and_characters(src_dir, logger)
 
     if ignore_character_metadata:
         characters_per_image = None
@@ -217,6 +229,7 @@ def classify_from_directory(
     labels, batch_diff, batch_same = cluster_characters_basics(
         images,
         clu_min_samples=clu_min_samples,
+        logger=logger,
     )
 
     # The number of known character names from metadata
@@ -227,7 +240,7 @@ def classify_from_directory(
     if ref_dir is not None:
         ref_image_files, ref_labels_tmp, ref_characters = parse_ref_dir(ref_dir)
         if ref_image_files:
-            logging.info(
+            logger.info(
                 "Extracting feature of "
                 + f'{plural_word(len(ref_image_files), "images")} ...'
             )
@@ -259,6 +272,7 @@ def classify_from_directory(
             ref_labels=ref_labels,
             same_threshold_rel=same_threshold_rel,
             same_threshold_abs=same_threshold_abs,
+            logger=logger,
         )
 
     # TODO: Add possibility to add reference images automatically
@@ -272,6 +286,7 @@ def classify_from_directory(
             cluster_ids=labels,
             same_threshold=0.01,
             characters_per_image=characters_per_image,
+            logger=logger,
         )
 
     if characters_per_image is not None:
@@ -280,6 +295,7 @@ def classify_from_directory(
             characters_per_image[:, :n_meta_labels],
             n_pre_labels,
             min_proportion=0.6,
+            logger=logger,
         )
 
     if ref_images is None and characters_per_image is None:
@@ -297,6 +313,7 @@ def classify_from_directory(
             min_merge_id=n_pre_labels,
             merge_threshold=merge_threshold,
             characters_per_image=characters_per_image,
+            logger=logger,
         )
     else:
         labels[labels >= n_pre_labels] = -1
@@ -311,6 +328,7 @@ def classify_from_directory(
             characters_per_image=characters_per_image,
             same_threshold_rel=same_threshold_rel,
             same_threshold_abs=same_threshold_abs,
+            logger=logger,
         )
 
     if to_filter:
@@ -322,7 +340,16 @@ def classify_from_directory(
             batch_same,
             same_threshold_rel=same_threshold_rel,
             same_threshold_abs=same_threshold_abs,
+            logger=logger,
         )
 
-    save_to_dir(image_files, images, dst_dir, labels, character_mapping, move=move)
+    save_to_dir(
+        image_files,
+        images,
+        dst_dir,
+        labels,
+        character_mapping,
+        move=move,
+        logger=logger,
+    )
     remove_empty_folders(src_dir)

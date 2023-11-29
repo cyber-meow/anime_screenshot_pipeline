@@ -4,7 +4,9 @@
 src_dir = "path/to/src_dir"
 # Directory to save output files
 dst_dir = "path/to/dst_dir"
-# Extra path component to add between dst_dir/[training|intermediate] and image type
+# Extra path component to add between dst_dir/[training|intermediate] and image_type
+# The main difference between extra_path_component and image_type is that the
+# latter can also be used in captions and considered as embeddings for pivotal tuning
 extra_path_component = ""
 # Stage number or alias to start from
 start_stage = 1
@@ -49,6 +51,8 @@ use_3stage_crop = {}
 [character_classification]
 # Directory containing reference character images
 character_ref_dir = "path/to/reference/character/images"
+# The number of additional reference images to add to each character from classification result"
+n_add_to_ref_per_character = 0
 # Whether to disable matching character labels for noise images
 no_extract_from_noise = false
 # Whether to disable final filtering for character consistency
