@@ -1,5 +1,5 @@
 exp_dir_base: 'hcp_exps'
-config_dir: 'hcp_configs'
+config_dir: 'configs/hcp'
 emb_dir: 'embs'
 emb_lr: 1e-2
 
@@ -32,25 +32,23 @@ lora_unet: null
 lora_text_encoder: null
 
 plugin_unet:
-  lokr:
-    _target_: lycoris.hcp.LokrBlock.wrap_model
+  loha:
+    _target_: lycoris.hcp.LohaBlock.wrap_model
     _partial_: True
     lr: 2e-4
-    dim: 10000
-    alpha: 0
-    factor: 8
+    dim: 8
+    alpha: 4
     layers:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
 plugin_TE:
-  lokr:
-    _target_: lycoris.hcp.LokrBlock.wrap_model
+  loha:
+    _target_: lycoris.hcp.LohaBlock.wrap_model
     _partial_: True
-    lr: 2e-5
-    dim: 10000
-    alpha: 0
-    factor: 8
+    lr: 6e-5
+    dim: 4
+    alpha: 1
     layers:
       - 're:.*self_attn$'
       - 're:.*mlp$'

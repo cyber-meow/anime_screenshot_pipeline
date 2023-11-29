@@ -33,11 +33,11 @@ def test_data_inplace():
 
 
 @pytest.fixture(scope="module")
-def test_data_fanart():
+def test_data_booru():
     # Define your test directories
     root_dir = "data"
-    src_dir = os.path.join(root_dir, "intermediate", "fanart", "cropped")
-    dst_dir = os.path.join(root_dir, "intermediate", "fanart", "classified")
+    src_dir = os.path.join(root_dir, "intermediate", "booru", "cropped")
+    dst_dir = os.path.join(root_dir, "intermediate", "booru", "classified")
     os.makedirs(dst_dir, exist_ok=True)
     character_ref_dir = os.path.join(root_dir, "ref_images", "hikikomari")
 
@@ -45,11 +45,11 @@ def test_data_fanart():
 
 
 @pytest.fixture(scope="module")
-def test_data_fanart_inplace():
+def test_data_booru_inplace():
     # Define your test directories
     root_dir = "data"
-    src_dir = os.path.join(root_dir, "intermediate", "fanart", "classified")
-    dst_dir = os.path.join(root_dir, "intermediate", "fanart", "classified")
+    src_dir = os.path.join(root_dir, "intermediate", "booru", "classified")
+    dst_dir = os.path.join(root_dir, "intermediate", "booru", "classified")
     os.makedirs(dst_dir, exist_ok=True)
     character_ref_dir = os.path.join(root_dir, "ref_images", "hikikomari")
 
@@ -104,8 +104,8 @@ def test_classify_ref_inplace(test_data_inplace):
     )
 
 
-def test_classify_existing(test_data_fanart):
-    src_dir, dst_dir, _ = test_data_fanart
+def test_classify_existing(test_data_booru):
+    src_dir, dst_dir, _ = test_data_booru
     # Call the function with the test arguments
     classify_from_directory(
         src_dir,
@@ -119,8 +119,8 @@ def test_classify_existing(test_data_fanart):
     )
 
 
-def test_classify_existing_ref_inplace(test_data_fanart_inplace):
-    src_dir, dst_dir, character_ref_dir = test_data_fanart_inplace
+def test_classify_existing_ref_inplace(test_data_booru_inplace):
+    src_dir, dst_dir, character_ref_dir = test_data_booru_inplace
     # Call the function with the test arguments
     classify_from_directory(
         src_dir,

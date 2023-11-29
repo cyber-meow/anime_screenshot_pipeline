@@ -1,4 +1,4 @@
-exp_dir: exps/${hcp.time:}
+exp_dir: hcp_exps/${hcp.time:}
 mixed_precision: 'bf16'
 allow_tf32: False
 seed: 114514

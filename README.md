@@ -15,12 +15,23 @@ The script `automatic_pipeline.py` allows you to construct a text-to-image train
 
 ```bash
 python automatic_pipeline.py \
+    --base_config_file path/to/base_config_file \
+    --config_file path/to/config_file1 path/to/config_file2 [...]
+```
+
+An example base_config_file is provided in [configs/pipelines/base.toml](configs/pipelines/base.toml).
+Config files for `screenshots` and `booru` pipelines can be found in the same folder.
+
+Alternatively, you can directly specify the arguments in command line.
+
+```bash
+python automatic_pipeline.py \
     --start_stage 1 \
     --end_stage 7 \
     --src_dir /path/to/video_dir \
     --dst_dir /path/to/dataset_dir \
     --character_ref_dir /path/to/ref_image_dir \
-    --image_type screenshots \
+    --pipeline_type screenshots \
     --crop_with_head \
     --image_prefix my_favorite_anime \
     --ep_init 3 \
@@ -35,17 +46,14 @@ The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipe
 - `--character_ref_dir`: Optional. A folder containing some example images for characters you want to train for. There are two ways to organize
     - With sub-folders: You can put character images in different sub-folders. Sub-folder names are then used as character names.
     - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
-- `--image_type`: this affects folder names in the constructed dataset (see [Dataset Organization](#Dataset-Organization)) and can also be used in caption (controlled with `--use_image_type_prob`).
 
 :bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.  
 :bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 3 to 7 with `--character_ref_dir` now given. See [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.
 
-There are a lot of possible command line arguments that allow you to configure the entire process. See all of them with
+There are a lot of arguments that allow you to configure the entire process. See all of them in the aforementioned config files or with
 ```bash
 python automatic_pipeline.py --help
 ```
-
-I may add the possibility to read arguments from `.toml` file later.
 
 
 ## Dataset Organization and Training
@@ -86,7 +94,7 @@ Contributions are welcome
 
 - [x] Readme and Requirements.txt
 - [x] HCP-diffusion compatibility [2023.10.08]
-- [ ] .toml support
+- [x] .toml support [2023.11.29]
 - [ ] Fanart support
 
 ### Secondary

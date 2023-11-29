@@ -1,5 +1,5 @@
 exp_dir_base: 'hcp_exps'
-config_dir: 'hcp_configs'
+config_dir: 'configs/hcp'
 emb_dir: 'embs'
 emb_lr: 1e-2
 

@@ -1,0 +1,173 @@
+# General Configuration
+[general]
+# Directory containing source files
+src_dir = "path/to/src_dir"
+# Directory to save output files
+dst_dir = "path/to/dst_dir"
+# Stage number or alias to start from
+start_stage = 1
+# Stage number or alias to end at
+end_stage = 7
+# Directory to save logs. Set to None or none to disable.
+log_dir = "logs"
+# Prefix for log files
+log_prefix = "logfile"
+# Overwrite path in metadata. It has effect at stage 2 and 4-7.
+# Using by starting at stage 4 will prevent character information from being written to the original images.
+# Should never be used in general.
+overwrite_path = false
+# Pipeline type that is used to construct dataset
+remove_intermediate = false
+
+# Duplicate Detection Configuration
+[duplicate_detection]
+# Do not remove similar images
+no_remove_similar = false
+# Model used for duplicate detection
+detect_duplicate_model = "mobilenet-v2-imagenet-torch"
+# Cosine similarity threshold for image duplicate detection
+similar_thresh = 0.96
+
+# Character Cropping Configuration
+[character_cropping]
+# Minimum size for character cropping
+min_crop_size = 320
+# Crop only images with head for character identification
+crop_with_head = true
+# Crop only images with face for character identification
+crop_with_face = false
+# The detection model level being used. The 'n' model runs faster with smaller system overhead
+detect_level = "n"
+# Use 3 stage crop to get halfbody and head crops.
+# This is slow and should only be called once for a set of images. Possible to use either at stage 2 or 4.
+# Set to {} or comment it to disable
+use_3stage_crop = {}
+
+# Character Clustering/Classification Configuration
+[character_classification]
+# Directory containing reference character images
+character_ref_dir = "path/to/reference/character/images"
+# Whether to disable matching character labels for noise images
+no_extract_from_noise = false
+# Whether to disable final filtering for character consistency
+no_filter_characters = false
+# Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata
+keep_unnamed_clusters = true
+# Cluster merge threshold in character clustering
+cluster_merge_threshold = 0.85
+# Minimum cluster samples in character clustering
+cluster_min_samples = 5
+# The relative threshold for determining whether images belong to the same cluster for noise extraction and filtering
+same_threshold_rel = 0.6
+# The absolute threshold for determining whether images belong to the same cluster for noise extraction and filtering
+same_threshold_abs = 20
+
+# Dataset Construction Configuration
+[dataset_construction]
+# Overwrite existing trigger word csv
+overwrite_emb_init_info = false
+# Do not perform image resizing
+no_resize = false
+# Max image size that shorter edge aligns to
+max_size = 768
+# Dataset image extension
+image_save_ext = ".webp"
+# Filter repeated images again here
+filter_again = true
+
+# Metadata Loading and Saving for Tagging and Captioning
+[metadata_handling]
+# List of auxiliary attributes to load
+# load_aux = ["processed_tags", "characters"] 
+load_aux = []
+# List of auxiliary attributes to save
+# save_aux = ["processed_tags", "characters"]
+save_aux = []
+
+# Tagging Configuration
+[tagging]
+# Whether to overwrite existing tags
+overwrite_tags = false
+# Method used for tagging
+tagging_method = "wd14_convnextv2"
+# Threshold for tagging
+tag_threshold = 0.35
+
+# General Tag Processing Configuration
+[tag_processing]
+# Mode to sort the tags
+sort_mode = "score"
+# Max number of tags to include in caption
+max_tag_number = 30
+# Path to the file containing blacklisted tags
+blacklist_tags_file = "configs/tag_filtering/blacklist_tags.txt"
+# Path to the file containing overlap tag information
+overlap_tags_file = "configs/tag_filtering/overlap_tags.json"
+# Path to the file containing character tag information
+character_tags_file = "configs/tag_filtering/character_tags.json"
+# Process tags from original tags instead of processed tags
+process_from_original_tags = true
+# Different ways to prune tags
+pruned_mode = "character_core"
+
+# Core Tag Processing Configuration
+[core_tag_processing]
+# Minimum frequency for a tag to be considered a core tag
+core_frequency_thresh = 0.4
+# Use existing core tag json instead of recomputing them
+use_existing_core_tag_file = false
+# The difficulty level up to which tags should be dropped
+drop_difficulty = 2
+# Whether to drop all core tags or not
+drop_all_core = false
+# The difficulty level from which tags should be used for embedding initialization
+emb_min_difficulty = 1
+# The difficulty level up to which tags should be used for embedding initialization
+emb_max_difficulty = 2
+# Whether to use all core tags for embedding initialization
+emb_init_all_core = false
+
+# Captioning Configuration
+[captioning]
+# For separating items of a single field of caption
+caption_inner_sep = ", "
+# For separating different fields of caption
+caption_outer_sep = ", "
+# For separating characters
+character_sep = ", "
+# For separating items of a single field of character
+character_inner_sep = " "
+# For separating different fields of character
+character_outer_sep = ", "
+# Probability to include number of people in captions
+use_npeople_prob = 0
+# Probability to include character info in captions
+use_character_prob = 1
+# Probability to include copyright info in captions
+use_copyright_prob = 0
+# Probability to include image type info in captions
+use_image_type_prob = 1
+# Probability to include artist info in captions
+use_artist_prob = 0
+# Probability to include rating info in captions
+use_rating_prob = 1
+# Probability to include tag info in captions
+use_tags_prob = 1
+
+# Folder Organization Configuration
+[folder_organization]
+# Description of the concept balancing directory hierarchy
+arrange_format = "n_characters/character"
+# If have more than X characters put X+
+max_character_number = 6
+# Put others instead of character name if number of images of the character combination is smaller than this number
+min_images_per_combination = 10
+
+# Balancing Configuration
+[balancing]
+# Minimum multiply of each image
+min_multiply = 1
+# Maximum multiply of each image
+max_multiply = 100
+# If provided use the provided csv to modify weights
+weight_csv = "configs/csv_examples/default_weighting.csv"

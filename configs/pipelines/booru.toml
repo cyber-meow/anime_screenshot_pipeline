@@ -1,0 +1,115 @@
+# General Configuration
+[general]
+# Directory containing source files
+src_dir = "data/intermediate/booru"
+# Directory to save output files
+dst_dir = "data"
+# Stage number or alias to start from
+start_stage = 2
+# Stage number or alias to end at
+end_stage = 6
+# Directory to save logs. Set to None or none to disable.
+log_dir = "logs"
+# Prefix for log files
+log_prefix = "logfile"
+# Pipeline type that is used to construct dataset
+pipeline_type = "booru"
+# Image type that we are dealing with, used for folder name and might appear in caption as well. Default to pipeline_type.
+image_type = "booru"
+
+# Character Cropping Configuration
+[character_cropping]
+# Use 3 stage crop to get halfbody and head crops.
+use_3stage_crop = 2
+
+# Character Clustering/Classification Configuration
+[character_classification]
+# Directory containing reference character images
+character_ref_dir = "path/to/reference/character/images"
+# Whether to ignore existing character metadata during classification
+ignore_character_metadata = false
+# Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata
+keep_unnamed_clusters = true
+
+# Dataset Construction Configuration
+[dataset_construction]
+# Overwrite existing character metadata for uncropped images
+character_overwrite_uncropped = false
+# Remove unclassified characters in the character metadata field
+character_remove_unclassified = false
+
+# Tagging Configuration
+[tagging]
+# Whether to overwrite existing tags
+overwrite_tags = true
+
+# General Tag Processing Configuration
+[tag_processing]
+# Mode to sort the tags
+sort_mode = "score"
+# Max number of tags to include in caption
+max_tag_number = 30
+# Process tags from original tags instead of processed tags
+process_from_original_tags = true
+# Different ways to prune tags
+pruned_mode = "character_core"
+
+# Core Tag Processing Configuration
+[core_tag_processing]
+# Minimum frequency for a tag to be considered a core tag
+core_frequency_thresh = 0.4
+# The difficulty level up to which tags should be dropped
+drop_difficulty = 2
+# Whether to drop all core tags or not
+drop_all_core = false
+# The difficulty level from which tags should be used for embedding initialization
+emb_min_difficulty = 1
+# The difficulty level up to which tags should be used for embedding initialization
+emb_max_difficulty = 2
+# Whether to use all core tags for embedding initialization
+emb_init_all_core = false
+
+# Captioning Configuration
+[captioning]
+# For separating items of a single field of caption
+caption_inner_sep = ", "
+# For separating different fields of caption
+caption_outer_sep = ", "
+# For separating characters
+character_sep = ", "
+# For separating items of a single field of character
+character_inner_sep = " "
+# For separating different fields of character
+character_outer_sep = ", "
+# Probability to include number of people in captions
+use_npeople_prob = 0
+# Probability to include character info in captions
+use_character_prob = 1
+# Probability to include copyright info in captions
+use_copyright_prob = 0
+# Probability to include image type info in captions
+use_image_type_prob = 1
+# Probability to include artist info in captions
+use_artist_prob = 0
+# Probability to include rating info in captions
+use_rating_prob = 1
+# Probability to include tag info in captions
+use_tags_prob = 1
+
+# Folder Organization Configuration
+[folder_organization]
+# Description of the concept balancing directory hierarchy
+arrange_format = "n_characters/character"
+# If have more than X characters put X+
+max_character_number = 2
+# Put others instead of character name if number of images of the character combination is smaller than this number
+min_images_per_combination = 10
+
+# Balancing Configuration
+[balancing]
+# Minimum multiply of each image
+min_multiply = 1
+# Maximum multiply of each image
+max_multiply = 100
+# If provided use the provided csv to modify weights
+weight_csv = "configs/csv_examples/default_weighting.csv"

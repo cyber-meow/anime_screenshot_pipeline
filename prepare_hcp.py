@@ -20,10 +20,10 @@ def copy_files(src_dir, dst_dir):
 
 def get_emb_names_and_inits(filepath, n_rand_tokens=10, std=0.017):
     """
-    Read a CSV file to extract embedding names and their initialization texts.
+    Read a json or csv file to extract embedding names and their initialization texts.
 
     Args:
-    - filepath: Path to the CSV file.
+    - filepath: Path to the json or csv file.
 
     Returns:
     - Dictionary with names as keys and initialization texts as values.
@@ -190,9 +190,18 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--config_src_dir",
-        default="hcp_configs",
-        help="Source directory for config files.",
+        default=None,
+        help="Source directory for config files. Default is configs/hcp.",
     )
+    parser.add_argument(
+        "--main_config_file",
+        default=None,
+        help=(
+            "Path to the main configuration file. "
+            "Default is {config_src_dir}/lora_conventional.yaml."
+        ),
+    )
+
     parser.add_argument(
         "--config_dst_dir",
         required=True,
@@ -204,13 +213,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--exp_dir",
         default=None,
-        help=("Experiment directory. " "Default is {config_dst_dir}/exps."),
-    )
-
-    parser.add_argument(
-        "--main_config_file",
-        default="hcp_configs/lora_conventional.yaml",
-        help="Path to the main configuration file.",
+        help="Experiment directory. Default is {config_dst_dir}/exps.",
     )
 
     parser.add_argument(
@@ -219,9 +222,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trigger_word_file",
         required="--pivotal" in sys.argv,
-        help=(
-            "File with trigger words for embeddings. " "Required for pivotal tuning."
-        ),
+        help="File with trigger words for embeddings. Required for pivotal tuning.",
     )
     parser.add_argument(
         "--emb_dir",
@@ -249,11 +250,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if args.config_src_dir is None:
+        args.config_src_dir = os.path.join("configs", "hcp")
+    if args.main_config_file is None:
+        args.main_config_file = os.path.join(
+            args.config_src_dir, "lora_conventional.yaml"
+        )
     if args.exp_dir is None:
         args.exp_dir = os.path.join(args.config_dst_dir, "exps")
-
     if args.emb_dir is None:
         args.emb_dir = os.path.join(args.config_dst_dir, "embs")
+
     os.makedirs(args.emb_dir, exist_ok=True)
 
     os.makedirs(args.config_dst_dir, exist_ok=True)

@@ -1,4 +1,6 @@
 import os
+import toml
+import copy
 import shutil
 import logging
 import argparse
@@ -9,16 +11,55 @@ from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
 from anime2sd import extract_and_remove_similar
-from anime2sd import classify_from_directory
-from anime2sd import tag_and_caption_from_directory
-from anime2sd import select_dataset_images_from_directory
 from anime2sd import rearrange_related_files
+from anime2sd import classify_from_directory
+from anime2sd import select_dataset_images_from_directory
+from anime2sd import tag_and_caption_from_directory
 from anime2sd import arrange_folder, get_repeat
 from anime2sd import read_weight_mapping
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
+
+
+def update_args_from_toml(
+    args: argparse.Namespace, toml_path: str
+) -> argparse.Namespace:
+    """
+    Update a copy of args with configurations from a TOML file.
+
+    This function reads a TOML file and updates the attributes of the given
+    argparse.Namespace object with the configurations found in the file.
+    If the TOML file contains nested sections, they are flattened.
+
+    Args:
+        args (argparse.Namespace):
+            The original argparse Namespace object containing command-line arguments.
+        toml_path (str):
+            Path to the TOML configuration file.
+
+    Returns:
+        argparse.Namespace:
+            A new Namespace object with updated configurations from the TOML file.
+
+    Raises:
+        Exception: If there is an error in reading or parsing the TOML file.
+    """
+    new_args = copy.deepcopy(args)
+    try:
+        with open(toml_path, "r") as f:
+            config = toml.load(f)
+        for key, value in config.items():
+            if isinstance(value, dict):
+                # Handle nested sections by flattening them
+                for nested_key, nested_value in value.items():
+                    setattr(new_args, nested_key, nested_value)
+            else:
+                setattr(new_args, key, value)
+    except Exception as e:
+        print(f"Error loading config from {toml_path}: {e}")
+    return new_args
 
 
 def setup_logging(log_dir, log_prefix):
@@ -34,6 +75,9 @@ def setup_logging(log_dir, log_prefix):
 
     # Create logger
     logger = logging.getLogger()
+    original_handlers = logger.handlers[:]
+    for handler in original_handlers:
+        logger.removeHandler(handler)
     logger.setLevel(logging.INFO)
 
     # Create console handler and set level to info
@@ -356,45 +400,97 @@ def balance(args, src_dir, is_start_stage):
     return training_dir
 
 
-# Mapping stage numbers to their respective function names
-STAGE_FUNCTIONS = {
-    1: extract_frames,
-    2: crop_characters,
-    3: classify_characters,
-    4: select_dataset_images,
-    5: tag_and_caption,
-    6: rearrange,
-    7: balance,
-}
+def launch_pipeline(args):
+    # Mapping stage numbers to their respective function names
+    STAGE_FUNCTIONS = {
+        1: extract_frames,
+        2: crop_characters,
+        3: classify_characters,
+        4: select_dataset_images,
+        5: tag_and_caption,
+        6: rearrange,
+        7: balance,
+    }
 
-# Mapping stage numbers to their aliases
-STAGE_ALIASES = {
-    1: ["extract"],
-    2: ["crop"],
-    3: ["classify"],
-    4: ["select"],
-    5: ["tag", "caption", "tag_and_caption"],
-    6: ["arrange"],
-    7: ["balance"],
-}
+    # Mapping stage numbers to their aliases
+    STAGE_ALIASES = {
+        1: ["extract"],
+        2: ["crop"],
+        3: ["classify"],
+        4: ["select"],
+        5: ["tag", "caption", "tag_and_caption"],
+        6: ["arrange"],
+        7: ["balance"],
+    }
+
+    if args.image_type is None:
+        args.image_type = args.pipeline_type
+
+    start_stage = args.start_stage
+    end_stage = args.end_stage
+
+    # Convert stage aliases to numbers if provided
+    for stage_number in STAGE_ALIASES:
+        if args.start_stage in STAGE_ALIASES[stage_number]:
+            start_stage = stage_number
+        if args.end_stage in STAGE_ALIASES[stage_number]:
+            end_stage = stage_number
+
+    start_stage = int(start_stage)
+    end_stage = int(end_stage)
+
+    src_dir = args.src_dir
+
+    setup_logging(args.log_dir, f"{args.pipeline_type}_{args.log_prefix}")
+
+    # Loop through the stages and execute them
+    for stage_num in range(start_stage, end_stage + 1):
+        logging.info(f"-------------Start stage {stage_num}-------------")
+        is_start_stage = stage_num == start_stage
+        src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir, is_start_stage)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    # Configuration toml files
+    parser.add_argument(
+        "--base_config_file",
+        nargs="?",
+        help=(
+            "Path to base TOML configuration file. Configurations from the "
+            "TOML file will override default and command-line arguments."
+        ),
+    )
+    parser.add_argument(
+        "--config_file",
+        nargs="*",
+        help=(
+            "Path to TOML configuration files. Configurations from the "
+            "TOML files will override default and command-line arguments. "
+            "Multiple files can be specified by repeating the argument, in which case "
+            "multiple pipelines will be executed in parallel."
+        ),
+    )
+
     # General arguments
     parser.add_argument(
-        "--src_dir", default=".", help="Directory containing source files"
+        "--src_dir", default="animes", help="Directory containing source files"
     )
-    parser.add_argument("--dst_dir", default=".", help="Directory to save output files")
     parser.add_argument(
-        "--start_stage", default="1", help="Stage or alias to start from"
+        "--dst_dir", default="data", help="Directory to save output files"
     )
-    parser.add_argument("--end_stage", default="4", help="Stage or alias to end at")
+    parser.add_argument(
+        "--start_stage", default="1", help="Stage numbeer or alias to start from"
+    )
+    parser.add_argument(
+        "--end_stage", default="7", help="Stage number or alias to end at"
+    )
     parser.add_argument(
         "--log_dir",
         type=str,
         default="logs",
-        help=("Directory to save logs. " "Set to None or none to disable."),
+        help="Directory to save logs. Set to None or none to disable.",
     )
     parser.add_argument(
         "--log_prefix", type=str, default="logfile", help="Prefix for log files"
@@ -415,8 +511,8 @@ if __name__ == "__main__":
         default="screenshots",
         choices=["screenshots", "booru"],
         help=(
-            "Pipeline type that is used to construct dataset ",
-            "Options are 'screenshots' and 'booru'",
+            "Pipeline type that is used to construct dataset. ",
+            "Options are 'screenshots' and 'booru'.",
         ),
     )
     parser.add_argument(
@@ -425,14 +521,17 @@ if __name__ == "__main__":
         default=None,
         help=(
             "Image type that we are dealing with, used for folder name. "
+            "It may appear in caption if 'use_image_type_prob' is larger than 0. "
             "Defaults to pipeline_type."
         ),
     )
     parser.add_argument(
         "--remove_intermediate",
         action="store_true",
-        help="Whether to remove intermediate result or not "
-        + "(results after stage 1 are always saved)",
+        help=(
+            "Whether to remove intermediate result or not "
+            "(results after stage 1 are always saved)"
+        ),
     )
 
     # Arguments for video extraction
@@ -484,7 +583,7 @@ if __name__ == "__main__":
         default="n",
         help=(
             "The detection model level being used. "
-            "The 'n' model runs faster with smaller system overhead"
+            "The 'n' model runs faster with smaller system overhead."
         ),
     )
     parser.add_argument(
@@ -585,7 +684,7 @@ if __name__ == "__main__":
         "--character_remove_unclassified",
         action="store_true",
         help=(
-            "Remove unclassified characters in the metadata field "
+            "Remove unclassified characters in the character metadata field "
             "(only has effect for 'booru' pipeline without "
             "--character_overwrite_uncropped)"
         ),
@@ -673,19 +772,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--blacklist_tags_file",
         type=str,
-        default="tag_filtering/blacklist_tags.txt",
+        default="configs/tag_filtering/blacklist_tags.txt",
         help="Path to the file containing blacklisted tags.",
     )
     parser.add_argument(
         "--overlap_tags_file",
         type=str,
-        default="tag_filtering/overlap_tags.json",
+        default="configs/tag_filtering/overlap_tags.json",
         help="Path to the file containing overlap tag information.",
     )
     parser.add_argument(
         "--character_tags_file",
         type=str,
-        default="tag_filtering/character_tags.json",
+        default="configs/tag_filtering/character_tags.json",
         help="Path to the file containing character tag information.",
     )
     parser.add_argument(
@@ -715,7 +814,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--use_existing_core_tag_file",
         action="store_true",
-        help=("Use existing core tag json instead of recomputing them."),
+        help="Use existing core tag json instead of recomputing them.",
     )
     parser.add_argument(
         "--drop_difficulty",
@@ -866,34 +965,23 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--weight_csv",
-        default="csv_examples/default_weighting.csv",
+        default="configs/csv_examples/default_weighting.csv",
         help="If provided use the provided csv to modify weights",
     )
 
     args = parser.parse_args()
 
-    if args.image_type is None:
-        args.image_type = args.pipeline_type
+    if args.base_config_file:
+        args = update_args_from_toml(args, args.base_config_file)
 
-    start_stage = args.start_stage
-    end_stage = args.end_stage
+    configs = []
+    if args.config_file:
+        for toml_path in args.config_file:
+            config_args = update_args_from_toml(args, toml_path)
+            configs.append(config_args)
+    else:
+        configs.append(args)
 
-    # Convert stage aliases to numbers if provided
-    for stage_number in STAGE_ALIASES:
-        if args.start_stage in STAGE_ALIASES[stage_number]:
-            start_stage = stage_number
-        if args.end_stage in STAGE_ALIASES[stage_number]:
-            end_stage = stage_number
-
-    start_stage = int(start_stage)
-    end_stage = int(end_stage)
-
-    src_dir = args.src_dir
-
-    setup_logging(args.log_dir, args.log_prefix)
-
-    # Loop through the stages and execute them
-    for stage_num in range(start_stage, end_stage + 1):
-        logging.info(f"-------------Start stage {stage_num}-------------")
-        is_start_stage = stage_num == start_stage
-        src_dir = STAGE_FUNCTIONS[stage_num](args, src_dir, is_start_stage)
+    for config in configs:
+        # Process each configuration
+        launch_pipeline(config)
