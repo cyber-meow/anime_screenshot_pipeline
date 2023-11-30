@@ -25,6 +25,11 @@ from anime2sd.basics import (
     load_metadata_from_aux,
     setup_logging,
 )
+from anime2sd.execution_ordering import (
+    get_and_create_dst_dir,
+    get_src_dir,
+    get_execution_configs,
+)
 from anime2sd.parse_arguments import parse_arguments
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
 from anime2sd.waifuc_customize import MinFaceCountAction, MinHeadCountAction
@@ -99,79 +104,6 @@ def setup_args(args):
 
     args.start_stage = int(start_stage)
     args.end_stage = int(end_stage)
-
-
-def get_and_create_dst_dir(
-    args: argparse.Namespace,
-    mode: str,
-    sub_dir: str = "",
-    makedirs: bool = True,
-) -> str:
-    """
-    Constructs the destination directory path based on the mode, subdirectory,
-    and additional arguments.
-
-    If 'makedirs' is True, the function also creates the directory if it doesn't exist.
-
-    Args:
-        args (argparse.Namespace):
-            The namespace object containing the command-line arguments.
-        mode (str):
-            The mode specifying the main directory under the destination directory.
-        sub_dir (str, optional):
-            An additional subdirectory to put at the end.
-            Defaults to an empty string.
-        makedirs (bool, optional):
-            Whether to create the directory if it doesn't exist. Defaults to True.
-
-    Returns:
-        str: The path to the constructed destination directory.
-    """
-    dst_dir = os.path.join(
-        args.dst_dir, mode, args.extra_path_component, args.image_type, sub_dir
-    )
-    if makedirs:
-        os.makedirs(dst_dir, exist_ok=True)
-    return dst_dir
-
-
-def get_src_dir(args, stage):
-    """
-    Determines the source directory for a given stage of the pipeline.
-
-    Args:
-        args (argparse.Namespace):
-            The namespace object containing the command-line arguments.
-        stage (int): The current stage of the pipeline.
-
-    Returns:
-        str: The path to the source directory for the given stage.
-
-    Raises:
-        ValueError: If the provided stage number is invalid.
-    """
-    if stage == args.start_stage or stage == 1:
-        return args.src_dir
-    elif stage == 2:
-        return get_and_create_dst_dir(args, "intermediate", "raw", makedirs=False)
-    elif stage == 3:
-        return get_and_create_dst_dir(args, "intermediate", "cropped", makedirs=False)
-    elif stage == 4:
-        return get_and_create_dst_dir(args, "intermediate", makedirs=False)
-    elif stage == 5:
-        return get_and_create_dst_dir(args, "training", makedirs=False)
-    elif stage == 6:
-        dst_dir = get_src_dir(args, 5)
-        for _ in range(args.rearrange_up_levels):
-            dst_dir = os.path.dirname(dst_dir)
-        return dst_dir
-    elif stage == 7:
-        dst_dir = get_src_dir(args, 6)
-        for _ in range(args.compute_multiply_up_levels):
-            dst_dir = os.path.dirname(dst_dir)
-        return dst_dir
-    else:
-        raise ValueError(f"Invalid stage: {stage}")
 
 
 def extract_frames(args, stage, logger):
@@ -453,23 +385,7 @@ def balance(args, stage, logger):
     )
 
 
-def identify_dependencies(configs):
-    stage3_dependencies = {}
-    for i, config in enumerate(configs):
-        if config.pipeline_type != "booru" or config.n_add_to_ref_per_character <= 0:
-            dependent_configs = [
-                j
-                for j, dep_config in enumerate(configs)
-                if dep_config.character_ref_dir == config.character_ref_dir
-                and dep_config.pipeline_type == "booru"
-                and dep_config.n_add_to_ref_per_character > 0
-            ]
-            if dependent_configs:
-                stage3_dependencies[i] = dependent_configs
-    return stage3_dependencies
-
-
-async def run_stage(config, config_index, stage_num, stage_events, logger, executor):
+def run_stage(config, stage_num, logger):
     # Mapping stage numbers to their respective function names
     STAGE_FUNCTIONS = {
         1: extract_frames,
@@ -482,38 +398,55 @@ async def run_stage(config, config_index, stage_num, stage_events, logger, execu
     }
 
     logger.info(f"-------------Start stage {stage_num}-------------")
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(
-        executor, STAGE_FUNCTIONS[stage_num], config, stage_num, logger
-    )
-    stage_events[config_index][stage_num].set()
+    STAGE_FUNCTIONS[stage_num](config, stage_num, logger)
 
 
-async def run_pipeline(
-    config, config_index, stage_events, stage3_dependencies, executor
-):
+async def run_pipeline(config, config_index, execution_config, stage_events, executor):
     logger = setup_logging(
         config.log_dir,
         f"{config.pipeline_type}_{config.log_prefix}",
         f"pipeline_{config_index}",
     )
-    config = configs[config_index]
     # Loop through the stages and execute them
     for stage_num in range(config.start_stage, config.end_stage + 1):
-        if stage_num == 3 and config_index in stage3_dependencies:
-            # Wait for dependent booru configs to complete stage 3
+        if stage_num == 3:
+            # Wait for dependent booru configs to complete classification
             await asyncio.gather(
                 *(
                     stage_events[dep_index][3].wait()
-                    for dep_index in stage3_dependencies[config_index]
+                    for dep_index in execution_config.stage3_dependencies
+                )
+            )
+        if stage_num == 6:
+            if not execution_config.run_stage6:
+                stage_events[config_index][stage_num].set()
+                continue
+            # Wait for dependent configs to complete tagging
+            await asyncio.gather(
+                *(
+                    stage_events[dep_index][5].wait()
+                    for dep_index in execution_config.stage6_dependencies
+                )
+            )
+        if stage_num == 7:
+            if not execution_config.run_stage7:
+                stage_events[config_index][stage_num].set()
+                continue
+            # Wait for dependent configs to complete rearranging
+            await asyncio.gather(
+                *(
+                    stage_events[dep_index][6].wait()
+                    for dep_index in execution_config.stage7_dependencies
                 )
             )
 
-        await run_stage(config, config_index, stage_num, stage_events, logger, executor)
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(executor, run_stage, config, stage_num, logger)
+        stage_events[config_index][stage_num].set()
 
 
 async def main(configs):
-    stage3_dependencies = identify_dependencies(configs)
+    execution_configs = get_execution_configs(configs)
 
     # Initialize events for each stage of each config
     stage_events = [
@@ -526,8 +459,12 @@ async def main(configs):
         # Run pipelines asynchronously with dependencies
         await asyncio.gather(
             *(
-                run_pipeline(config, i, stage_events, stage3_dependencies, executor)
-                for i, config in enumerate(configs)
+                run_pipeline(
+                    config, config_index, execution_config, stage_events, executor
+                )
+                for config_index, (config, execution_config) in enumerate(
+                    zip(configs, execution_configs)
+                )
             )
         )
 

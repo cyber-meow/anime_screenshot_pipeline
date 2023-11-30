@@ -384,6 +384,15 @@ def parse_arguments():
 
     # Specific arguments for core tag processing
     parser.add_argument(
+        "--compute_core_tag_up_levels",
+        type=int,
+        default=0,
+        help=(
+            "Number of directory levels to go up from the captioned directory when "
+            "computing core tags. Defaults to 0."
+        ),
+    )
+    parser.add_argument(
         "--core_frequency_thresh",
         type=float,
         default=0.4,
