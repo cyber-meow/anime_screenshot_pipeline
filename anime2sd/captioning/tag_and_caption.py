@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from waifuc.action import TaggingAction
 
-from .tagging_character import CoreTagProcessor
+from .tagging_character import CharacterTagProcessor, CoreTagProcessor
 from .waifuc_actions import (
     TagPruningAction,
     TagSortingAction,
@@ -16,6 +16,7 @@ from .waifuc_actions import (
 from .captioning import CaptionGenerator
 
 from ..emb_utils import update_emb_init_info
+from ..character import Character
 from ..waifuc_customize import LocalSource, SaveExporter
 
 
@@ -36,7 +37,7 @@ class TaggingManager(object):
             The threshold value for tag selection.
         overwrite_tags (bool):
             Flag to indicate whether existing tags should be overwritten.
-        pruned_mode (str):
+        prune_mode (str):
             The mode of tag pruning to apply.
             Options are 'character', 'character_core', 'minimal', 'none'.
         character_tag_processor (CharacterTagProcessor):
@@ -59,7 +60,7 @@ class TaggingManager(object):
         tagging_method,
         tag_threshold,
         overwrite_tags,
-        pruned_mode,
+        prune_mode,
         blacklist_tags_file,
         overlap_tags_file,
         character_tag_processor,
@@ -71,7 +72,7 @@ class TaggingManager(object):
         self.tagging_method = tagging_method
         self.tag_threshold = tag_threshold
         self.overwrite_tags = overwrite_tags
-        self.pruned_mode = pruned_mode
+        self.prune_mode = prune_mode
         self.character_tag_processor = character_tag_processor
         self.process_from_original_tags = process_from_original_tags
         self.sort_mode = sort_mode
@@ -132,14 +133,14 @@ class TaggingManager(object):
             tags_attribute = "tags"
         else:
             tags_attribute = "processed_tags"
-        if self.pruned_mode == "character_core":
-            pruned_mode = "minimal"
+        if self.prune_mode == "character_core":
+            prune_mode = "minimal"
         else:
-            pruned_mode = self.pruned_mode
+            prune_mode = self.prune_mode
         return TagPruningAction(
             self.blacklisted_tags,
             self.overlap_tags_dict,
-            pruned_mode=pruned_mode,
+            prune_mode=prune_mode,
             tags_attribute=tags_attribute,
             character_tag_processor=self.character_tag_processor,
             logger=self.logger,
@@ -163,10 +164,6 @@ def tag_and_caption_from_directory(
     dir: str,
     tagging_manager: TaggingManager,
     caption_generator: CaptionGenerator,
-    use_existing_core_tag_file: bool,
-    core_frequency_threshold: float,
-    image_type: str,
-    overwrite_emb_init_info: bool,
     load_aux: List[str],
     save_aux: List[str],
     overwrite_path: bool,
@@ -188,14 +185,6 @@ def tag_and_caption_from_directory(
             The tagging manager for managing tag operations.
         caption_generator (CaptionGenerator):
             The caption generator for generating captions.
-        use_existing_core_tag_file (bool):
-            Flag to use existing core tags file.
-        core_frequency_threshold (float):
-            Frequency threshold for core tags.
-        image_type (str):
-            Type of images being processed (for embedding initialization).
-        overwrite_emb_init_info (bool):
-            Flag to overwrite embedding initialization info.
         load_aux (list):
             List of auxiliary attributes to load.
         save_aux (list):
@@ -204,13 +193,9 @@ def tag_and_caption_from_directory(
             Whether to overwrite path in metadata or not.
         logger (Logger):
             Logger for logging. Defaults to None, which uses the default logger.
-
-    Returns:
-        None
     """
-    core_tag_path = os.path.join(dir, "core_tags.json")
-    wildcard_path = os.path.join(dir, "wildcard.txt")
-    emb_init_filepath = os.path.join(dir, "emb_init.json")
+    if logger is None:
+        logger = logging.getLogger()
 
     source = LocalSource(dir, load_aux=load_aux, overwrite_path=overwrite_path)
     source = source.attach(
@@ -219,48 +204,135 @@ def tag_and_caption_from_directory(
         TagRemovingUnderscoreAction(),
     )
 
-    if tagging_manager.pruned_mode == "character_core":
+    if tagging_manager.prune_mode == "character_core":
         source.export(
             SaveExporter(dir, no_meta=False, save_caption=False, in_place=True)
         )
-        if use_existing_core_tag_file:
-            core_tag_processor = CoreTagProcessor(
-                core_tag_path=core_tag_path,
-                logger=logger,
-            )
-        else:
-            assert tagging_manager.character_tag_processor is not None
-            core_tag_processor = CoreTagProcessor(
-                folder_path=dir,
-                frequency_threshold=core_frequency_threshold,
-                logger=logger,
-            )
-            emb_init_dict = core_tag_processor.categorize_core_tags(
-                tagging_manager.character_tag_processor
-            )[1]
-            core_tag_processor.save_core_tags(
-                core_tag_path,
-                wildcard_path,
-                caption_generator,
-            )
-            update_emb_init_info(
-                emb_init_filepath,
-                emb_init_dict.keys(),
-                image_type,
-                emb_init_dict=emb_init_dict,
-                overwrite=overwrite_emb_init_info,
-                logger=logger,
-            )
+    else:
         source = source.attach(
-            CoreCharacterTagPruningAction(
-                core_tag_processor, tags_attribute="processed_tags", logger=logger
+            tagging_manager.get_tag_sorting_action(),
+            CaptioningAction(caption_generator),
+        )
+        source.export(
+            SaveExporter(
+                dir,
+                no_meta=False,
+                save_caption=True,
+                save_aux=save_aux,
+                in_place=True,
             )
         )
-        characters = list(core_tag_processor.get_core_tags().keys())
-    else:
-        characters = None
 
+
+def compute_and_save_core_tags(
+    dir: str,
+    core_tag_path: str,
+    core_frequency_threshold: float,
+    character_tag_processor: Optional[CharacterTagProcessor] = None,
+    caption_generator: Optional[CaptionGenerator] = None,
+    image_types: List[str] = [],
+    overwrite_emb_init_info: bool = False,
+    logger: Optional[logging.Logger] = None,
+):
+    """
+    Computes and saves core tags for all images in a directory.
+
+    Args:
+        dir (str):
+            Path to the directory containing images.
+        core_tag_path (str):
+            Path to the output file for core tags.
+        core_frequency_threshold (float):
+            Frequency threshold for core tags.
+        character_tag_processor (CharacterTagProcessor):
+            Processor for character-specific tag handling.
+            When given it is used to categorize core tags and embedding
+            initialization information is saved.
+        caption_generator (CaptionGenerator):
+            The caption generator for generating captions. Used for wildcards.
+        image_types (List[str]):
+            Types of images being processed (for embedding initialization).
+        overwrite_emb_init_info (bool):
+            Flag to overwrite embedding initialization info.
+        logger (logging.Logger):
+            Logger for logging. Defaults to None which uses the default logger.
+    """
+    if logger is None:
+        logger = logging.getLogger()
+
+    wildcard_path = os.path.join(os.path.dirname(core_tag_path), "wildcard.txt")
+    emb_init_filepath = os.path.join(os.path.dirname(core_tag_path), "emb_init.json")
+
+    core_tag_processor = CoreTagProcessor(
+        folder_path=dir, frequency_threshold=core_frequency_threshold, logger=logger
+    )
+    if character_tag_processor is None:
+        embedding_names = [
+            Character.from_string(char).embedding_name
+            for char in core_tag_processor.core_tags.keys()
+        ]
+        emb_init_dict = dict()
+    else:
+        emb_init_dict = core_tag_processor.categorize_core_tags(
+            character_tag_processor
+        )[1]
+        embedding_names = emb_init_dict.keys()
+    core_tag_processor.save_core_tags(
+        core_tag_path,
+        wildcard_path,
+        caption_generator,
+    )
+    update_emb_init_info(
+        emb_init_filepath,
+        embedding_names,
+        image_types,
+        emb_init_dict=emb_init_dict,
+        overwrite=overwrite_emb_init_info,
+        logger=logger,
+    )
+
+
+def tag_and_caption_from_directory_core_final(
+    dir: str,
+    core_tag_path: str,
+    tagging_manager: TaggingManager,
+    caption_generator: CaptionGenerator,
+    load_aux: List[str],
+    save_aux: List[str],
+    logger: Optional[logging.Logger] = None,
+):
+    """
+    Final stage of captioning when prune_mode is 'character_core'.
+
+    Args:
+        dir (str):
+            Path to the directory containing images.
+        core_tag_path (str):
+            Path to the output file for core tags.
+        tagging_manager (TaggingManager):
+            The tagging manager for managing tag operations.
+        caption_generator (CaptionGenerator):
+            The caption generator for generating captions.
+        load_aux (list):
+            List of auxiliary attributes to load.
+        save_aux (list):
+            List of auxiliary attributes to save.
+        logger (Logger):
+            Logger for logging. Defaults to None, which uses the default logger.
+    """
+    if logger is None:
+        logger = logging.getLogger()
+
+    source = LocalSource(dir, load_aux=load_aux)
+    core_tag_processor = CoreTagProcessor(
+        core_tag_path=core_tag_path,
+        logger=logger,
+    )
+    characters = list(core_tag_processor.get_core_tags().keys())
     source = source.attach(
+        CoreCharacterTagPruningAction(
+            core_tag_processor, tags_attribute="processed_tags", logger=logger
+        ),
         tagging_manager.get_tag_sorting_action(),
         CaptioningAction(caption_generator, characters),
     )
@@ -273,13 +345,3 @@ def tag_and_caption_from_directory(
             in_place=True,
         )
     )
-
-    if tagging_manager.pruned_mode != "character_core":
-        core_tag_processor = CoreTagProcessor(
-            dir, frequency_threshold=core_frequency_threshold, logger=logger
-        )
-        core_tag_processor.save_core_tags(
-            core_tag_path,
-            wildcard_path,
-            caption_generator,
-        )

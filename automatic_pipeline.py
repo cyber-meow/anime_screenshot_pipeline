@@ -15,7 +15,11 @@ from waifuc.action import ThreeStageSplitAction
 from anime2sd import extract_and_remove_similar
 from anime2sd import classify_from_directory
 from anime2sd import select_dataset_images_from_directory
-from anime2sd import tag_and_caption_from_directory
+from anime2sd import (
+    tag_and_caption_from_directory,
+    compute_and_save_core_tags,
+    tag_and_caption_from_directory_core_final,
+)
 from anime2sd import arrange_folder, get_repeat
 from anime2sd import read_weight_mapping
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
@@ -184,7 +188,7 @@ def classify_characters(args, stage, logger):
 
     # Get the path to the source directory containing images to be classified
     src_dir = get_src_dir(args, stage)
-    # Get the path to the distination directory containing the classified images
+    # Get the path to the destination directory containing the classified images
     dst_dir = get_and_create_dst_dir(args, "intermediate", "classified")
 
     # Determine whether to move or copy files to the destination directory.
@@ -264,15 +268,24 @@ def select_dataset_images(args, stage, logger):
         shutil.rmtree(classified_dir)
 
 
-def tag_and_caption(args, stage, logger):
-    """Perform in-place tagging and captioning."""
+async def tag_and_caption(
+    args, stage, config_index, execution_config, stage_events, executor, logger
+):
+    """
+    Perform in-place tagging and captioning.
+    Note that this is a coroutine because we may need to wait for other
+    pipelines to perform the first stage of tagging before computing the core
+    tags when prune_mode is 'character_core'.
+    """
     # Get path to the directiry containing images to be tagged and captioned
     src_dir = get_src_dir(args, stage)
-    if args.start_stage == stage:
+    is_start_stage = args.start_stage == stage
+    if is_start_stage:
         # rearrange json and ccip in case of manual inspection
         rearrange_related_files(src_dir, logger)
+    overwrite_path = is_start_stage and args.overwrite_path
 
-    if "character" in args.pruned_mode:
+    if "character" in args.prune_mode:
         char_tag_proc = CharacterTagProcessor(
             tag_list_path=args.character_tags_file,
             drop_difficulty=args.drop_difficulty,
@@ -288,7 +301,7 @@ def tag_and_caption(args, stage, logger):
         tagging_method=args.tagging_method,
         tag_threshold=args.tag_threshold,
         overwrite_tags=args.overwrite_tags,
-        pruned_mode=args.pruned_mode,
+        prune_mode=args.prune_mode,
         blacklist_tags_file=args.blacklist_tags_file,
         overlap_tags_file=args.overlap_tags_file,
         character_tag_processor=char_tag_proc,
@@ -315,22 +328,63 @@ def tag_and_caption(args, stage, logger):
 
     logger.info(f"Tagging and captioning images in {src_dir} ...")
 
-    tag_and_caption_from_directory(
+    loop = asyncio.get_running_loop()
+
+    await loop.run_in_executor(
+        executor,
+        tag_and_caption_from_directory,
         src_dir,
         tagging_manager,
         caption_generator,
-        # For core tags
-        use_existing_core_tag_file=args.use_existing_core_tag_file,
-        core_frequency_threshold=args.core_frequency_thresh,
-        # For saving embedding initialization information
-        image_type=args.image_type,
-        overwrite_emb_init_info=args.overwrite_emb_init_info,
-        # For file io
-        load_aux=args.load_aux,
-        save_aux=args.save_aux,
-        overwrite_path=args.overwrite_path,
-        logger=logger,
+        args.load_aux,
+        args.save_aux,
+        overwrite_path,
+        logger,
     )
+    stage_events[config_index]["5_phase1"].set()
+
+    core_tag_dir = get_src_dir(args, "core_tag")
+    core_tag_path = os.path.join(core_tag_dir, "core_tag.json")
+
+    if execution_config.run_save_core:
+        await asyncio.gather(
+            *(
+                stage_events[dep_index]["5_phase1"].wait()
+                for dep_index in execution_config.save_core_dependencies
+            )
+        )
+        await loop.run_in_executor(
+            executor,
+            compute_and_save_core_tags,
+            core_tag_dir,
+            core_tag_path,
+            args.core_frequency_thresh,
+            char_tag_proc,
+            caption_generator,
+            execution_config.image_types,
+            args.overwrite_emb_init_info,
+            logger,
+        )
+    stage_events[config_index]["save_core"].set()
+
+    if args.prune_mode == "character_core":
+        await asyncio.gather(
+            *(
+                stage_events[dep_index]["save_core"].wait()
+                for dep_index in execution_config.stage5_final_dependencies
+            )
+        )
+        await loop.run_in_executor(
+            executor,
+            tag_and_caption_from_directory_core_final,
+            src_dir,
+            core_tag_path,
+            tagging_manager,
+            caption_generator,
+            args.load_aux,
+            args.save_aux,
+            logger,
+        )
 
 
 def rearrange(args, stage, logger):
@@ -441,7 +495,18 @@ async def run_pipeline(config, config_index, execution_config, stage_events, exe
             )
 
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(executor, run_stage, config, stage_num, logger)
+        if stage_num == 5:
+            await tag_and_caption(
+                config,
+                stage_num,
+                config_index,
+                execution_config,
+                stage_events,
+                executor,
+                logger,
+            )
+        else:
+            await loop.run_in_executor(executor, run_stage, config, stage_num, logger)
         stage_events[config_index][stage_num].set()
 
 
@@ -449,10 +514,16 @@ async def main(configs):
     execution_configs = get_execution_configs(configs)
 
     # Initialize events for each stage of each config
-    stage_events = [
-        {j: asyncio.Event() for j in range(config.start_stage, config.end_stage + 1)}
-        for config in configs
-    ]
+    stage_events = []
+    for config in configs:
+        events = {
+            j: asyncio.Event() for j in range(config.start_stage, config.end_stage + 1)
+        }
+        # Add events to manage core tag computation and saving for stage 5
+        if 5 in events.keys():
+            events["5_phase1"] = asyncio.Event()
+            events["save_core"] = asyncio.Event()
+        stage_events.append(events)
 
     # Create a ThreadPoolExecutor
     with concurrent.futures.ThreadPoolExecutor() as executor:

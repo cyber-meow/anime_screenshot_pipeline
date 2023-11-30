@@ -162,11 +162,11 @@ In this phase, we use a publicly available taggers to tag images.
 
 ### Tag pruning
 
-For now tag pruning goes through 3 steps. You can deactivate tag pruning by setting `--pruned_mode none`.
+For now tag pruning goes through 3 steps. You can deactivate tag pruning by setting `--prune_mode none`.
 
-- Pruned blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](../tag_filtering/blacklist_tags.txt) by default.
-- Pruned overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](../tag_filtering/overlap_tags.json) by default.
-- By default `pruned_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--pruned_mode minimal` to skip this step.
+- Prune blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](../tag_filtering/blacklist_tags.txt) by default.
+- Prune overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](../tag_filtering/overlap_tags.json) by default.
+- By default `prune_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--pruned_mode minimal` to skip this step.
 
 All the tags are saved to the field `processed_tags` of metadata. We also process by this field if it exists by default (unless `--overwrite_tags` is used). If you want to process from the field `tags`, you should use `--process_from_original_tags`. 
 

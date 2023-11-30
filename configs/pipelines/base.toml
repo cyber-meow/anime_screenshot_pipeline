@@ -114,10 +114,13 @@ character_tags_file = "configs/tag_filtering/character_tags.json"
 # Process tags from original tags instead of processed tags
 process_from_original_tags = true
 # Different ways to prune tags
-pruned_mode = "character_core"
+prune_mode = "character_core"
 
 # Core Tag Processing Configuration
 [core_tag_processing]
+# Number of directory levels to go up from the captioned directory when computing core tags
+# Set to 1 here so that we compute a single time for all the image types
+compute_core_tag_up_levels = 1
 # Minimum frequency for a tag to be considered a core tag
 core_frequency_thresh = 0.4
 # Use existing core tag json instead of recomputing them

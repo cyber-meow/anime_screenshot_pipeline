@@ -647,11 +647,13 @@ def select_dataset_images_from_directory(
     )
 
     # save trigger word info
+    # may update this to use compute_core_tag_up_levels, but this is not essential
+    # as we expect that every character at least appears in one solo image
     emb_init_filepath = os.path.join(dst_dir, "emb_init.json")
     update_emb_init_info(
         emb_init_filepath,
         character_embeddings,
-        image_type,
+        [image_type],
         overwrite=overwrite_emb_init_info,
         logger=logger,
     )

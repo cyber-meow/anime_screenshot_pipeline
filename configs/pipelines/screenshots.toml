@@ -62,7 +62,7 @@ max_tag_number = 30
 # Process tags from original tags instead of processed tags
 process_from_original_tags = true
 # Different ways to prune tags
-pruned_mode = "character_core"
+prune_mode = "character_core"
 
 # Core Tag Processing Configuration
 [core_tag_processing]

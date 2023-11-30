@@ -33,7 +33,7 @@ def get_and_create_dst_dir(
     ).rstrip(os.path.sep)
     if makedirs:
         os.makedirs(dst_dir, exist_ok=True)
-    return dst_dir
+    return os.path.abspath(dst_dir)
 
 
 def get_src_dir(args, stage):
@@ -52,7 +52,7 @@ def get_src_dir(args, stage):
         ValueError: If the provided stage number is invalid.
     """
     if stage == args.start_stage or stage == 1:
-        return args.src_dir
+        return os.path.abspath(args.src_dir)
     elif stage == 2:
         return get_and_create_dst_dir(args, "intermediate", "raw", makedirs=False)
     elif stage == 3:
@@ -147,16 +147,21 @@ class ExecutionConfig(object):
                 core_tag_dir, get_src_dir(config_alter, 5), both_sides=True
             ):
                 self.save_core_dependencies.append(config_alter_index)
+                # Include all related image types for embedding initialization
+                self.image_types.add(config_alter.image_type)
             # If two configs compute core tags from the same directory, we only need to
             # compute core tags once, but we need to wait for this computation to be
             # completed to proceed to final pruning where we read from core tag file
             if core_tag_dir == get_src_dir(config_alter, "core_tag"):
                 self.stage5_final_dependencies.append(config_alter_index)
                 if self.run_save_core:
-                    if execution_config_alter is not None:
+                    if (
+                        config_alter.prune_mode == "character_core"
+                        and self.config.prune_mode != "character_core"
+                    ):
+                        self.run_save_core = False
+                    elif execution_config_alter is not None:
                         execution_config_alter.run_save_core = False
-                    # Include all related image types for embedding initialization
-                    self.image_types.add(config_alter.image_type)
 
         # Update stage 6 dependencies
         if self.config.start_stage <= 6 <= self.config.end_stage:

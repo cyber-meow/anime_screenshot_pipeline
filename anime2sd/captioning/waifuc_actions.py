@@ -14,23 +14,23 @@ class TagPruningAction(ProcessAction):
         self,
         blacklisted_tags,
         overlap_tags_dict,
-        pruned_mode="character",
+        prune_mode="character",
         tags_attribute="processed_tags",
         character_tag_processor: Optional[CharacterTagProcessor] = None,
         logger: Optional[logging.Logger] = None,
     ):
         self.logger = logging.getLogger() if logger is None else logger
-        assert pruned_mode in ["none", "minimal", "character"]
+        assert prune_mode in ["none", "minimal", "character"]
         self.blacklisted_tags = blacklisted_tags
         self.overlap_tags_dict = overlap_tags_dict
-        self.pruned_mode = pruned_mode
+        self.prune_mode = prune_mode
         self.tags_attribute = tags_attribute
-        if pruned_mode == "character":
+        if prune_mode == "character":
             assert character_tag_processor is not None
         self.character_tag_processor = character_tag_processor
 
     def process(self, item: ImageItem) -> ImageItem:
-        if self.pruned_mode == "none":
+        if self.prune_mode == "none":
             return item
         if self.tags_attribute in item.meta:
             tags = item.meta[self.tags_attribute]
@@ -45,7 +45,7 @@ class TagPruningAction(ProcessAction):
             return item
         tags = drop_blacklisted_tags(tags, self.blacklisted_tags)
         tags = drop_overlap_tags(tags, self.overlap_tags_dict)
-        if self.pruned_mode == "character":
+        if self.prune_mode == "character":
             assert self.character_tag_processor is not None
             # Only pruned character related tags for character images
             if "characters" in item.meta and item.meta["characters"]:
