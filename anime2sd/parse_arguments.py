@@ -298,6 +298,17 @@ def parse_arguments():
         ),
     )
     parser.add_argument(
+        "--accept_multiple_candidates",
+        action="store_true",
+        help=(
+            "Whether we try to attribute label when multiple candidates are available "
+            "when performing classification with metadata character information. "
+            "This typically coressponds to the case where we have one character that "
+            "always appear with another specific character, or to some specific form "
+            "of a character that is recognized as character tag in Danbooru."
+        ),
+    )
+    parser.add_argument(
         "--cluster_merge_threshold",
         type=float,
         default=0.85,

@@ -1,6 +1,6 @@
 import logging
 import numpy as np
-from typing import List, Tuple, Dict, Set, Optional, Sequence, Literal
+from typing import List, Tuple, Dict, Optional, Sequence, Literal
 from tqdm import tqdm
 
 from imgutils.metrics import ccip_difference, ccip_default_threshold
@@ -260,7 +260,7 @@ def map_clusters_to_reference(
                 characters_per_image=characters_per_image,
                 image_indices=image_indices_to_update,
             )
-            # Actully the dictionary contains at most one element and would then
+            # Actually the dictionary contains at most one element and would then
             # be with key best_id
             for label, indices in updated_indices.items():
                 if label not in updated_indices_mapping:
@@ -280,6 +280,7 @@ def map_clusters_to_existing(
     characters_per_image: np.ndarray,
     n_pre_labels: int,
     min_proportion: float = 0.6,
+    accept_multiple_candidates: bool = False,
     logger: Optional[logging.Logger] = None,
 ) -> Tuple[np.ndarray, Dict[int, List[np.ndarray]]]:
     """Maps cluster labels to the most frequent character ID in characters_per_image,
@@ -296,6 +297,9 @@ def map_clusters_to_existing(
         min_proportion (float):
             The minimum proportion for the most frequent character ID to be considered
             as the representative for the cluster.
+        accept_multiple_candidates (bool):
+            Whether we try to perform classification when there are multiple
+            candidate labels. Defaults to False.
         logger (logging.Logger):
             A logger to use for logging. Defaults to None, in which case
             the default logger will be used.
@@ -347,6 +351,8 @@ def map_clusters_to_existing(
                 f"Label {label} has multiple potential representative characters: "
                 f"{max_characters}."
             )
+            if not accept_multiple_candidates:
+                continue
 
         # Update the label of the cluster with the character ID that
         # has the maximum count, but only update when agree with orignal labels

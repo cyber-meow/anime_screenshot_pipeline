@@ -53,11 +53,17 @@ use_3stage_crop = 2
 # Directory containing reference character images
 character_ref_dir = "path/to/reference/character/images"
 # The number of additional reference images to add to each character from classification result"
-n_add_to_ref_per_character = 15
+n_add_to_ref_per_character = 20
 # Whether to ignore existing character metadata during classification
 ignore_character_metadata = false
+# Minimum cluster samples in character clustering
+cluster_min_samples = 5
 # Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata
 keep_unnamed_clusters = false
+# Whether we try to attribute label when multiple candidates are available when performing classification with metadata character information
+# This typically coressponds to the case where we have one character that always appear with another specific character,
+# or to some specific form of a character that is recognized as character tag in Danbooru
+accept_multiple_candidates = false
 
 # Dataset Construction Configuration
 [dataset_construction]

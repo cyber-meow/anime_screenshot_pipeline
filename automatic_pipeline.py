@@ -263,6 +263,7 @@ def classify_characters(args, stage, logger):
         to_extract_from_noise=not args.no_extract_from_noise,
         to_filter=not args.no_filter_characters,
         keep_unnamed=args.keep_unnamed_clusters,
+        accept_multiple_candidates=args.accept_multiple_candidates,
         clu_min_samples=args.cluster_min_samples,
         merge_threshold=args.cluster_merge_threshold,
         same_threshold_rel=args.same_threshold_rel,

@@ -242,6 +242,7 @@ def classify_from_directory(
     to_extract_from_noise: bool = True,
     to_filter: bool = True,
     keep_unnamed: bool = True,
+    accept_multiple_candidates: bool = False,
     clu_min_samples: int = 5,
     merge_threshold: float = 0.85,
     same_threshold_rel: float = 0.6,
@@ -282,6 +283,10 @@ def classify_from_directory(
             Whether to keep unnamed clusters when some character information is
             provided. If False, unnamed clusters will all be treated as noise.
             Defaults to True.
+        accept_multiple_candidates (bool):
+            Whether we try to perform classification when there are multiple
+            candidate labels when classifying using metadata.
+            Defaults to False.
         clu_min_samples (int):
             Minimum number of samples in a cluster. Defaults to 5.
         merge_threshold (float):
@@ -378,10 +383,11 @@ def classify_from_directory(
     if characters_per_image is not None:
         labels, updated_indices_mapping_tmp = map_clusters_to_existing(
             labels,
-            # Only retrive the part that come from metadata
+            # Only retrieve the part that come from metadata
             characters_per_image[:, :n_meta_labels],
             n_pre_labels,
             min_proportion=0.6,
+            accept_multiple_candidates=accept_multiple_candidates,
             logger=logger,
         )
         for meta_label in updated_indices_mapping_tmp:
