@@ -41,7 +41,7 @@ character_ref_dir = "path/to/reference/character/images"
 # The number of additional reference images to add to each character from classification result"
 n_add_to_ref_per_character = 0
 # Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata
-keep_unnamed_clusters = true
+keep_unnamed_clusters = false
 
 # Dataset Construction Configuration
 [dataset_construction]

@@ -1,12 +1,11 @@
 import logging
-from tqdm import tqdm
-from typing import Optional, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from hbutils.string import plural_word
 
 import numpy as np
 from sklearn.cluster import OPTICS
 
-from imgutils.metrics import ccip_extract_feature, ccip_default_threshold
+from imgutils.metrics import ccip_default_threshold
 from imgutils.metrics import ccip_batch_differences
 
 from ..basics import remove_empty_folders
@@ -151,6 +150,90 @@ def merge_characters(
     return updated_characters, updated_ref_labels, characters_per_image
 
 
+def select_indices_recursively(
+    list_of_indices: List[np.ndarray], n_to_select: int
+) -> List[int]:
+    """
+    Recursively select indices from a list of np.ndarrays, trying to evenly
+    distribute the selection.
+
+    Args:
+        list_of_indices (List[np.ndarray]): List of np.ndarrays containing indices.
+        n_to_select (int): Total number of indices to select.
+
+    Returns:
+        List[int]: List of selected indices.
+    """
+    if n_to_select <= 0 or not list_of_indices:
+        return []
+
+    selected_indices = []
+    total_selected = 0
+
+    max_per_array = max(n_to_select // len(list_of_indices), 1)
+
+    # Select indices from each array
+    for indices in list_of_indices:
+        n_select = min(max_per_array, len(indices), n_to_select - total_selected)
+        selected_indices.extend(indices[:n_select])
+        total_selected += n_select
+
+    # Recursively select more if needed
+    if total_selected < n_to_select:
+        remaining_indices = [
+            indices[max_per_array:]
+            for indices in list_of_indices
+            if len(indices) > max_per_array
+        ]
+        selected_indices.extend(
+            select_indices_recursively(remaining_indices, n_to_select - total_selected)
+        )
+
+    return selected_indices
+
+
+def select_to_add_to_ref(
+    updated_indices_mapping: Dict[int, List[np.ndarray]],
+    n_add_images_to_ref: int,
+    shuffle_indices: bool = True,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Select image labels to add to reference images.
+
+    Args:
+        updated_indices_mapping (Dict[int, List[np.ndarray]]):
+            A dictionary mapping reference or metadata labels to the indices of images
+            that are updated to that label.
+            The arrays in the lists correspond to indices from different clusters.
+        n_add_images_to_ref (int):
+            The number of images to add to reference images per character.
+        shuffle_indices (bool):
+            Whether to shuffle the array indices before selecting them.
+            Defaults to True.
+
+    Returns:
+        np.array:
+            The image indices of images to add to reference directory.
+        np.array:
+            The image labels of images to add to reference directory.
+    """
+    selected_indices = []
+    labels = []
+
+    for label, list_of_indices in updated_indices_mapping.items():
+        if shuffle_indices:
+            for indices in list_of_indices:
+                np.random.shuffle(indices)
+        # Start with an initial maximum per array based on the total number of arrays
+        selected_for_label = select_indices_recursively(
+            list_of_indices, n_add_images_to_ref
+        )
+        selected_indices.extend(selected_for_label)
+        labels.extend([label] * len(selected_for_label))
+
+    return np.array(selected_indices), np.array(labels)
+
+
 def classify_from_directory(
     src_dir: str,
     dst_dir: str,
@@ -163,6 +246,7 @@ def classify_from_directory(
     merge_threshold: float = 0.85,
     same_threshold_rel: float = 0.6,
     same_threshold_abs: int = 10,
+    n_add_images_to_ref: int = 0,
     move: bool = False,
     logger: Optional[logging.Logger] = None,
 ):
@@ -208,7 +292,11 @@ def classify_from_directory(
         same_threshold_abs (int):
             The absolute threshold for determining whether images belong to the same
             cluster for noise extraction and filtering. Defaults to 10.
-        move: Whether to move or copy files
+        n_add_images_to_ref (int):
+            The number of images to add to the reference directory per character.
+            Defaults to 0.
+        move (bool):
+            Whether to move or copy files
         logger (Optional[logging.Logger]):
             A logger to use for logging. Defaults to None, in which case
             the default logger will be used.
@@ -220,7 +308,9 @@ def classify_from_directory(
         images,
         characters_per_image,
         character_mapping,
-    ) = load_image_features_and_characters(src_dir, logger)
+    ) = load_image_features_and_characters(
+        src_dir, tqdm_desc="Extract dataset features", logger=logger
+    )
 
     if ignore_character_metadata:
         characters_per_image = None
@@ -240,16 +330,11 @@ def classify_from_directory(
     if ref_dir is not None:
         ref_image_files, ref_labels_tmp, ref_characters = parse_ref_dir(ref_dir)
         if ref_image_files:
-            logger.info(
-                "Extracting feature of "
-                + f'{plural_word(len(ref_image_files), "images")} ...'
-            )
-            ref_images = np.array(
-                [
-                    ccip_extract_feature(img)
-                    for img in tqdm(ref_image_files, desc="Extract reference features")
-                ]
-            )
+            ref_images = load_image_features_and_characters(
+                image_files=ref_image_files,
+                tqdm_desc="Extract reference features",
+                logger=logger,
+            )[1]
             ref_labels = ref_labels_tmp
             # Merge class names and update ref_labels and characters_per_image
             character_mapping, ref_labels, characters_per_image = merge_characters(
@@ -275,11 +360,12 @@ def classify_from_directory(
             logger=logger,
         )
 
-    # TODO: Add possibility to add reference images automatically
+    updated_indices_mapping = dict()
+
     if ref_images is not None:
         # Use a low threshold here because cluster may represent
         # different forms of the same character
-        labels = map_clusters_to_reference(
+        labels, updated_indices_mapping = map_clusters_to_reference(
             images,
             ref_images,
             ref_labels,
@@ -290,26 +376,32 @@ def classify_from_directory(
         )
 
     if characters_per_image is not None:
-        labels = map_clusters_to_existing(
+        labels, updated_indices_mapping_tmp = map_clusters_to_existing(
             labels,
+            # Only retrive the part that come from metadata
             characters_per_image[:, :n_meta_labels],
             n_pre_labels,
             min_proportion=0.6,
             logger=logger,
         )
+        for meta_label in updated_indices_mapping_tmp:
+            if meta_label in updated_indices_mapping:
+                updated_indices_mapping[meta_label].extend(
+                    updated_indices_mapping_tmp[meta_label]
+                )
+            else:
+                updated_indices_mapping[meta_label] = updated_indices_mapping_tmp[
+                    meta_label
+                ]
 
     if ref_images is None and characters_per_image is None:
         keep_unnamed = True
 
     if keep_unnamed:
         # trying to merge clusters
-        _exist_ids = np.unique(labels[labels >= 0])
-        max_clu_id = np.max(_exist_ids)
         merge_clusters(
-            set(_exist_ids),
-            max_clu_id,
-            batch_same,
             labels,
+            batch_same,
             min_merge_id=n_pre_labels,
             merge_threshold=merge_threshold,
             characters_per_image=characters_per_image,
@@ -340,6 +432,24 @@ def classify_from_directory(
             batch_same,
             same_threshold_rel=same_threshold_rel,
             same_threshold_abs=same_threshold_abs,
+            logger=logger,
+        )
+
+    if n_add_images_to_ref > 0:
+        selected_indices, labels_for_ref = select_to_add_to_ref(
+            updated_indices_mapping,
+            n_add_images_to_ref,
+        )
+        image_files_for_ref = image_files[selected_indices]
+        images_for_ref = images[selected_indices]
+        # Note that the labels in updated_indices_mapping should all be part of
+        # character_mapping as they come from either reference or metadata
+        save_to_dir(
+            image_files_for_ref,
+            images_for_ref,
+            ref_dir,
+            labels_for_ref,
+            character_mapping,
             logger=logger,
         )
 

@@ -21,16 +21,26 @@ from ..character import Character
 
 
 def load_image_features_and_characters(
-    src_dir: str,
+    src_dir: Optional[str] = None,
+    image_files: Optional[List[str]] = None,
+    save_ccip_cache: bool = True,
+    tqdm_desc: Optional[str] = None,
     logger: Optional[logging.Logger] = None,
 ) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Dict[int, Character]]:
     """Load image features and associated character information
     from a given source directory.
 
     Args:
-        src_dir (str):
+        src_dir (Optional[str]):
             The source directory where image files and their corresponding
             metadata are stored.
+        image_files (Optional[List[str]]):
+            A list of image file paths to load.
+            If provided it overwrites the effect of src_dir.
+        save_ccip_cache (bool):
+            Whether to save the extracted image features to a cache file.
+        tqdm_desc (Optional[str]):
+            A description of the progress bar.
         logger (Optional[Logger]):
             A logger to use for logging. Defaults to None, in which case
             the default logger will be used.
@@ -46,7 +56,14 @@ def load_image_features_and_characters(
     if logger is None:
         logger = logging.getLogger()
 
-    image_files = np.array(natsorted(get_images_recursively(src_dir)))
+    assert (
+        src_dir is not None or image_files is not None
+    ), "Either src_dir or image_files must be provided."
+
+    if image_files:
+        image_files = np.array(image_files)
+    else:
+        image_files = np.array(natsorted(get_images_recursively(src_dir)))
     logger.info(f'Extracting feature of {plural_word(len(image_files), "image")} ...')
 
     images = []
@@ -56,12 +73,15 @@ def load_image_features_and_characters(
     label_counter = 0
 
     # Iterate over image files to extract features and metadata
-    for img_path in tqdm(image_files, desc="Extract dataset features"):
+    for img_path in tqdm(image_files, desc=tqdm_desc):
         ccip_path, _ = get_corr_ccip_names(img_path)
         if os.path.exists(ccip_path):
             images.append(np.load(ccip_path))
         else:
-            images.append(ccip_extract_feature(img_path))
+            img_embedding = ccip_extract_feature(img_path)
+            images.append(img_embedding)
+            if save_ccip_cache:
+                np.save(ccip_path, img_embedding)
 
         meta_path, _ = get_corr_meta_names(img_path)
         characters = []
@@ -199,7 +219,11 @@ def save_to_dir(
     """
     if logger is None:
         logger = logging.getLogger()
+
     unique_labels = sorted(set(labels))
+    os.makedirs(dst_dir, exist_ok=True)
+
+    logger.info(f"Saving classified images to {dst_dir} ...")
     for label in unique_labels:
         if character_mapping and label in character_mapping:
             character = character_mapping[label]

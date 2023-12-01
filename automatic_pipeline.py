@@ -8,6 +8,7 @@ from datetime import datetime
 
 import asyncio
 import concurrent.futures
+import fiftyone as fo
 import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
@@ -261,6 +262,7 @@ def classify_characters(args, stage, logger):
         merge_threshold=args.cluster_merge_threshold,
         same_threshold_rel=args.same_threshold_rel,
         same_threshold_abs=args.same_threshold_abs,
+        n_add_images_to_ref=args.n_add_to_ref_per_character,
         move=move,
         logger=logger,
     )
@@ -611,6 +613,12 @@ if __name__ == "__main__":
 
     # A set to record dst_dir and image_type in configs
     dst_folder_set = set()
+
+    # fiftyone logging with multithreading can cause trouble, this disables
+    # notably progress bar for compute embedding that is used in duplicate removal
+    if len(configs) > 1:
+        fo.config.show_progress_bars = False
+        model = foz.load_zoo_model(args.detect_duplicate_model)
 
     # Process each configuration
     for config in configs:

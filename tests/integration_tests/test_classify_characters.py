@@ -131,5 +131,6 @@ def test_classify_existing_ref_inplace(test_data_booru_inplace):
         keep_unnamed=True,
         clu_min_samples=5,
         merge_threshold=0.85,
+        n_add_images_to_ref=5,
         move=True,
     )

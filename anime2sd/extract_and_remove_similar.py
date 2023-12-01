@@ -178,7 +178,7 @@ def mark_duplicate(subdataset, similarity_matrix, thresh=0.98):
 def remove_similar(dataset, model, thresh=0.98, max_compare_size=10000, logger=None):
     if logger is None:
         logger = logging.getLogger()
-    logger.info("Compute embeddings ...")
+    logger.info(f"Compute embeddings for {len(dataset)} images ...")
     embeddings = dataset.compute_embeddings(model)
 
     samples_to_remove = set()
