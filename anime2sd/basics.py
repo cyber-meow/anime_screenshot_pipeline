@@ -1,4 +1,5 @@
 import os
+import csv
 import json
 import shutil
 import logging
@@ -72,6 +73,26 @@ def get_folders_recursively(folder_path):
     - list: A list of folder paths.
     """
     return [str(folder) for folder in Path(folder_path).rglob("*") if folder.is_dir()]
+
+
+def read_class_mapping(class_mapping_csv):
+    """
+    Reads a CSV file mapping old class names to new class names.
+
+    Args:
+        class_mapping_csv (str):
+            The path to the CSV file.
+
+    Returns:
+        dict: A dictionary mapping old class names to new class names.
+    """
+    class_mapping = {}
+    with open(class_mapping_csv, "r") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            old_class, new_class = row
+            class_mapping[old_class] = new_class
+    return class_mapping
 
 
 def get_corr_meta_names(img_path):

@@ -3,16 +3,19 @@ import toml
 import copy
 import shutil
 import logging
-import asyncio
 import argparse
-import concurrent.futures
 from datetime import datetime
+
+import asyncio
+import concurrent.futures
+import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
-from anime2sd import extract_and_remove_similar
+from anime2sd import download_images
+from anime2sd import extract_and_remove_similar, remove_similar_from_dir
 from anime2sd import classify_from_directory
 from anime2sd import select_dataset_images_from_directory
 from anime2sd import (
@@ -20,11 +23,12 @@ from anime2sd import (
     compute_and_save_core_tags,
     tag_and_caption_from_directory_core_final,
 )
-from anime2sd import arrange_folder, get_repeat
-from anime2sd import read_weight_mapping
+from anime2sd import arrange_folder
+from anime2sd import read_weight_mapping, get_repeat
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
 from anime2sd.basics import (
+    read_class_mapping,
     rearrange_related_files,
     load_metadata_from_aux,
     setup_logging,
@@ -85,13 +89,14 @@ def setup_args(args):
     """
     # Mapping stage numbers to their aliases
     STAGE_ALIASES = {
-        1: ["extract"],
+        0: ["download"],
+        1: ["extract", "remove_similar", "remove_duplicates"],
         2: ["crop"],
         3: ["classify"],
         4: ["select"],
         5: ["tag", "caption", "tag_and_caption"],
         6: ["arrange"],
-        7: ["balance"],
+        7: ["balance", "compute_multiply"],
     }
     if not config.image_type:
         config.image_type = args.pipeline_type
@@ -110,28 +115,70 @@ def setup_args(args):
     args.end_stage = int(end_stage)
 
 
-def extract_frames(args, stage, logger):
+def download(args, stage, logger):
+    """
+    Downloads images or animes from the internet.
+    """
+    if args.pipeline_type != "booru":
+        raise ValueError("Download is currently only supported for booru pipeline")
+    dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
+
+    if args.character_info_file is not None and os.path.exists(
+        args.character_info_file
+    ):
+        character_mapping = read_class_mapping(args.character_info_file)
+    else:
+        character_mapping = None
+    anime = [args.anime] if args.anime else []
+    if not (anime or character_mapping):
+        raise ValueError(
+            "Either anime or character info should be provided for booru downloading"
+        )
+
+    logger.info(f"Downloading images to {dst_dir} ...")
+    download_images(
+        dst_dir,
+        anime,
+        limit_all=args.booru_download_limit,
+        limit_per_character=args.booru_download_limit_per_character,
+        ratings=args.allowed_ratings,
+        classes=args.allowed_image_classes,
+        max_image_size=args.max_download_size,
+        character_mapping=character_mapping,
+        download_for_characters=args.download_for_characters,
+        save_aux=args.save_aux,
+        logger=logger,
+    )
+
+
+def extract_frames_and_or_remove_duplicate(args, stage, logger):
     """
     Extracts frames from videos and saves them to the destination directory.
     This function also handles duplicate detection and removal.
     """
     # Get the path to the source directory containing the videos
     src_dir = get_src_dir(args, stage)
-    # Get the path to the destination directory for the extracted frames
-    dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
-    logger.info(f"Extracting frames to {dst_dir} ...")
 
-    extract_and_remove_similar(
-        src_dir,
-        dst_dir,
-        args.image_prefix,
-        ep_init=args.ep_init,
-        extract_key=args.extract_key,
-        model_name=args.detect_duplicate_model,
-        thresh=args.similar_thresh,
-        to_remove_similar=not args.no_remove_similar,
-        logger=logger,
-    )
+    if args.pipeline_type == "screenshots":
+        # Get the path to the destination directory for the extracted frames
+        dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
+        logger.info(f"Extracting frames to {dst_dir} ...")
+
+        extract_and_remove_similar(
+            src_dir,
+            dst_dir,
+            args.image_prefix,
+            ep_init=args.ep_init,
+            extract_key=args.extract_key,
+            model_name=args.detect_duplicate_model,
+            thresh=args.similar_thresh,
+            to_remove_similar=not args.no_remove_similar,
+            logger=logger,
+        )
+    else:
+        logger.info(f"Removing duplicate images for {src_dir} ...")
+        model = foz.load_zoo_model(args.detect_duplicate_model)
+        remove_similar_from_dir(src_dir, model, args.similar_thresh, logger=logger)
 
 
 # TODO: Avoid cropping for already cropped data
@@ -442,11 +489,12 @@ def balance(args, stage, logger):
 def run_stage(config, stage_num, logger):
     # Mapping stage numbers to their respective function names
     STAGE_FUNCTIONS = {
-        1: extract_frames,
+        0: download,
+        1: extract_frames_and_or_remove_duplicate,
         2: crop_characters,
         3: classify_characters,
         4: select_dataset_images,
-        5: tag_and_caption,
+        # 5: tag_and_caption,
         6: rearrange,
         7: balance,
     }
@@ -510,7 +558,7 @@ async def run_pipeline(config, config_index, execution_config, stage_events, exe
         stage_events[config_index][stage_num].set()
 
 
-async def main(configs, execution_configs):
+async def main(configs):
     # Set up configs for execution dependencies and optional skips
     execution_configs = get_execution_configs(configs)
 

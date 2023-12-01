@@ -51,8 +51,15 @@ def get_src_dir(args, stage):
     Raises:
         ValueError: If the provided stage number is invalid.
     """
-    if stage == args.start_stage or stage == 1:
+    if stage == args.start_stage:
         return os.path.abspath(args.src_dir)
+    elif stage == 1:
+        if args.pipeline_type == "screenshots":
+            return get_and_create_dst_dir(
+                args, "intermediate", "animes", makedirs=False
+            )
+        else:
+            return get_and_create_dst_dir(args, "intermediate", "raw", makedirs=False)
     elif stage == 2:
         return get_and_create_dst_dir(args, "intermediate", "raw", makedirs=False)
     elif stage == 3:

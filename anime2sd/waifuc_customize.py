@@ -104,7 +104,8 @@ class TagRenameAction(ProcessAction):
     """
 
     def __init__(self, mapping: Dict[str, str], fields: Optional[List[str]] = None):
-        self.mapping = mapping
+        # Drop tags that map to empty string or None
+        self.mapping = {k: v for k, v in mapping.items() if v}
         self.fields = fields or ["tags", "processed_tags"]
         if isinstance(self.fields, str):
             self.fields = [self.fields]

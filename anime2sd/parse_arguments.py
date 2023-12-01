@@ -80,8 +80,8 @@ def parse_arguments():
         default="screenshots",
         choices=["screenshots", "booru"],
         help=(
-            "Pipeline type that is used to construct dataset. ",
-            "Options are 'screenshots' and 'booru'.",
+            "Pipeline type that is used to construct dataset. "
+            "Options are 'screenshots' and 'booru'."
         ),
     )
     parser.add_argument(
@@ -100,6 +100,82 @@ def parse_arguments():
         help=(
             "Whether to remove intermediate result or not "
             "(results after stage 1 are always saved)"
+        ),
+    )
+
+    # Arguments for downloading images from Danbooru
+    parser.add_argument(
+        "--anime",
+        type=str,
+        default=None,
+        help="The anime name used for downloading images from Danbooru",
+    )
+    parser.add_argument(
+        "--character_info_file",
+        type=str,
+        default=None,
+        help=(
+            "Path to CSV file containing character mapping information "
+            "It is used for renaming and potentially for downloading as well"
+        ),
+    )
+    parser.add_argument(
+        "--download_for_characters",
+        action="store_true",
+        help=(
+            "Indicates whether to attempt downloading for all characters "
+            "in the character info file"
+        ),
+    )
+    parser.add_argument(
+        "--booru_download_limit",
+        type=int,
+        default=None,
+        help=(
+            "Limit on the total number of images to download from Danbooru. "
+            "Defaults to no limit. Setting to 0 will download all images as well. "
+            "Note that for efficiency if both --boordu_download_limit and "
+            "--booru_download_limit_per_character are set, "
+            "we are not guaranteed to download --booru_download_limit images."
+        ),
+    )
+    parser.add_argument(
+        "--booru_download_limit_per_character",
+        type=int,
+        default=500,
+        help=(
+            "Limit on the number of images to download per character from Danbooru. "
+            "Defaults to 500. Set to 0 to disable."
+        ),
+    )
+    parser.add_argument(
+        "--allowed_ratings",
+        nargs="*",
+        default=[],
+        help=(
+            "List of allowed ratings for filtering images. "
+            "Should pick from 'safe' 'r15', and 'r18'. "
+            "Defaults to empty list which means no filtering."
+        ),
+    )
+    parser.add_argument(
+        "--allowed_image_classes",
+        nargs="*",
+        default=["illustration", "bangumi"],
+        help=(
+            "List of allowed classes for filtering images. "
+            "Should pick from 'illustration' 'bangumi' 'comic', and '3d'. "
+            "Defauts to ['illustration', 'bangumi']. "
+            "Set to empty list to disable."
+        ),
+    )
+    parser.add_argument(
+        "--max_download_size",
+        type=int,
+        default=1024,
+        help=(
+            "Maximum size for the smaller dimension of too large downloaded images "
+            "to resize to"
         ),
     )
 
@@ -189,9 +265,9 @@ def parse_arguments():
         "--ignore_character_metadata",
         action="store_true",
         help=(
-            "Whether to ignore existing character metadata during classification ",
+            "Whether to ignore existing character metadata during classification "
             "(only meaning ful for 'booru' pipeline as this is always the case "
-            "for 'screenshots' pipeline)",
+            "for 'screenshots' pipeline)"
         ),
     )
     parser.add_argument(

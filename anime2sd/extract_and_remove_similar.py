@@ -259,7 +259,7 @@ def extract_and_remove_similar(
         subprocess.run(ffmpeg_command, check=True)
 
         if to_remove_similar:
-            logger.info("Removing duplicates for '{filename_without_ext}':")
+            logger.info(f"Removing duplicates for '{filename_without_ext}':")
             logger.info("Preparing dataset ...")
             dataset = fo.Dataset.from_dir(
                 dst_ep_dir, dataset_type=fo.types.ImageDirectory

@@ -95,8 +95,9 @@ Contributions are welcome
 - [x] Readme and Requirements.txt
 - [x] HCP-diffusion compatibility [2023.10.08]
 - [x] .toml support [2023.11.29]
-- [ ] Fanart support
-- [ ] Multi-anime support
+- [x] Fanart support [2023.12.01]
+- [x] Multi-anime support [2023.12.01]
+- [ ] Fully automatic with only need for specifying anime name: Coming Soon!
 
 ### Secondary
 
@@ -107,9 +108,8 @@ Contributions are welcome
 - [x] Ref directory hierarchy and Character class to account for different appearances of the same character [2023.11.28]
 - [ ] Do not crop images that are already cropped before unless otherwise specified
 - [ ] Prepare HCP with multiple datasets
-- [ ] Arguments to optionally remove character combinations with too few images
+- [ ] Arguments to optionally remove subfolders with too few images
 - [ ] Replace ffmpeg command by built-in python functions
-- [ ] Compute repeat based on metadata and trainer-dependent folder organization in the same script
 - [ ] Improved tag pruning (with tag tree?)
 
 ### Advanced

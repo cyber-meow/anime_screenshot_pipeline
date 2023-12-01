@@ -1,5 +1,7 @@
 # General Configuration
 [general]
+# The anime name in question, used for downloading images from Danbooru
+anime = "my_favorite_anime"
 # Directory containing source files
 src_dir = "path/to/src_dir"
 # Directory to save output files
