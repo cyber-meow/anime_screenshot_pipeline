@@ -15,6 +15,7 @@ The script `automatic_pipeline.py` allows you to construct a text-to-image train
 
 ```bash
 python automatic_pipeline.py \
+    --anime name_of_my_favorite_anime \
     --base_config_file path/to/base_config_file \
     --config_file path/to/config_file1 path/to/config_file2 [...]
 ```

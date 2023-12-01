@@ -46,7 +46,7 @@ crop_with_face = false
 detect_level = "n"
 # Use 3 stage crop to get halfbody and head crops
 # This is slow and should only be called once for a set of images. Possible to use either at stage 2 or 4.
-# Set to {} or comment it to disable
+# Set to {} or comment this line to disable
 use_3stage_crop = {}
 
 # Character Clustering/Classification Configuration

@@ -31,7 +31,7 @@ ep_init = 1
 # Character Cropping Configuration
 [character_cropping]
 # Use 3 stage crop to get halfbody and head crops
-# Set to {} or comment it to disable
+# Set to {} or comment this line to disable
 use_3stage_crop = {}
 
 # Character Clustering/Classification Configuration

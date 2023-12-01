@@ -32,13 +32,16 @@ def parse_arguments():
         "--src_dir",
         type=str,
         default="animes",
-        help="Directory containing source files",
+        help=(
+            "Directory containing source files. "
+            "It is ignored if we start from stage 0."
+        ),
     )
     parser.add_argument(
         "--dst_dir",
         type=str,
         default="data",
-        help="Directory to save output files. It only affects stage 1 to 4.",
+        help="Directory to save output files. It only affects stage 0 to 4.",
     )
     parser.add_argument(
         "--extra_path_component",
@@ -134,9 +137,9 @@ def parse_arguments():
         help=(
             "Limit on the total number of images to download from Danbooru. "
             "Defaults to no limit. Setting to 0 will download all images as well. "
-            "Note that for efficiency if both --boordu_download_limit and "
-            "--booru_download_limit_per_character are set, "
-            "we are not guaranteed to download --booru_download_limit images."
+            "Note that for efficiency if both --booru_download_limit and "
+            "--booru_download_limit_per_character are set, we are not guaranteed "
+            "to download --booru_download_limit number of images."
         ),
     )
     parser.add_argument(

@@ -138,3 +138,4 @@ logs/
 **/wandb/
 **/results_training
 */*.ckpt
+!docs/
