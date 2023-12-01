@@ -32,6 +32,15 @@ def remove_empty_folders(path_abs):
 
 
 def get_images_recursively(folder_path):
+    """
+    Get all images recursively from a folder using Path and rglob.
+
+    Args:
+    - folder_path (str): The path to the folder.
+
+    Returns:
+    - list: A list of image paths.
+    """
     allowed_patterns = [
         "*.[Pp][Nn][Gg]",
         "*.[Jj][Pp][Gg]",
@@ -188,10 +197,16 @@ def get_corr_ccip_names(img_path):
     return ccip_path, ccip_filename
 
 
+# TODO: Replace the use of this with construct_aux_files_dict
 def get_related_paths(img_path):
     meta_path, _ = get_corr_meta_names(img_path)
     ccip_path, _ = get_corr_ccip_names(img_path)
-    return [meta_path, ccip_path]
+    res = [meta_path, ccip_path]
+    base_filename = os.path.splitext(img_path)[0]
+    for ext in [".tags", ".processed_tags", ".characters"]:
+        related_path = f"{base_filename}{ext}"
+        res.append(related_path)
+    return res
 
 
 def construct_file_list(src_dir: str):

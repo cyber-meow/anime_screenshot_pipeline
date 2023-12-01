@@ -1,9 +1,7 @@
 from .basics import rearrange_related_files, load_metadata_from_aux
 from .download import download_images
-from .extract_and_remove_similar import (
-    extract_and_remove_similar,
-    remove_similar_from_dir,
-)
+from .extract_frames import extract_and_remove_similar
+from .remove_duplicates import DuplicateRemover
 from .classif.classify_characters import classify_from_directory
 from .emb_utils import update_emb_init_info
 from .image_selection import (

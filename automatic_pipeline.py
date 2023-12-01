@@ -8,15 +8,13 @@ from datetime import datetime
 
 import asyncio
 import concurrent.futures
-import fiftyone as fo
-import fiftyone.zoo as foz
 
 from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
 from anime2sd import download_images
-from anime2sd import extract_and_remove_similar, remove_similar_from_dir
+from anime2sd import extract_and_remove_similar
 from anime2sd import classify_from_directory
 from anime2sd import select_dataset_images_from_directory
 from anime2sd import (
@@ -26,6 +24,7 @@ from anime2sd import (
 )
 from anime2sd import arrange_folder
 from anime2sd import read_weight_mapping, get_repeat
+from anime2sd import DuplicateRemover
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
 from anime2sd.basics import (
@@ -152,13 +151,23 @@ def download(args, stage, logger):
     )
 
 
-def extract_frames_and_or_remove_duplicate(args, stage, logger):
+def extract_frames_and_or_remove_similar(args, stage, logger):
     """
     Extracts frames from videos and saves them to the destination directory.
     This function also handles duplicate detection and removal.
     """
     # Get the path to the source directory containing the videos
     src_dir = get_src_dir(args, stage)
+
+    if args.no_remove_similar:
+        duplicate_remover = None
+    else:
+        duplicate_remover = DuplicateRemover(
+            args.detect_duplicate_model,
+            threshold=args.similar_thresh,
+            dataloader_batch_size=args.detect_duplicate_batch_size,
+            logger=logger,
+        )
 
     if args.pipeline_type == "screenshots":
         # Get the path to the destination directory for the extracted frames
@@ -171,15 +180,11 @@ def extract_frames_and_or_remove_duplicate(args, stage, logger):
             args.image_prefix,
             ep_init=args.ep_init,
             extract_key=args.extract_key,
-            model_name=args.detect_duplicate_model,
-            thresh=args.similar_thresh,
-            to_remove_similar=not args.no_remove_similar,
+            duplicate_remover=duplicate_remover,
             logger=logger,
         )
     else:
-        logger.info(f"Removing duplicate images for {src_dir} ...")
-        model = foz.load_zoo_model(args.detect_duplicate_model)
-        remove_similar_from_dir(src_dir, model, args.similar_thresh, logger=logger)
+        duplicate_remover.remove_similar_from_dir(src_dir)
 
 
 # TODO: Avoid cropping for already cropped data
@@ -284,6 +289,16 @@ def select_dataset_images(args, stage, logger):
         rearrange_related_files(classified_dir, logger)
     overwrite_path = is_start_stage and args.overwrite_path
 
+    if args.filter_again:
+        duplicate_remover = DuplicateRemover(
+            args.detect_duplicate_model,
+            threshold=args.similar_thresh,
+            dataloader_batch_size=args.detect_duplicate_batch_size,
+            logger=logger,
+        )
+    else:
+        duplicate_remover = None
+
     logger.info(f"Preparing dataset images to {dst_dir} ...")
 
     select_dataset_images_from_directory(
@@ -307,9 +322,7 @@ def select_dataset_images(args, stage, logger):
         to_resize=not args.no_resize,
         n_anime_reg=args.n_anime_reg,
         # For additional filtering after obtaining dataset images
-        filter_again=args.filter_again,
-        detect_duplicate_model=args.detect_duplicate_model,
-        similarity_threshold=args.similar_thresh,
+        duplicate_remover=duplicate_remover,
         logger=logger,
     )
 
@@ -492,7 +505,7 @@ def run_stage(config, stage_num, logger):
     # Mapping stage numbers to their respective function names
     STAGE_FUNCTIONS = {
         0: download,
-        1: extract_frames_and_or_remove_duplicate,
+        1: extract_frames_and_or_remove_similar,
         2: crop_characters,
         3: classify_characters,
         4: select_dataset_images,
@@ -613,12 +626,6 @@ if __name__ == "__main__":
 
     # A set to record dst_dir and image_type in configs
     dst_folder_set = set()
-
-    # fiftyone logging with multithreading can cause trouble, this disables
-    # notably progress bar for compute embedding that is used in duplicate removal
-    if len(configs) > 1:
-        fo.config.show_progress_bars = False
-        model = foz.load_zoo_model(args.detect_duplicate_model)
 
     # Process each configuration
     for config in configs:

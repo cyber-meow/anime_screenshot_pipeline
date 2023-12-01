@@ -30,9 +30,11 @@ remove_intermediate = false
 # Do not remove similar images
 no_remove_similar = false
 # Model used for duplicate detection
-detect_duplicate_model = "mobilenet-v2-imagenet-torch"
+detect_duplicate_model = "mobilenetv3_large_100"
+# Batch size for embendding computation used in duplicate detection
+detect_duplicate_batch_size = 16
 # Cosine similarity threshold for image duplicate detection
-similar_thresh = 0.96
+similar_thresh = 0.95
 
 # Character Cropping Configuration
 [character_cropping]

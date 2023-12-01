@@ -7,7 +7,6 @@ from tqdm import tqdm
 from typing import List, Dict, Set, Optional
 from PIL import Image
 
-import fiftyone.zoo as foz
 from waifuc.action import ThreeStageSplitAction
 
 from .basics import (
@@ -18,8 +17,8 @@ from .basics import (
     remove_empty_folders,
 )
 from .emb_utils import update_emb_init_info
-from .extract_and_remove_similar import remove_similar_from_dir
 from .character import Character
+from .remove_duplicates import DuplicateRemover
 from .waifuc_customize import LocalSource, SaveExporter
 
 
@@ -556,7 +555,7 @@ def resize_character_images(
     else:
         selected_frames = nocharacter_frames
 
-    logger.info(f"Copying {len(selected_frames)} no character images ...")
+    logger.info(f"Processing {len(selected_frames)} no character images ...")
 
     for img_path in tqdm(selected_frames):
         if to_resize:
@@ -593,9 +592,7 @@ def select_dataset_images_from_directory(
     to_resize: bool,
     n_anime_reg: int,
     # For additional filtering after obtaining dataset images
-    filter_again: bool,
-    detect_duplicate_model: str,
-    similarity_threshold: float,
+    duplicate_remover: Optional[DuplicateRemover] = None,
     logger: Optional[logging.Logger] = None,
 ) -> None:
     """
@@ -622,9 +619,8 @@ def select_dataset_images_from_directory(
         image_save_ext (str): Extension for saving images.
         to_resize (bool): Flag to resize images.
         n_anime_reg (int): Number of no character anime images to save.
-        filter_again (bool): Flag to filter similar images again after processing.
-        detect_duplicate_model (str): Model used for duplicate detection.
-        similarity_threshold (float): Threshold for similarity in duplicate detection.
+        duplicate_remover (DuplicateRemover):
+            DuplicateRemover for removing similar images after processing.
         logger (Optional[Logger]): A logger to use for logging.
 
     Raises:
@@ -691,14 +687,8 @@ def select_dataset_images_from_directory(
     )
     remove_empty_folders(dst_dir)
 
-    if filter_again:
-        logger.info(f"Removing duplicates from {dst_dir} ...")
-        model = foz.load_zoo_model(detect_duplicate_model)
+    if duplicate_remover is not None:
         for folder in os.listdir(dst_dir):
-            if os.path.isdir(os.path.join(dst_dir, folder)):
-                remove_similar_from_dir(
-                    os.path.join(dst_dir, folder),
-                    model=model,
-                    thresh=similarity_threshold,
-                    logger=logger,
-                )
+            remove_from = os.path.join(dst_dir, folder)
+            if os.path.isdir(remove_from):
+                duplicate_remover.remove_similar_from_dir(remove_from)

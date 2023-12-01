@@ -197,13 +197,19 @@ def parse_arguments():
     )
     parser.add_argument(
         "--detect_duplicate_model",
-        default="mobilenet-v2-imagenet-torch",
-        help="Model used for duplicate detection",
+        default="mobilenetv3_large_100",
+        help="Model used for duplicate detection from timm",
+    )
+    parser.add_argument(
+        "--detect_duplicate_batch_size",
+        type=int,
+        default=16,
+        help="Batch size for embendding computation used in duplicate detection",
     )
     parser.add_argument(
         "--similar_thresh",
         type=float,
-        default=0.96,
+        default=0.95,
         help="Cosine similarity threshold for image duplicate detection",
     )
 
