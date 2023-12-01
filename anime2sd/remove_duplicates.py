@@ -1,6 +1,7 @@
 import os
 import logging
 from tqdm import tqdm
+from typing import List, Tuple, Set, Optional
 from PIL import Image
 
 import numpy as np
@@ -15,14 +16,28 @@ from .basics import get_related_paths, get_images_recursively
 
 
 class ImageDataset(Dataset):
-    def __init__(self, image_paths, transform):
+    """
+    A dataset class for loading and transforming images from a directory.
+    """
+
+    def __init__(self, image_paths: List[str], transform: callable):
+        """
+        Initializes the ImageDataset with image paths and a transform.
+
+        Args:
+            image_paths (List[str]):
+                List of paths to the images.
+            transform (callable):
+                A function/transform that takes in a PIL image and returns
+                a transformed version.
+        """
         self.image_paths = image_paths
         self.transform = transform
 
     def __len__(self):
         return len(self.image_paths)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[str, np.ndarray]:
         image_path = self.image_paths[idx]
         image = Image.open(image_path).convert("RGB")
         if self.transform:
@@ -30,12 +45,44 @@ class ImageDataset(Dataset):
         return image_path, image
 
     @classmethod
-    def from_directory(cls, dataset_dir, transform):
+    def from_directory(cls, dataset_dir: str, transform: callable):
+        """
+        Creates an ImageDataset from a directory of images.
+
+        Args:
+            dataset_dir (str): Path to the directory containing images.
+            transform (callable): A function/transform for image processing.
+
+        Returns:
+            ImageDataset: The constructed dataset.
+        """
         image_paths = get_images_recursively(dataset_dir)
         return cls(image_paths, transform)
 
     @classmethod
-    def from_subdirectories(cls, dataset_dir, transform, portion="first"):
+    def from_subdirectories(
+        cls, dataset_dir: str, transform: callable, portion: Optional[str] = "first"
+    ):
+        """
+        Creates an ImageDataset from subdirectories of images,
+        selecting a specific portion of images.
+        This is useful for creating dataset that contain opening and ending of animes.
+        This assumes that different episodes are stored in different subfolders,
+        and that the extracted frames follow a specific naming convention so
+        that their numbers can be extracted.
+
+        Args:
+            dataset_dir (str):
+                Path to the directory containing subdirectories of images.
+            transform (callable):
+                A function/transform for image processing.
+            portion (Optional[str]):
+                Specifies which portion of images to consider ('first' or 'last').
+
+        Returns:
+            ImageDataset: The constructed dataset.
+        """
+
         def get_image_number(filename):
             return int(os.path.splitext(filename)[0].split("_")[-1])
 
@@ -68,42 +115,35 @@ class ImageDataset(Dataset):
         return cls(image_paths, transform)
 
 
-def remove_similar_from_dir(
-    dirpath,
-    model_name,
-    threshold=0.985,
-    max_cmopare_size=10000,
-    device="cuda",
-    logger=None,
-):
-    if logger is None:
-        logger = logging.getLogger()
-    model = timm.create_model(model_name)
-    data_cfg = timm.data.resolve_data_config(model.pretrained_cfg)
-    transform = timm.data.create_transform(**data_cfg)
-    dataset = ImageDataset.from_directory(dirpath, transform=transform)
-    remove_similar(
-        dataset,
-        model,
-        threshold=threshold,
-        max_compare_size=max_cmopare_size,
-        device=device,
-        logger=logger,
-    )
-
-
 class DuplicateRemover(object):
+    """
+    A class to remove duplicate images from a dataset based on image embeddings.
+    """
+
     def __init__(
         self,
-        model_name,
-        device=None,
-        threshold=0.96,
-        max_compare_size=10000,
-        dataloader_batch_size=16,
-        dataloader_num_workers=4,
-        pin_memory=True,
-        logger=None,
+        model_name: str,
+        device: Optional[str] = None,
+        threshold: float = 0.96,
+        max_compare_size: int = 10000,
+        dataloader_batch_size: int = 16,
+        dataloader_num_workers: int = 4,
+        pin_memory: bool = True,
+        logger: Optional[logging.Logger] = None,
     ):
+        """Initializes the DuplicateRemover object.
+
+        Attributes:
+            model_name (str): Name of the model used for generating embeddings.
+            device (str): Device to use for computations.
+            threshold (float):
+                Threshold for cosine similarity to consider images as duplicates.
+            max_compare_size (int): Maximum number of images to compare at once.
+            dataloader_batch_size (int): Batch size for the DataLoader.
+            dataloader_num_workers (int): Number of worker threads for DataLoader.
+            pin_memory (bool): Whether to use pinned memory in DataLoader.
+            logger (logging.Logger): Logger for logging information.
+        """
         if logger is None:
             self.logger = logging.getLogger()
         else:
@@ -124,7 +164,7 @@ class DuplicateRemover(object):
         self.data_cfg = timm.data.resolve_data_config(self.model.pretrained_cfg)
         self.transform = timm.data.create_transform(**self.data_cfg)
 
-    def compute_embeddings(self, dataset):
+    def compute_embeddings(self, dataset: ImageDataset):
         dataloader = DataLoader(
             dataset,
             batch_size=self.dataloader_batch_size,
@@ -132,6 +172,15 @@ class DuplicateRemover(object):
             pin_memory=self.pin_memory,
             shuffle=False,
         )
+        """
+        Compute embeddings for all images in the dataset.
+
+        Args:
+            dataset: Dataset containing images.
+
+        Returns:
+            np.ndarray: Array of embeddings of shape n_images x n_featuers.
+        """
         embeddings = []
 
         with torch.no_grad(), torch.autocast(device_type=self.device):
@@ -140,11 +189,21 @@ class DuplicateRemover(object):
                 features = self.model(images)
                 embeddings.append(features.cpu().numpy())
 
-        print(np.vstack(embeddings).shape)
-        # n_images x n_featuers
         return np.vstack(embeddings)
 
-    def get_duplicate(self, embeddings, indices=None):
+    def get_duplicate(
+        self, embeddings: np.ndarray, indices: Optional[np.ndarray] = None
+    ) -> Tuple[Set[int], Set[int]]:
+        """
+        Identify duplicate images based on embeddings.
+
+        Args:
+            embeddings (np.ndarray): Array of embeddings.
+            indices (Optional[np.ndarray]): Indices of embeddings to consider.
+
+        Returns:
+            Tuple[Set[int], Set[int]]: Sets of indices to remove and keep.
+        """
         if indices is None:
             indices = np.arange(len(embeddings))
         embeddings = embeddings[indices]
@@ -166,7 +225,13 @@ class DuplicateRemover(object):
                     samples_to_remove.add(indices[dup])
         return samples_to_remove, samples_to_keep
 
-    def remove_similar(self, dataset):
+    def remove_similar(self, dataset: ImageDataset):
+        """
+        Remove similar images from the dataset.
+
+        Args:
+            dataset: Dataset containing images.
+        """
         self.logger.info(f"Compute embeddings for {len(dataset)} images ...")
         embeddings = self.compute_embeddings(dataset)
 
@@ -188,7 +253,20 @@ class DuplicateRemover(object):
                 if os.path.exists(related_path):
                     os.remove(related_path)
 
-    def remove_similar_from_dir(self, dirpath, portion=None):
+    def remove_similar_from_dir(self, dirpath: str, portion: Optional[str] = None):
+        """
+        Remove similar images from a directory.
+
+        Args:
+            dirpath (str):
+                Path to the directory containing images.
+            portion (Optional[str]):
+                Specifies which portion of images to consider ('first' or 'last').
+                Useful for removing duplicates from opening and ending of animes.
+                This assumes that different episodes are stored in different subfolders,
+                and that the extracted frames follow a specific naming convention so
+                that their numbers can be extracted.
+        """
         if portion:
             rtype = "op" if portion == "first" else "ed"
             self.logger.info(f"Removing {rtype} duplicates for '{dirpath}' ...")

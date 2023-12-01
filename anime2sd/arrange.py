@@ -65,8 +65,10 @@ def get_folder_name(folder_type, info_dict, max_character_number) -> str:
         return f"{count}_{suffix}"
     elif folder_type == "n_characters":
         characters = info_dict.get("characters", [])
-        if len(characters) > 0 and type(characters[0]) is list:
-            characters = [character[0] for character in characters]
+        characters = [
+            Character.from_string(character).character_name
+            for character in info_dict.get("characters", [])
+        ]
         characters = sorted(list(set(characters)))
         n_character = len(characters)
         if n_character >= max_character_number:
