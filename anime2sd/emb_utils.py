@@ -37,6 +37,8 @@ def update_emb_init_info(
     """
     if logger is None:
         logger = logging.getLogger()
+    if isinstance(image_types, str):
+        image_types = [image_types]
     name_init_map = {}
 
     # Read existing content if not overwriting

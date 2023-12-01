@@ -451,7 +451,6 @@ def run_stage(config, stage_num, logger):
         7: balance,
     }
 
-    logger.info(f"-------------Start stage {stage_num}-------------")
     STAGE_FUNCTIONS[stage_num](config, stage_num, logger)
 
 
@@ -494,6 +493,7 @@ async def run_pipeline(config, config_index, execution_config, stage_events, exe
                 )
             )
 
+        logger.info(f"-------------Start stage {stage_num}-------------")
         loop = asyncio.get_running_loop()
         if stage_num == 5:
             await tag_and_caption(
@@ -510,7 +510,8 @@ async def run_pipeline(config, config_index, execution_config, stage_events, exe
         stage_events[config_index][stage_num].set()
 
 
-async def main(configs):
+async def main(configs, execution_configs):
+    # Set up configs for execution dependencies and optional skips
     execution_configs = get_execution_configs(configs)
 
     # Initialize events for each stage of each config

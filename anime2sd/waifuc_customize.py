@@ -1,14 +1,119 @@
 import os
 import re
-from typing import Iterator, Optional
+from typing import List, Dict, Tuple, Optional, Iterator, Union
 from PIL import UnidentifiedImageError
 from tqdm import tqdm
 
 from waifuc.source.base import BaseDataSource
 from waifuc.export.base import LocalDirectoryExporter
-from waifuc.action.base import FilterAction
+from waifuc.action.base import FilterAction, ProcessAction
 from waifuc.model import ImageItem
+from waifuc.source import WebDataSource, DanbooruSource
 from imgutils.detect import detect_faces, detect_heads
+
+
+class WebDataSourceWithLimit(WebDataSource):
+    """
+    Ensure that we do not download more than limit_per_character images per character
+    unless there are other characters in the image
+    """
+
+    def __init__(
+        self,
+        *args,
+        limit_per_character: Optional[int] = 100,
+        character_n_images: Optional[Dict[str, int]] = None,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        assert hasattr(self, "site_name"), "site_name must be specified"
+        self.limit_per_character = limit_per_character
+        self.character_n_images = (
+            character_n_images if character_n_images is not None else {}
+        )
+
+    def _iter_data(self) -> Iterator[Tuple[Union[str, int], str, dict]]:
+        for id_, url, meta in super()._iter_data():
+            if (
+                self.limit_per_character is not None
+                and self.site_name in meta
+                and "tag_string_character" in meta[self.site_name]
+            ):
+                characters = re.split(
+                    r"\s+", meta[self.site_name]["tag_string_character"]
+                )
+                # Ensure that we do not download more than limit_per_character
+                to_download = False
+                for character in characters:
+                    if character not in self.character_n_images:
+                        self.character_n_images[character] = 0
+                    if self.character_n_images[character] < self.limit_per_character:
+                        to_download = True
+                        break
+                if to_download:
+                    for character in characters:
+                        if character not in self.character_n_images:
+                            self.character_n_images[character] = 0
+                        self.character_n_images[character] += 1
+                    yield id_, url, meta
+            else:
+                yield id_, url, meta
+
+
+class DanbooruSourceWithLimit(WebDataSourceWithLimit, DanbooruSource):
+    pass
+
+
+class ConvertSiteMetadataAction(ProcessAction):
+    """Retrieve metadata from specific site field"""
+
+    def __init__(
+        self,
+        site_name: str = "danbooru",
+        keep_fields: Optional[List[str]] = None,
+    ):
+        self.site_name = site_name
+        self.keep_fields = keep_fields or ["score", "md5", "rating", "fav_count"]
+        self.tag_string_mapping = {
+            "tag_string_general": "tags",
+            "tag_string_copyright": "copyright",
+            "tag_string_artist": "artist",
+            "tag_string_character": "characters",
+        }
+
+    def process(self, item: ImageItem) -> ImageItem:
+        if self.site_name in item.meta:
+            for field in self.keep_fields:
+                if field in item.meta[self.site_name]:
+                    item.meta[field] = item.meta[self.site_name][field]
+            for tag_string, field in self.tag_string_mapping.items():
+                if tag_string in item.meta[self.site_name]:
+                    item.meta[field] = re.split(
+                        r"\s+", item.meta[self.site_name][tag_string]
+                    )
+            item.meta["site"] = self.site_name
+            del item.meta[self.site_name]
+        return item
+
+
+class TagRenameAction(ProcessAction):
+    """
+    Rename tags in metadata according to the provided mapping
+    It can also be used to rename other fields that are lists, such as
+    characters, copyright, and artist
+    """
+
+    def __init__(self, mapping: Dict[str, str], fields: Optional[List[str]] = None):
+        self.mapping = mapping
+        self.fields = fields or ["tags", "processed_tags"]
+        if isinstance(self.fields, str):
+            self.fields = [self.fields]
+
+    def process(self, item: ImageItem) -> ImageItem:
+        for field in self.fields:
+            if field in item.meta:
+                item.meta[field] = [self.mapping.get(t, t) for t in item.meta[field]]
+        return item
 
 
 class MinFaceCountAction(FilterAction):

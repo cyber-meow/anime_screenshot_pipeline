@@ -1,4 +1,5 @@
 from .basics import rearrange_related_files, load_metadata_from_aux
+from .download import download_images
 from .extract_and_remove_similar import (
     extract_and_remove_similar,
     remove_similar_from_dir,

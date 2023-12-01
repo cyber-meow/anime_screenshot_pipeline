@@ -144,7 +144,7 @@ class CaptionGenerator(object):
         return "by " + self.caption_inner_sep.join(to_add)
 
     def to_text_rating(self, to_add):
-        if to_add == "explicit":
+        if to_add in ["explicit", "e"]:
             return "explicit"
         else:
             return None
