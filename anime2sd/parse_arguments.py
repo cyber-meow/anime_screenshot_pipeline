@@ -523,7 +523,7 @@ def parse_arguments():
         help="process tags from original tags instead of processed tags",
     )
     parser.add_argument(
-        "--pruned_mode",
+        "--prune_mode",
         type=str,
         default="character_core",
         choices=["character", "character_core", "minimal", "none"],
