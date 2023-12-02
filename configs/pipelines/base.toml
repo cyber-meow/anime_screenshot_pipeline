@@ -141,6 +141,8 @@ emb_min_difficulty = 1
 emb_max_difficulty = 2
 # Whether to use all core tags for embedding initialization
 emb_init_all_core = false
+# Whether to append dropped character tags to wildcard
+append_dropped_character_tags_wildcard = false
 
 # Captioning Separation Configuration
 [captioning_separation]

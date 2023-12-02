@@ -602,6 +602,11 @@ def parse_arguments():
             "Overwrites --emb_min_difficulty and --emb_max_difficulty."
         ),
     )
+    parser.add_argument(
+        "--append_dropped_character_tags_wildcard",
+        action="store_true",
+        help="Whether to append dropped character tags to wildcard",
+    )
 
     # Arguments for captioning
     parser.add_argument(

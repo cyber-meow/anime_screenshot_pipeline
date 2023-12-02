@@ -451,6 +451,10 @@ async def tag_and_caption(
                 for dep_index in execution_config.save_core_dependencies
             )
         )
+        # Do not use character tag processor for computing core tags
+        # in mode "character" as this causes classifcation into different types
+        if args.prune_mode == "character":
+            char_tag_proc = None
         await loop.run_in_executor(
             executor,
             compute_and_save_core_tags,
@@ -459,6 +463,7 @@ async def tag_and_caption(
             args.core_frequency_thresh,
             char_tag_proc,
             caption_generator,
+            args.append_dropped_character_tags_wildcard,
             execution_config.image_types,
             args.overwrite_emb_init_info,
             logger,

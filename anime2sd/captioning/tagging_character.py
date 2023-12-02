@@ -3,7 +3,7 @@ import re
 import json
 import logging
 from tqdm import tqdm
-from typing import List
+from typing import List, Optional
 
 from .tagging_basics import get_all_singular_plural_forms
 from .captioning import CaptionGenerator
@@ -262,7 +262,11 @@ class CoreTagProcessor(object):
     ]
 
     def __init__(
-        self, folder_path=None, core_tag_path=None, frequency_threshold=0.4, logger=None
+        self,
+        folder_path: Optional[str] = None,
+        core_tag_path: Optional[str] = None,
+        frequency_threshold: float = 0.35,
+        logger: Optional[logging.Logger] = None,
     ):
         """
         For each character in the given folder, find the tags whose appearance
@@ -380,6 +384,7 @@ class CoreTagProcessor(object):
         json_output: str,
         wildcard_ouput: str,
         caption_generator: CaptionGenerator,
+        append_dropped_character_tags: bool = False,
     ):
         """
         Save the core tags to a JSON file and a wildcard output file.
@@ -388,6 +393,8 @@ class CoreTagProcessor(object):
             json_output (str): The file path for saving the JSON output.
             wildcard_output (str): The file path for saving the wildcard output.
             caption_generator (CaptionGenerator): The caption generator.
+            append_dropped_character_tags (bool):
+                Whether to append dropped tags in wildcard output.
         """
         with open(json_output, "w") as f:
             json.dump(self.core_tags, f, indent=4)
@@ -398,11 +405,18 @@ class CoreTagProcessor(object):
                 }
                 caption = caption_generator.generate_caption(meta)
                 f.write(caption + "\n")
+                tags_full = None
                 # The case where we split into kept, dropped, and emb_init
                 if isinstance(tags, dict):
+                    if append_dropped_character_tags:
+                        tags_full = tags["kept"] + tags["emb_init"] + tags["dropped"]
                     tags = tags["kept"]
                 if len(tags) > 0:
                     meta["tags"] = tags
+                    caption = caption_generator.generate_caption(meta)
+                    f.write(caption + "\n")
+                if tags_full is not None and len(tags_full) > len(tags):
+                    meta["tags"] = tags_full
                     caption = caption_generator.generate_caption(meta)
                     f.write(caption + "\n")
 

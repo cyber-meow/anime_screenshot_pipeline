@@ -248,6 +248,7 @@ def compute_and_save_core_tags(
     core_frequency_threshold: float,
     character_tag_processor: Optional[CharacterTagProcessor] = None,
     caption_generator: Optional[CaptionGenerator] = None,
+    append_dropped_character_tags_wildcard: bool = False,
     image_types: List[str] = [],
     overwrite_emb_init_info: bool = False,
     logger: Optional[logging.Logger] = None,
@@ -268,6 +269,8 @@ def compute_and_save_core_tags(
             initialization information is saved.
         caption_generator (CaptionGenerator):
             The caption generator for generating captions. Used for wildcards.
+        append_dropped_character_tags_wildcard (bool):
+            Whether to append dropped character tags to wildcard.
         image_types (List[str]):
             Types of images being processed (for embedding initialization).
         overwrite_emb_init_info (bool):
@@ -299,6 +302,7 @@ def compute_and_save_core_tags(
         core_tag_path,
         wildcard_path,
         caption_generator,
+        append_dropped_character_tags=append_dropped_character_tags_wildcard,
     )
     update_emb_init_info(
         emb_init_filepath,
