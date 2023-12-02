@@ -152,9 +152,7 @@ def download(args, stage, logger):
     elif args.pipeline_type == "booru":
         dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
 
-        if args.character_info_file is not None and os.path.exists(
-            args.character_info_file
-        ):
+        if args.character_info_file and os.path.exists(args.character_info_file):
             character_mapping = read_class_mapping(args.character_info_file)
         else:
             character_mapping = None
