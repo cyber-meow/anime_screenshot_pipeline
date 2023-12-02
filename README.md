@@ -2,6 +2,8 @@
 
 A 99% automatized pipeline to construct training set from anime and more for text-to-image model training
 
+Demonstration: [https://youtu.be/-Nzj6SEU9XY?si=8-o9vN6ToTRTeGea](https://youtu.be/-Nzj6SEU9XY?si=8-o9vN6ToTRTeGea)
+
 The old scripts and readme have been moved into [scripts_v1](scripts_v1).
 
 Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version.
@@ -15,15 +17,14 @@ The script `automatic_pipeline.py` allows you to construct a text-to-image train
 
 ```bash
 python automatic_pipeline.py \
-    --anime name_of_my_favorite_anime \
-    --base_config_file path/to/base_config_file \
-    --config_file path/to/config_file1 path/to/config_file2 [...]
+    --anime_name name_of_my_favorite_anime \
+    --base_config_file configs/pipelines/base.toml \
+    --config_file configs/pipelines/screenshot.toml configs/pipelines/booru.toml [...]
 ```
 
-An example base_config_file is provided in [configs/pipelines/base.toml](configs/pipelines/base.toml).
-Config files for `screenshots` and `booru` pipelines can be found in the same folder.
+Providing multiple [configuration files](configs/pipelines) allow for parallel processing of fanarts and animes (and even for parallel processing of multiple animes). You can either create your own configuration files or overwrite existing values by command line arguments.
 
-Alternatively, you can directly specify the arguments in command line (these arguments have higher priority than the ones in the configuration files).
+Of course, you can always go without configuration files if you do not need to run multiple pipelines in parallel.
 
 ```bash
 python automatic_pipeline.py \
@@ -39,22 +40,43 @@ python automatic_pipeline.py \
     --log_prefix my_favorite_anime
 ```
 
-The process is split into 7 stages as detailed in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki). You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume.
 
+:bulb: To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions or used for embedding initialization later on.  
+:bulb: You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 3 to 7 with `--character_ref_dir` now given. See [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.  
+:warning: Although it is possible to run from stage 0 which downloads anime automatically, it is still recommended to prepare the animes yourself as the downloading part is not fully optimized (may just hang if there are no seeders etc).
 
-- `--src_dir`: The choice of this would vary depending on `start_stage` (details provided in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki)). In the case where `start_stage` is set to 1, this should be a folder containing the videos to extract frames from.
-- `--dst_dir`: Place to construct dataset.
-- `--character_ref_dir`: Optional. A folder containing some example images for characters you want to train for. There are two ways to organize
-    - With sub-folders: You can put character images in different sub-folders. Sub-folder names are then used as character names.
-    - No sub-folders. In this case anything appearing before the first _ in the file name is used as character name.
-
-:bulb: **Tip:** To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions later on.  
-:bulb: **Tip:** You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 3 to 7 with `--character_ref_dir` now given. See [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.
-
-There are a lot of arguments that allow you to configure the entire process. See all of them in the aforementioned config files or with
+There are a lot of arguments (more than 100) that allow you to configure the entire process. See all of them in the aforementioned config files or with
 ```bash
 python automatic_pipeline.py --help
 ```
+
+## Advanced Usage
+
+There are three ways that you can use the script.
+
+- **Use it as a black box:** Type the anime name, go watching two episodes of anime, come back, and the dataset is ready.
+- **Use it powerful dataset creation assistant:** You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume. You can provide character reference images, correct character classification results, adjust core tags, edit tags with other tools. This will allow you to construct a better dataset than what we get with the fully automatic process.
+- **Use it as a tool box:** Each stage can be run independently for the task in question, with many parameters that you can adjust.
+Besides the main script, there are also other numerous scripts in this repository that are useful for dataset preparation.
+However, [waifuc](https://github.com/deepghs/waifuc) which this project heavily makes use of may be more appropriate in this case.
+
+## Pipeline Overview
+
+The script performs all the following automatically.
+
+- [Stage 0] Anime and fanart downloading
+- [Stage 1] Frame extraction and similar image removal
+- [Stage 2] Character cropping 
+- [Stage 3] Character classification
+- [Stage 4] Dataset image selection and resizing
+- [Stage 5] Tagging, captioning, and generating wildcards and embedding initialization information
+- [Stage 6] Dataset arrangement
+- [Stage 7] Repeat computation for concept balancing
+
+More details are found in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) (to be updated).
+
+
+
 
 
 ## Dataset Organization and Training
@@ -82,9 +104,30 @@ cd waifuc && pip install . && cd ..
 # cd waifuc ; pip install . ; cd . for powershell
 ```
 
-**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpege from the command line (ideally with cuda support) for this stage.**
+**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpeg from the command line (ideally with cuda support) for this stage.**
 
 ** While I personally work on Linux, others have successfully run the scripts on Windows.
+
+
+## Change Logs
+
+### Main
+
+- Fully automatic with only need for specifying anime name [2023.12.02]
+- Multi-anime support [2023.12.01]
+- Fanart support [2023.12.01]
+- .toml support [2023.11.29]
+- HCP-diffusion compatibility [2023.10.08]
+
+### Secondary
+
+- Keep tokens separator support for Kohya trainer, possibility to add dropped character tags to the end [2023.12.02]
+- Ref directory hierarchy and Character class to account for different appearances of the same character [2023.11.28]
+- Embedding initialization with hard tags [2023.11.11]
+- Improved classification workflow that takes existing character metadata into account [2023.11.10]
+- Core tag-based pruning [2023.10.15]
+- Add size to metadata to avoid opening images for size comparison [2023.10.14]
+
 
 ## TODO / Potential improvements
 
@@ -92,24 +135,14 @@ Contributions are welcome
 
 ### Main
 
-- [x] Readme and Requirements.txt
-- [x] HCP-diffusion compatibility [2023.10.08]
-- [x] .toml support [2023.11.29]
-- [x] Fanart support [2023.12.01]
-- [x] Multi-anime support [2023.12.01]
-- [x] Fully automatic with only need for specifying anime name [2023.12.02]
+- [ ] Update documentation
+
 
 ### Secondary
 
-- [x] Add size to metadata to avoid opening images for size comparison [2023.10.14]
-- [x] Core tag-based pruning [2023.10.15]
-- [x] Improved classification workflow that takes existing character metadata into account [2023.11.10]
-- [x] Embedding initialization with hard tags [2023.11.11]
-- [x] Ref directory hierarchy and Character class to account for different appearances of the same character [2023.11.28]
-- [x] Keep tokens separator support Kohya trainer, possibility to add dropped character tags to the end [2023.12.02]
 - [ ] Do not crop images that are already cropped before unless otherwise specified
 - [ ] Text detection
-- [ ] Improve core tag detection by using halfbody or full body images
+- [ ] Improve core tag detection by using half body or full body images
 - [ ] Bag of words clustering for wildcard
 - [ ] Prepare HCP with multiple datasets
 - [ ] Arguments to optionally remove subfolders with too few images
