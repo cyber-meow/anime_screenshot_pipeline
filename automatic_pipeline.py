@@ -74,8 +74,12 @@ def update_args_from_toml(
             if isinstance(value, dict):
                 # Handle nested sections by flattening them
                 for nested_key, nested_value in value.items():
+                    if not hasattr(new_args, nested_key):
+                        logging.warning(f"Key {nested_key} is not a valid argument.")
                     setattr(new_args, nested_key, nested_value)
             else:
+                if not hasattr(new_args, key):
+                    logging.warning(f"Key {key} is not a valid argument.")
                 setattr(new_args, key, value)
     except Exception as e:
         print(f"Error loading config from {toml_path}: {e}")
