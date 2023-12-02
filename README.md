@@ -55,7 +55,7 @@ python automatic_pipeline.py --help
 There are three ways that you can use the script.
 
 - **Use it as a black box:** Type the anime name, go watching two episodes of anime, come back, and the dataset is ready.
-- **Use it powerful dataset creation assistant:** You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume. You can provide character reference images, correct character classification results, adjust core tags, edit tags with other tools. This will allow you to construct a better dataset than what we get with the fully automatic process.
+- **Use it as a powerful dataset creation assistant:** You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume. You can provide character reference images, correct character classification results, adjust core tags, edit tags with other tools. This will allow you to construct a better dataset than what we get with the fully automatic process.
 - **Use it as a tool box:** Each stage can be run independently for the task in question, with many parameters that you can adjust.
 Besides the main script, there are also other numerous scripts in this repository that are useful for dataset preparation.
 However, [waifuc](https://github.com/deepghs/waifuc) which this project heavily makes use of may be more appropriate in this case.
