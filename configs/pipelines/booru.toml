@@ -26,6 +26,7 @@ image_type = "booru"
 anime_name_booru = {}
 # Path to CSV file containing character mapping information, used for renaming characters and potentially for downloading as well
 # Set to {} or comment this line to disable
+character_info_file = {}
 # character_info_file = "configs/csv_examples/character_mapping_example.csv"
 # Indicates whether to attempt downloading for all characters in the character info file
 download_for_characters = true
