@@ -117,6 +117,21 @@ class TagRenameAction(ProcessAction):
         return item
 
 
+class RatingFilterActionBooru(FilterAction):
+    def __init__(self, ratings: List[str]):
+        self.ratings = ratings
+        self.rating_mapping = {
+            "s": "safe",
+            "g": "safe",
+            "q": "r18",
+            "e": "r18",
+        }
+
+    def check(self, item: ImageItem) -> bool:
+        rating = item.meta.get("rating", "s")
+        return self.rating_mapping[rating] in self.ratings or rating in self.ratings
+
+
 class MinFaceCountAction(FilterAction):
     def __init__(
         self,

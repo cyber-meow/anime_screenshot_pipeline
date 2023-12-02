@@ -1,5 +1,47 @@
 import os
+import logging
 import argparse
+from datetime import datetime
+
+
+def setup_logging(log_dir: str, log_prefix: str, logger_name: str):
+    """
+    Set up logging to file and stdout with specified directory and prefix.
+
+    Args:
+        log_dir (str): Directory to save the log file.
+        log_prefix (str): Prefix for the log file name.
+        logger_name (str): Unique name for the logger.
+    """
+
+    # Create logger
+    logger = logging.getLogger(logger_name)
+    original_handlers = logger.handlers[:]
+    for handler in original_handlers:
+        logger.removeHandler(handler)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    # Stop propagation to parent loggers
+    # logger.propagate = False
+
+    # Create console handler and set level to info
+    # ch = logging.StreamHandler()
+    # ch.setLevel(logger.info)
+    # logger.addHandler(ch)
+    # ch.setFormatter(formatter)
+
+    # Create file handler and set level to info
+    if log_dir.lower() != "none":
+        os.makedirs(log_dir, exist_ok=True)
+        current_time = datetime.now()
+        str_current_time = current_time.strftime("%Y-%m-%d%H-%M-%S")
+        log_file = os.path.join(log_dir, f"{log_prefix}_{str_current_time}.log")
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(logging.INFO)
+        logger.addHandler(fh)
+        fh.setFormatter(formatter)
+    return logger
 
 
 def get_and_create_dst_dir(

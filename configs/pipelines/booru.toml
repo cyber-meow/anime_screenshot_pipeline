@@ -1,7 +1,5 @@
 # General Configuration
 [general]
-# The anime name in question, used for downloading images from Danbooru
-anime = "my_favorite_anime"
 # Directory containing source files
 src_dir = "data/intermediate/booru"
 # Directory to save output files
@@ -14,15 +12,18 @@ start_stage = 0
 end_stage = 7
 # Directory to save logs. Set to None or none to disable.
 log_dir = "logs"
-# Prefix for log files
-log_prefix = "logfile"
+# Prefix for log files, defaults to --anime_name if provided otherwise 'logfile'
+log_prefix = {}
 # Pipeline type that is used to construct dataset
 pipeline_type = "booru"
-# Image type that we are dealing with, used for folder name and might appear in caption as well. Default to pipeline_type.
+# Image type that we are dealing with, used for folder name and might appear in caption as well. Default to --pipeline_type.
 image_type = "booru"
 
 # Configuration for downloading images from Danbooru
 [booru_download]
+# The anime name used for downloading images from Danbooru
+# Set to {} or comment this line to use --anime_name
+anime_name_booru = {}
 # Path to CSV file containing character mapping information, used for renaming characters and potentially for downloading as well
 # Set to {} or comment this line to disable
 # character_info_file = "configs/csv_examples/character_mapping_example.csv"
@@ -51,7 +52,7 @@ use_3stage_crop = 2
 # Character Clustering/Classification Configuration
 [character_classification]
 # Directory containing reference character images
-character_ref_dir = "path/to/reference/character/images"
+character_ref_dir = "data/ref_images"
 # The number of additional reference images to add to each character from classification result"
 n_add_to_ref_per_character = 20
 # Whether to ignore existing character metadata during classification

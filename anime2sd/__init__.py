@@ -1,5 +1,5 @@
 from .basics import rearrange_related_files, load_metadata_from_aux
-from .download import download_images
+from .download import download_animes, download_images
 from .extract_frames import extract_and_remove_similar
 from .remove_duplicates import DuplicateRemover
 from .classif.classify_characters import classify_from_directory

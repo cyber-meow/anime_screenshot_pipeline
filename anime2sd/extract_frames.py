@@ -1,8 +1,10 @@
 import os
+import re
 import logging
 import subprocess
 from typing import Optional
 
+from .basics import parse_anime_info
 from .remove_duplicates import DuplicateRemover
 
 
@@ -48,14 +50,44 @@ def get_ffmpeg_command(file, file_pattern, extract_key, logger=None):
 
 
 def extract_and_remove_similar(
-    src_dir,
-    dst_dir,
-    prefix,
-    ep_init=1,
-    extract_key=False,
+    src_dir: str,
+    dst_dir: str,
+    prefix: Optional[str] = None,
+    ep_init: Optional[int] = None,
+    extract_key: bool = False,
     duplicate_remover: Optional[DuplicateRemover] = None,
     logger: Optional[logging.Logger] = None,
-):
+) -> None:
+    """
+    Extracts frames from video files in the specified source directory,
+    saves them to the destination directory, and optionally removes similar frames.
+
+    The function supports multiple video file formats such as mp4, mkv, avi, etc.
+    It uses FFmpeg to extract frames from videos.
+    If a `DuplicateRemover` instance is provided, it removes similar frames within each
+    episode's directory and across the entire source directory (for opening and ending).
+
+    Args:
+        src_dir (str):
+            The directory containing source video files.
+        dst_dir (str):
+            The directory where extracted frames will be saved.
+        prefix (Optional[str]):
+            A prefix to add to the names of extracted frames.
+            Defaults to None in which case prefix if inferred from file name.
+        ep_init (Optional[int]):
+            An initial episode number to start from for naming the extracted frames.
+            Defaults to None in which case episode number is inferred from file name.
+        extract_key (bool):
+            Flag indicating whether to extract only key frames.
+            Defaults to False.
+        duplicate_remover (Optional[DuplicateRemover]):
+            An instance of DuplicateRemover to remove duplicate frames.
+            Defaults to None in which case no duplicate removal is performed.
+        logger (Optional[logging.Logger]):
+            A logger for logging messages.
+            Defaults to None in which case a default logger is used.
+    """
     if logger is None:
         logger = logging.getLogger()
     # Supported video file extensions
@@ -75,10 +107,19 @@ def extract_and_remove_similar(
         # Extract the filename without extension
         filename_without_ext = os.path.splitext(os.path.basename(file))[0]
 
+        # Extract the anime name and episode number
+        anime_name, ep_num = parse_anime_info(filename_without_ext)
+        anime_name = "_".join(re.split(r"\s+", anime_name))
+        prefix_anime = f"{prefix if isinstance(prefix, str) else anime_name}_"
+        if isinstance(ep_init, int):
+            ep_num = i + ep_init
+        elif ep_num is None:
+            ep_num = i
+
         # Create the output directory
         dst_ep_dir = os.path.join(dst_dir, filename_without_ext)
         os.makedirs(dst_ep_dir, exist_ok=True)
-        file_pattern = os.path.join(dst_ep_dir, f"{prefix}EP{i+ep_init}_%d.png")
+        file_pattern = os.path.join(dst_ep_dir, f"{prefix_anime}EP{i+ep_num}_%d.png")
 
         # Run ffmpeg on the file, saving the output to the output directory
         ffmpeg_command = get_ffmpeg_command(file, file_pattern, extract_key, logger)

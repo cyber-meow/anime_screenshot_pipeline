@@ -97,7 +97,7 @@ Contributions are welcome
 - [x] .toml support [2023.11.29]
 - [x] Fanart support [2023.12.01]
 - [x] Multi-anime support [2023.12.01]
-- [ ] Fully automatic with only need for specifying anime name: Coming Soon!
+- [x] Fully automatic with only need for specifying anime name [2023.12.02]
 
 ### Secondary
 

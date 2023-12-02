@@ -1,20 +1,96 @@
-import csv
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
+
+from pynyaasi.nyaasi import NyaaSiClient
+from torrentp import TorrentDownloader
 
 from waifuc.action import (
     ModeConvertAction,
     ClassFilterAction,
-    RatingFilterAction,
+    # RatingFilterAction,
     AlignMinSizeAction,
 )
 
+from .basics import parse_anime_info
 from .waifuc_customize import (
     DanbooruSourceWithLimit,
     SaveExporter,
     ConvertSiteMetadataAction,
+    RatingFilterActionBooru,
     TagRenameAction,
 )
+
+
+# TODO: Add timeout
+def download_animes(
+    output_dir: str,
+    anime_names: Union[str, List[str]],
+    candidate_submitters: Union[str, List[str]],
+    resolution: int = 720,
+    min_download_episode: Optional[int] = None,
+    max_download_episode: Optional[int] = None,
+    logger: Optional[logging.Logger] = None,
+):
+    """
+    Downloads anime episodes from Nyaa.si based on the provided anime names and
+    candidate submitters.
+
+    The function iterates through each anime name and checks for available torrents
+    from the specified submitters.
+    It downloads the episodes within the given episode number range and saves them
+    to the specified output directory.
+
+    Args:
+        output_dir (str):
+            The directory where the downloaded anime episodes will be saved.
+        anime_names (Union[str, List[str]]):
+            A single anime name or a list of anime names to download.
+        candidate_submitters (Union[str, List[str]]):
+            A single submitter name or a list of submitter names to consider.
+        resolution (int):
+            The resolution of the anime episodes to download. Defaults to 720.
+        min_download_episode (Optional[int]):
+            The minimum episode number to start downloading from.
+            If not provided, downloads from the first available episode.
+        max_download_episode (Optional[int]):
+            The maximum episode number to download up to.
+            If not provided, downloads up to the last available episode.
+        logger (Optional[logging.Logger]):
+            The logger to use. Defaults to None which uses the default logger.
+    """
+    if logger is None:
+        logger = logging.getLogger()
+    if isinstance(anime_names, str):
+        anime_names = [anime_names]
+    if isinstance(candidate_submitters, str):
+        candidate_submitters = [candidate_submitters]
+
+    client = NyaaSiClient()
+    for anime_name in anime_names:
+        anime_found = False
+        for candidate_submitter in candidate_submitters:
+            for item in client.iter_items(
+                f"{candidate_submitter} {anime_name} {resolution}"
+            ):
+                _, ep_num = parse_anime_info(item.title)
+                if (
+                    min_download_episode
+                    and ep_num is not None
+                    and ep_num < min_download_episode
+                ):
+                    continue
+                if (
+                    max_download_episode
+                    and ep_num is not None
+                    and ep_num > max_download_episode
+                ):
+                    continue
+                anime_found = True
+                torrent_file = TorrentDownloader(item.magnet_url, output_dir)
+                logger.info(f"Downloading {item.title} ...")
+                torrent_file.start_download()
+            if anime_found:
+                break
 
 
 def download_images(
@@ -92,7 +168,12 @@ def download_images(
             source = source.attach(ClassFilterAction(classes))
         if ratings:
             # Filtering for ratings
-            source = source.attach(RatingFilterAction(ratings))
+            source = source.attach(
+                # Disable this as Danbooru source comes with ratings,
+                # 'r15' is however not used then
+                # RatingFilterAction(ratings),
+                RatingFilterActionBooru(ratings),
+            )
         if max_image_size:
             # If shorter side is over max_image_size, just resize it to max_image_size
             source = source.attach(AlignMinSizeAction(max_image_size))

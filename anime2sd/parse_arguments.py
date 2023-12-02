@@ -65,7 +65,13 @@ def parse_arguments():
         help="Directory to save logs. Set to None or none to disable.",
     )
     parser.add_argument(
-        "--log_prefix", type=str, default="logfile", help="Prefix for log files"
+        "--log_prefix",
+        type=str,
+        default=None,
+        help=(
+            "Prefix for log files, "
+            "defaults to --anime_name if provided otherwise 'logfile'"
+        ),
     )
     parser.add_argument(
         "--overwrite_path",
@@ -93,8 +99,8 @@ def parse_arguments():
         default=None,
         help=(
             "Image type that we are dealing with, used for folder name. "
-            "It may appear in caption if 'use_image_type_prob' is larger than 0. "
-            "Defaults to pipeline_type."
+            "It may appear in caption if --use_image_type_prob is larger than 0. "
+            "Defaults to --pipeline_type."
         ),
     )
     parser.add_argument(
@@ -106,12 +112,47 @@ def parse_arguments():
         ),
     )
 
-    # Arguments for downloading images from Danbooru
+    # Arguments for downloading animes from nyaa.si
     parser.add_argument(
-        "--anime",
+        "--anime_name",
         type=str,
         default=None,
-        help="The anime name used for downloading images from Danbooru",
+        help="The anime name used for downloading animes from nyaa.si",
+    )
+    parser.add_argument(
+        "--candidate_submitters",
+        nargs="+",
+        default=["Erai-raws", "SubsPlease", "CameEsp", "ohys"],
+        help="The candidate submitters used for downloading animes from nyaa.si",
+    )
+    parser.add_argument(
+        "--anime_resolution",
+        type=int,
+        default=720,
+        help="The resolution of anime to download",
+    )
+    parser.add_argument(
+        "--min_download_episode",
+        type=int,
+        default=None,
+        help="The minimum episode to download",
+    )
+    parser.add_argument(
+        "--max_download_episode",
+        type=int,
+        default=None,
+        help="The maximum episode to download",
+    )
+
+    # Arguments for downloading images from Danbooru
+    parser.add_argument(
+        "--anime_name_booru",
+        type=str,
+        default=None,
+        help=(
+            "The anime name used for downloading images from Danbooru. "
+            "Defaults to None in which case --anime_name would be used if provided."
+        ),
     )
     parser.add_argument(
         "--character_info_file",
@@ -157,7 +198,7 @@ def parse_arguments():
         default=[],
         help=(
             "List of allowed ratings for filtering images. "
-            "Should pick from 'safe' 'r15', and 'r18'. "
+            "Should pick from 's', 'g', 'q', 'e'. "
             "Defaults to empty list which means no filtering."
         ),
     )
@@ -186,9 +227,24 @@ def parse_arguments():
     parser.add_argument(
         "--extract_key", action="store_true", help="Only extract key frames"
     )
-    parser.add_argument("--image_prefix", default="", help="Output image prefix")
     parser.add_argument(
-        "--ep_init", type=int, default=1, help="Episode number to start with"
+        "--image_prefix",
+        default="",
+        help=(
+            "Output image prefix. "
+            "Default to None which tries to infer prefix from video name."
+        ),
+    )
+    parser.add_argument(
+        "--ep_init",
+        type=int,
+        default=None,
+        help=(
+            "Episode number to start with for naming output images. "
+            "The processing order of the videos follow the ordering of the names, "
+            "so this is not guaranteed to be the same as the true episode order. "
+            "Defaults to None which tries to infer episode number from video name."
+        ),
     )
 
     # Arguments for duplicate detection

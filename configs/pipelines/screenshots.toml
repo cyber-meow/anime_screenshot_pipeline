@@ -7,26 +7,41 @@ dst_dir = "data"
 # Extra path component to add between dst_dir/[training|intermediate] and image type
 extra_path_component = ""
 # Stage number or alias to start from
-start_stage = 1
+start_stage = 0
 # Stage number or alias to end at
 end_stage = 7
 # Directory to save logs. Set to None or none to disable.
 log_dir = "logs"
-# Prefix for log files
-log_prefix = "logfile"
+# Prefix for log files, defaults to --anime_name if provided otherwise 'logfile'
+log_prefix = {}
 # Pipeline type that is used to construct dataset
 pipeline_type = "screenshots"
-# Image type that we are dealing with, used for folder name and might appear in caption as well. Default to pipeline_type.
+# Image type that we are dealing with, used for folder name and might appear in caption as well. Default to --pipeline_type.
 image_type = "screenshots"
+
+# Configuration for downloading animes from nyaa.si
+[nyaa_download]
+# The anime name used for downloading animes from nyaa.si
+anime_name = "my_favorite_anime"
+# The candidate submitters used for downloading animes from nyaa.si
+candidate_submitters = ["Erai-raws", "SubsPlease", "CameEsp", "ohys"]
+# The resolution of anime to download
+anime_resolution = 720
+# The minimum episode to download
+# Set to {} or comment this line to disable
+min_download_episode = {}
+# The maximum episode to download
+# Set to {} or comment this line to disable
+max_download_episode = {}
 
 # Video Extraction Configuration
 [video_extraction]
 # Only extract key frames
 extract_key = true
-# Output image prefix
-image_prefix = "my_favorite_anime"
-# Episode number to start with
-ep_init = 1
+# Output image prefix, when not provided we try to infer it from video file name
+image_prefix = {}
+# Episode number to start with, when not provided we try to infer it from video file name
+ep_init = {}
 
 # Character Cropping Configuration
 [character_cropping]
@@ -37,7 +52,7 @@ use_3stage_crop = {}
 # Character Clustering/Classification Configuration
 [character_classification]
 # Directory containing reference character images
-character_ref_dir = "path/to/reference/character/images"
+character_ref_dir = "data/ref_images"
 # The number of additional reference images to add to each character from classification result"
 n_add_to_ref_per_character = 0
 # Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata

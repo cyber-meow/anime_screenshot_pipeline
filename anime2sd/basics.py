@@ -1,17 +1,48 @@
 import os
+import re
 import csv
 import json
 import shutil
 import logging
 import random
 import string
+
 from tqdm import tqdm
 from PIL import Image
 from typing import List, Optional
 from pathlib import Path
-from datetime import datetime
 
 from anime2sd.waifuc_customize import LocalSource, SaveExporter
+
+
+def parse_anime_info(filename: str) -> tuple:
+    """
+    Parses a filename to extract the anime name and episode number.
+
+    Args:
+        filename (str): The filename to be parsed.
+
+    Returns:
+        tuple: A tuple containing the anime name and episode number.
+    """
+    # Remove square bracket contents
+    filename = re.sub(r"\[.*?\]", "", filename)
+    filename = os.path.splitext(filename)[0].strip()
+
+    # Split on the last occurrence of '-'
+    parts = filename.rsplit("-", 1)
+
+    if len(parts) == 2:
+        anime_name = parts[0].strip()
+        episode_part = parts[1]
+
+        # Extract episode number
+        episode_num_match = re.search(r"^\W*\d+", episode_part)
+        episode_num = int(episode_num_match.group(0)) if episode_num_match else None
+
+        return anime_name, episode_num
+
+    return filename, None
 
 
 def random_string(length=6):
@@ -298,43 +329,3 @@ def load_metadata_from_aux(
             in_place=True,
         )
     )
-
-
-def setup_logging(log_dir: str, log_prefix: str, logger_name: str):
-    """
-    Set up logging to file and stdout with specified directory and prefix.
-
-    Args:
-        log_dir (str): Directory to save the log file.
-        log_prefix (str): Prefix for the log file name.
-        logger_name (str): Unique name for the logger.
-    """
-
-    # Create logger
-    logger = logging.getLogger(logger_name)
-    original_handlers = logger.handlers[:]
-    for handler in original_handlers:
-        logger.removeHandler(handler)
-    logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    # Stop propagation to parent loggers
-    # logger.propagate = False
-
-    # Create console handler and set level to info
-    # ch = logging.StreamHandler()
-    # ch.setLevel(logger.info)
-    # logger.addHandler(ch)
-    # ch.setFormatter(formatter)
-
-    # Create file handler and set level to info
-    if log_dir.lower() != "none":
-        os.makedirs(log_dir, exist_ok=True)
-        current_time = datetime.now()
-        str_current_time = current_time.strftime("%Y-%m-%d%H-%M-%S")
-        log_file = os.path.join(log_dir, f"{log_prefix}_{str_current_time}.log")
-        fh = logging.FileHandler(log_file)
-        fh.setLevel(logging.INFO)
-        logger.addHandler(fh)
-        fh.setFormatter(formatter)
-    return logger

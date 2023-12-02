@@ -13,7 +13,7 @@ from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
-from anime2sd import download_images
+from anime2sd import download_animes, download_images
 from anime2sd import extract_and_remove_similar
 from anime2sd import classify_from_directory
 from anime2sd import select_dataset_images_from_directory
@@ -31,11 +31,11 @@ from anime2sd.basics import (
     read_class_mapping,
     rearrange_related_files,
     load_metadata_from_aux,
-    setup_logging,
 )
 from anime2sd.execution_ordering import (
-    get_and_create_dst_dir,
+    setup_logging,
     get_src_dir,
+    get_and_create_dst_dir,
     get_execution_configs,
 )
 from anime2sd.parse_arguments import parse_arguments
@@ -85,7 +85,6 @@ def update_args_from_toml(
 def setup_args(args):
     """
     Sets up the start and end stages for the pipeline based on the provided arguments.
-    If the 'image_type' is not specified, it defaults to the 'pipeline_type'.
     """
     # Mapping stage numbers to their aliases
     STAGE_ALIASES = {
@@ -98,8 +97,15 @@ def setup_args(args):
         6: ["arrange"],
         7: ["balance", "compute_multiply"],
     }
-    if not config.image_type:
-        config.image_type = args.pipeline_type
+    if not args.image_type:
+        args.image_type = config.pipeline_type
+    if not config.anime_name_booru:
+        args.anime_name_booru = args.anime_name
+    if not config.log_prefix:
+        if args.anime_name:
+            args.log_prefix = args.anime_name
+        else:
+            args.log_prefix = "logfile"
 
     start_stage = args.start_stage
     end_stage = args.end_stage
@@ -119,36 +125,53 @@ def download(args, stage, logger):
     """
     Downloads images or animes from the internet.
     """
-    if args.pipeline_type != "booru":
-        raise ValueError("Download is currently only supported for booru pipeline")
-    dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
+    if args.pipeline_type == "screenshots":
+        dst_dir = get_and_create_dst_dir(args, "intermediate", "animes")
+        if not args.anime_name:
+            raise ValueError("Anime name must be provided for anime downloading")
 
-    if args.character_info_file is not None and os.path.exists(
-        args.character_info_file
-    ):
-        character_mapping = read_class_mapping(args.character_info_file)
-    else:
-        character_mapping = None
-    anime = [args.anime] if args.anime else []
-    if not (anime or character_mapping):
-        raise ValueError(
-            "Either anime or character info should be provided for booru downloading"
+        logger.info(f"Downloading animes to {dst_dir} ...")
+        download_animes(
+            dst_dir,
+            anime_names=[args.anime_name],
+            candidate_submitters=args.candidate_submitters,
+            resolution=args.anime_resolution,
+            min_download_episode=args.min_download_episode,
+            max_download_episode=args.max_download_episode,
+            logger=logger,
         )
 
-    logger.info(f"Downloading images to {dst_dir} ...")
-    download_images(
-        dst_dir,
-        anime,
-        limit_all=args.booru_download_limit,
-        limit_per_character=args.booru_download_limit_per_character,
-        ratings=args.allowed_ratings,
-        classes=args.allowed_image_classes,
-        max_image_size=args.max_download_size,
-        character_mapping=character_mapping,
-        download_for_characters=args.download_for_characters,
-        save_aux=args.save_aux,
-        logger=logger,
-    )
+    elif args.pipeline_type == "booru":
+        dst_dir = get_and_create_dst_dir(args, "intermediate", "raw")
+
+        if args.character_info_file is not None and os.path.exists(
+            args.character_info_file
+        ):
+            character_mapping = read_class_mapping(args.character_info_file)
+        else:
+            character_mapping = None
+        anime = [args.anime_name_booru] if args.anime_name_booru else []
+        if not (anime or character_mapping):
+            raise ValueError(
+                "Either anime or character info should be provided for booru "
+                " downloading (by specifying --anime_name, --anime_name_booru "
+                "or --character_info_file)"
+            )
+
+        logger.info(f"Downloading images to {dst_dir} ...")
+        download_images(
+            dst_dir,
+            anime,
+            limit_all=args.booru_download_limit,
+            limit_per_character=args.booru_download_limit_per_character,
+            ratings=args.allowed_ratings,
+            classes=args.allowed_image_classes,
+            max_image_size=args.max_download_size,
+            character_mapping=character_mapping,
+            download_for_characters=args.download_for_characters,
+            save_aux=args.save_aux,
+            logger=logger,
+        )
 
 
 def extract_frames_and_or_remove_similar(args, stage, logger):

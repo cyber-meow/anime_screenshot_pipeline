@@ -1,7 +1,7 @@
 # General Configuration
 [general]
-# The anime name in question, used for downloading images from Danbooru
-anime = "my_favorite_anime"
+# The anime name used for downloading animes from nyaa.si, and potentially for downloading images from Danbooru, unless --anime_name_booru is given
+anime_name = "my_favorite_anime"
 # Directory containing source files
 src_dir = "path/to/src_dir"
 # Directory to save output files
@@ -16,8 +16,8 @@ start_stage = 1
 end_stage = 7
 # Directory to save logs. Set to None or none to disable.
 log_dir = "logs"
-# Prefix for log files
-log_prefix = "logfile"
+# Prefix for log files, defaults to --anime_name if provided otherwise 'logfile'
+log_prefix = {}
 # Overwrite path in metadata. It has effect at stage 2 and 4-7
 # Using by starting at stage 4 will prevent character information from being written to the original images
 # Should never be used in general
