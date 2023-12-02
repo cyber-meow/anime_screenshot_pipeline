@@ -1,21 +1,135 @@
 import os
 import re
-import logging
-from typing import Iterator, Optional
+from typing import List, Dict, Tuple, Optional, Iterator, Union
 from PIL import UnidentifiedImageError
 from tqdm import tqdm
 
 from waifuc.source.base import BaseDataSource
 from waifuc.export.base import LocalDirectoryExporter
-from waifuc.action.base import ProcessAction, FilterAction
+from waifuc.action.base import FilterAction, ProcessAction
 from waifuc.model import ImageItem
+from waifuc.source import WebDataSource, DanbooruSource
 from imgutils.detect import detect_faces, detect_heads
 
-from anime2sd import CharacterTagProcessor
-from anime2sd.captioning import dict_to_caption
-from anime2sd.tagging_basics import drop_blacklisted_tags, drop_overlap_tags
-from anime2sd.tagging_basics import sort_tags
-from anime2sd.tagging_character import drop_character_core_tags
+
+class WebDataSourceWithLimit(WebDataSource):
+    """
+    Ensure that we do not download more than limit_per_character images per character
+    unless there are other characters in the image
+    """
+
+    def __init__(
+        self,
+        *args,
+        limit_per_character: Optional[int] = 100,
+        character_n_images: Optional[Dict[str, int]] = None,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        assert hasattr(self, "site_name"), "site_name must be specified"
+        self.limit_per_character = limit_per_character
+        self.character_n_images = (
+            character_n_images if character_n_images is not None else {}
+        )
+
+    def _iter_data(self) -> Iterator[Tuple[Union[str, int], str, dict]]:
+        for id_, url, meta in super()._iter_data():
+            if (
+                self.limit_per_character is not None
+                and self.site_name in meta
+                and "tag_string_character" in meta[self.site_name]
+            ):
+                characters = re.split(
+                    r"\s+", meta[self.site_name]["tag_string_character"]
+                )
+                # Ensure that we do not download more than limit_per_character
+                to_download = False
+                for character in characters:
+                    if character not in self.character_n_images:
+                        self.character_n_images[character] = 0
+                    if self.character_n_images[character] < self.limit_per_character:
+                        to_download = True
+                        break
+                if to_download:
+                    for character in characters:
+                        if character not in self.character_n_images:
+                            self.character_n_images[character] = 0
+                        self.character_n_images[character] += 1
+                    yield id_, url, meta
+            else:
+                yield id_, url, meta
+
+
+class DanbooruSourceWithLimit(WebDataSourceWithLimit, DanbooruSource):
+    pass
+
+
+class ConvertSiteMetadataAction(ProcessAction):
+    """Retrieve metadata from specific site field"""
+
+    def __init__(
+        self,
+        site_name: str = "danbooru",
+        keep_fields: Optional[List[str]] = None,
+    ):
+        self.site_name = site_name
+        self.keep_fields = keep_fields or ["score", "md5", "rating", "fav_count"]
+        self.tag_string_mapping = {
+            "tag_string_general": "tags",
+            "tag_string_copyright": "copyright",
+            "tag_string_artist": "artist",
+            "tag_string_character": "characters",
+        }
+
+    def process(self, item: ImageItem) -> ImageItem:
+        if self.site_name in item.meta:
+            for field in self.keep_fields:
+                if field in item.meta[self.site_name]:
+                    item.meta[field] = item.meta[self.site_name][field]
+            for tag_string, field in self.tag_string_mapping.items():
+                if tag_string in item.meta[self.site_name]:
+                    item.meta[field] = re.split(
+                        r"\s+", item.meta[self.site_name][tag_string]
+                    )
+            item.meta["site"] = self.site_name
+            del item.meta[self.site_name]
+        return item
+
+
+class TagRenameAction(ProcessAction):
+    """
+    Rename tags in metadata according to the provided mapping
+    It can also be used to rename other fields that are lists, such as
+    characters, copyright, and artist
+    """
+
+    def __init__(self, mapping: Dict[str, str], fields: Optional[List[str]] = None):
+        # Drop tags that map to empty string or None
+        self.mapping = {k: v for k, v in mapping.items() if v}
+        self.fields = fields or ["tags", "processed_tags"]
+        if isinstance(self.fields, str):
+            self.fields = [self.fields]
+
+    def process(self, item: ImageItem) -> ImageItem:
+        for field in self.fields:
+            if field in item.meta:
+                item.meta[field] = [self.mapping.get(t, t) for t in item.meta[field]]
+        return item
+
+
+class RatingFilterActionBooru(FilterAction):
+    def __init__(self, ratings: List[str]):
+        self.ratings = ratings
+        self.rating_mapping = {
+            "s": "safe",
+            "g": "safe",
+            "q": "r18",
+            "e": "r18",
+        }
+
+    def check(self, item: ImageItem) -> bool:
+        rating = item.meta.get("rating", "s")
+        return self.rating_mapping[rating] in self.ratings or rating in self.ratings
 
 
 class MinFaceCountAction(FilterAction):
@@ -65,138 +179,6 @@ class MinHeadCountAction(FilterAction):
             iou_threshold=self.iou_threshold,
         )
         return len(detection) >= self.count
-
-
-class TagPruningAction(ProcessAction):
-    def __init__(
-        self,
-        blacklisted_tags,
-        overlap_tags_dict,
-        pruned_mode="character",
-        tags_attribute="processed_tags",
-        character_tag_processor: Optional[CharacterTagProcessor] = None,
-    ):
-        assert pruned_mode in ["none", "minimal", "character"]
-        self.blacklisted_tags = blacklisted_tags
-        self.overlap_tags_dict = overlap_tags_dict
-        self.pruned_mode = pruned_mode
-        self.tags_attribute = tags_attribute
-        if pruned_mode == "character":
-            assert character_tag_processor is not None
-        self.character_tag_processor = character_tag_processor
-
-    def process(self, item: ImageItem) -> ImageItem:
-        if self.pruned_mode == "none":
-            return item
-        if self.tags_attribute in item.meta:
-            tags = item.meta[self.tags_attribute]
-        # fallback behavior
-        elif "tags" in item.meta:
-            tags = item.meta["tags"]
-        else:
-            logging.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
-            )
-            return item
-        tags = drop_blacklisted_tags(tags, self.blacklisted_tags)
-        tags = drop_overlap_tags(tags, self.overlap_tags_dict)
-        if self.pruned_mode == "character":
-            assert self.character_tag_processor is not None
-            # Only pruned character related tags for character images
-            if "characters" in item.meta and item.meta["characters"]:
-                tags = self.character_tag_processor.drop_character_tags(tags)
-        return ImageItem(item.image, {**item.meta, "processed_tags": tags})
-
-
-class CoreCharacterTagPruningAction(ProcessAction):
-    def __init__(self, character_core_tags, tags_attribute="processed_tags"):
-        self.tags_attribute = tags_attribute
-        self.character_core_tags = character_core_tags
-
-    def process(self, item: ImageItem) -> ImageItem:
-        if self.tags_attribute in item.meta:
-            tags = item.meta[self.tags_attribute]
-        # fallback behavior
-        elif "tags" in item.meta:
-            tags = item.meta["tags"]
-        else:
-            logging.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
-            )
-            return item
-        # Only pruned character related tags for character images
-        if "characters" in item.meta and item.meta["characters"]:
-            tags = drop_character_core_tags(
-                item.meta["characters"], tags, self.character_core_tags
-            )
-        return ImageItem(item.image, {**item.meta, "processed_tags": tags})
-
-
-class TagSortingAction(ProcessAction):
-    def __init__(
-        self, sort_mode="score", max_tag_number=None, tags_attribute="processed_tags"
-    ):
-        assert sort_mode in ["original", "shuffle", "score"]
-        self.sort_mode = sort_mode
-        self.max_tag_number = max_tag_number
-        self.tags_attribute = tags_attribute
-
-    def process(self, item: ImageItem) -> ImageItem:
-        if self.tags_attribute in item.meta:
-            tags = item.meta[self.tags_attribute]
-        # fallback behavior
-        elif "tags" in item.meta:
-            tags = item.meta["tags"]
-        else:
-            logging.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
-            )
-            return item
-        tags = sort_tags(tags, self.sort_mode)
-        if self.max_tag_number is not None and len(tags) > self.max_tag_number:
-            tags = tags[: self.max_tag_number]
-        return ImageItem(item.image, {**item.meta, "processed_tags": tags})
-
-
-class TagRemovingUnderscoreAction(ProcessAction):
-    def __init__(self, tags_attribute="processed_tags"):
-        self.tags_attribute = tags_attribute
-
-    def process(self, item: ImageItem) -> ImageItem:
-        if self.tags_attribute in item.meta:
-            tags = item.meta[self.tags_attribute]
-        # fallback behavior
-        elif "tags" in item.meta:
-            tags = item.meta["tags"]
-        else:
-            logging.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
-            )
-            return item
-        tags = [self.remove_underscore(tag) for tag in tags]
-        result = ImageItem(item.image, {**item.meta, "processed_tags": tags})
-        return result
-
-    @staticmethod
-    def remove_underscore(tag):
-        if tag == "^_^":
-            return tag
-        return tag.replace("_", " ")
-
-
-class CaptioningAction(ProcessAction):
-    def __init__(self, args, characters=None):
-        # TODO: write all the args
-        self.args = args
-        self.characters = characters
-
-    def process(self, item: ImageItem) -> ImageItem:
-        caption = dict_to_caption(item.meta, self.args, self.characters)
-        return ImageItem(item.image, {**item.meta, "caption": caption})
 
 
 class LocalSource(BaseDataSource):

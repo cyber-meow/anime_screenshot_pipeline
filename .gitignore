@@ -134,7 +134,9 @@ scripts_v1/tagger/wd14_tagger_model/
 scripts_v1/tagger/wd14_tagger_model_v1/
 data/
 logs/
+tmp/
 *.egg-info
 **/wandb/
 **/results_training
 */*.ckpt
+!docs/**/*.log

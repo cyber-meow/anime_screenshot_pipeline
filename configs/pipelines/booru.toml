@@ -1,0 +1,110 @@
+# General Configuration
+[general]
+# Directory containing source files
+src_dir = "data/intermediate/booru"
+# Directory to save output files
+dst_dir = "data"
+# Extra path component to add between dst_dir/[training|intermediate] and image type
+extra_path_component = ""
+# Stage number or alias to start from
+start_stage = 0
+# Stage number or alias to end at
+end_stage = 7
+# Directory to save logs. Set to None or none to disable.
+log_dir = "logs"
+# Prefix for log files, defaults to --anime_name if provided otherwise 'logfile'
+log_prefix = {}
+# Pipeline type that is used to construct dataset
+pipeline_type = "booru"
+# Image type that we are dealing with, used for folder name and might appear in caption as well. Default to --pipeline_type.
+image_type = "booru"
+
+# Configuration for downloading images from Danbooru
+[booru_download]
+# The anime name used for downloading images from Danbooru
+# Set to {} or comment this line to use --anime_name
+anime_name_booru = {}
+# Path to CSV file containing character mapping information, used for renaming characters and potentially for downloading as well
+# Set to {} or comment this line to disable
+# character_info_file = "configs/csv_examples/character_mapping_example.csv"
+# Indicates whether to attempt downloading for all characters in the character info file
+download_for_characters = true
+# Limit on the total number of images to download from Danbooru
+# Set to 0 for no limit or specify a number
+booru_download_limit = 0 
+# Limit on the number of images to download per character from Danbooru
+# Set to 0 for no limit or specify a number
+# Note that for efficiency if both booru_download_limit and booru_download_limit_per_character are set,
+# we are not guaranteed to download booru_download_limit number of images
+booru_download_limit_per_character = 500
+# List of allowed ratings for filtering images, set to empty list to disable
+allowed_ratings = []
+# List of allowed classes for filtering images, set to empty list to disable
+allowed_image_classes = ["illustration", "bangumi"]
+# List of allowed ratings for filtering images
+max_download_size = 1024
+
+# Character Cropping Configuration
+[character_cropping]
+# Use 3 stage crop to get halfbody and head crops
+use_3stage_crop = 2
+
+# Character Clustering/Classification Configuration
+[character_classification]
+# Directory containing reference character images
+character_ref_dir = "data/ref_images"
+# The number of additional reference images to add to each character from classification result"
+n_add_to_ref_per_character = 20
+# Whether to ignore existing character metadata during classification
+ignore_character_metadata = false
+# Minimum cluster samples in character clustering
+cluster_min_samples = 5
+# Whether to keep unnamed clusters when reference images are provided or when characters are available in metadata
+keep_unnamed_clusters = false
+# Whether we try to attribute label when multiple candidates are available when performing classification with metadata character information
+# This typically coressponds to the case where we have one character that always appear with another specific character,
+# or to some specific form of a character that is recognized as character tag in Danbooru
+accept_multiple_candidates = false
+
+# Dataset Construction Configuration
+[dataset_construction]
+# Overwrite existing character metadata for uncropped images
+character_overwrite_uncropped = false
+# Remove unclassified characters in the character metadata field
+character_remove_unclassified = false
+
+# Tagging Configuration
+[tagging]
+# Whether to overwrite existing tags
+overwrite_tags = true
+
+# General Tag Processing Configuration
+[tag_processing]
+# Mode to sort the tags
+sort_mode = "score"
+# Whether to append dropped character tags to the caption
+append_dropped_character_tags = false
+# Max number of tags to include in caption
+max_tag_number = 30
+# Process tags from original tags instead of processed tags
+process_from_original_tags = true
+# Different ways to prune tags
+prune_mode = "character_core"
+
+# Folder Organization Configuration
+[folder_organization]
+# Description of the concept balancing directory hierarchy
+arrange_format = "n_characters/character"
+# If have more than X characters put X+
+max_character_number = 2
+# Put others instead of character name if number of images of the character combination is smaller than this number
+min_images_per_combination = 10
+
+# Balancing Configuration
+[balancing]
+# Minimum multiply of each image
+min_multiply = 1
+# Maximum multiply of each image
+max_multiply = 100
+# If provided use the provided csv to modify weights
+weight_csv = "configs/csv_examples/default_weighting.csv"

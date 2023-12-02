@@ -1,12 +1,48 @@
 import os
+import re
+import csv
 import json
 import shutil
 import logging
 import random
 import string
-from pathlib import Path
+
 from tqdm import tqdm
 from PIL import Image
+from typing import List, Optional
+from pathlib import Path
+
+from anime2sd.waifuc_customize import LocalSource, SaveExporter
+
+
+def parse_anime_info(filename: str) -> tuple:
+    """
+    Parses a filename to extract the anime name and episode number.
+
+    Args:
+        filename (str): The filename to be parsed.
+
+    Returns:
+        tuple: A tuple containing the anime name and episode number.
+    """
+    # Remove square bracket contents
+    filename = re.sub(r"\[.*?\]", "", filename)
+    filename = os.path.splitext(filename)[0].strip()
+
+    # Split on the last occurrence of '-'
+    parts = filename.rsplit("-", 1)
+
+    if len(parts) == 2:
+        anime_name = parts[0].strip()
+        episode_part = parts[1]
+
+        # Extract episode number
+        episode_num_match = re.search(r"^\W*\d+", episode_part)
+        episode_num = int(episode_num_match.group(0)) if episode_num_match else None
+
+        return anime_name, episode_num
+
+    return filename, None
 
 
 def random_string(length=6):
@@ -27,6 +63,15 @@ def remove_empty_folders(path_abs):
 
 
 def get_images_recursively(folder_path):
+    """
+    Get all images recursively from a folder using Path and rglob.
+
+    Args:
+    - folder_path (str): The path to the folder.
+
+    Returns:
+    - list: A list of image paths.
+    """
     allowed_patterns = [
         "*.[Pp][Nn][Gg]",
         "*.[Jj][Pp][Gg]",
@@ -54,7 +99,40 @@ def get_files_recursively(folder_path):
     Returns:
     - list: A list of file paths.
     """
-    return [file for file in Path(folder_path).rglob("*") if file.is_file()]
+    return [str(file) for file in Path(folder_path).rglob("*") if file.is_file()]
+
+
+def get_folders_recursively(folder_path):
+    """
+    Get all folder recursively from a folder using Path and rglob.
+
+    Args:
+    - folder_path (str): The path to the folder.
+
+    Returns:
+    - list: A list of folder paths.
+    """
+    return [str(folder) for folder in Path(folder_path).rglob("*") if folder.is_dir()]
+
+
+def read_class_mapping(class_mapping_csv):
+    """
+    Reads a CSV file mapping old class names to new class names.
+
+    Args:
+        class_mapping_csv (str):
+            The path to the CSV file.
+
+    Returns:
+        dict: A dictionary mapping old class names to new class names.
+    """
+    class_mapping = {}
+    with open(class_mapping_csv, "r") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            old_class, new_class = row
+            class_mapping[old_class] = new_class
+    return class_mapping
 
 
 def get_corr_meta_names(img_path):
@@ -105,7 +183,7 @@ def get_default_metadata(img_path, warn=False):
     return meta_data
 
 
-def get_or_generate_metadata(img_path, warn=False):
+def get_or_generate_metadata(img_path, warn=False, overwrite_path=False):
     img_path = os.path.abspath(img_path)
     meta_path, _ = get_corr_meta_names(img_path)
     updated = False
@@ -116,11 +194,13 @@ def get_or_generate_metadata(img_path, warn=False):
             meta_data = json.load(meta_file)
 
         # Check for missing fields and update them
-        if "path" not in meta_data:
-            meta_data["path"] = get_default_path(img_path)
+        if "path" not in meta_data or (
+            overwrite_path and meta_data["path"] != img_path
+        ):
+            meta_data["path"] = img_path
             updated = True
-        if "current_path" not in meta_data:
-            meta_data["current_path"] = get_default_current_path(img_path)
+        if "current_path" not in meta_data or meta_data["current_path"] != img_path:
+            meta_data["current_path"] = img_path
             updated = True
         if "filename" not in meta_data:
             meta_data["filename"] = get_default_filename(img_path)
@@ -148,18 +228,26 @@ def get_corr_ccip_names(img_path):
     return ccip_path, ccip_filename
 
 
+# TODO: Replace the use of this with construct_aux_files_dict
 def get_related_paths(img_path):
     meta_path, _ = get_corr_meta_names(img_path)
     ccip_path, _ = get_corr_ccip_names(img_path)
-    return [meta_path, ccip_path]
+    res = [meta_path, ccip_path]
+    base_filename = os.path.splitext(img_path)[0]
+    for ext in [".tags", ".processed_tags", ".characters"]:
+        related_path = f"{base_filename}{ext}"
+        res.append(related_path)
+    return res
 
 
-def construct_file_list(src_dir):
+def construct_file_list(src_dir: str):
     """
     Construct a list of all files in the directory and checks for duplicates.
 
-    :param classified_dir: The directory to search.
-    :return: A list of all file paths in the directory.
+    Args:
+        src_dir (str): The directory to search.
+    Reurns:
+        A list of all file paths in the directory.
     """
     all_files = {}
     for root, _, filenames in os.walk(src_dir):
@@ -171,17 +259,20 @@ def construct_file_list(src_dir):
     return all_files
 
 
-def rearrange_related_files(src_dir):
+def rearrange_related_files(src_dir: str, logger: Optional[logging.Logger] = None):
     """
     Rearrange related files in some directory.
 
-    :param src_dir: The directory containing images
-        and other files to rearrange.
+    Args:
+        src_dir (src): The directory containing images and other files to rearrange.
+        logger (Logger): A logger to use for logging.
     """
+    if logger is None:
+        logger = logging.getLogger()
     all_files = construct_file_list(src_dir)
     image_files = get_images_recursively(src_dir)
 
-    logging.info("Arranging related files ...")
+    logger.info("Arranging related files ...")
     for img_path in tqdm(image_files, desc="Rearranging related files"):
         related_paths = get_related_paths(img_path)
         for related_path in related_paths:
@@ -191,13 +282,50 @@ def rearrange_related_files(src_dir):
                 found_path = all_files.get(os.path.basename(related_path))
                 if found_path is None:
                     if related_path.endswith("json"):
-                        logging.warning(f"No related file found for {related_path}")
+                        logger.warning(f"No related file found for {related_path}")
                         meta_data = get_default_metadata(img_path)
                         with open(related_path, "w") as f:
                             json.dump(meta_data, f)
                 else:
                     # Move the found file to the expected location
                     shutil.move(found_path, related_path)
-                    logging.info(
+                    logger.info(
                         f"Moved related file from {found_path} " f"to {related_path}"
                     )
+
+
+def load_metadata_from_aux(
+    src_dir: str,
+    load_aux: List[str],
+    save_aux: List[str],
+    overwrite_path: bool,
+    logger: Optional[logging.Logger] = None,
+) -> None:
+    """
+    Load metadata from auxiliary data and export it with potential modifications.
+
+    This function loads metadata from a source directory, potentially modifies it,
+    and then saves it back to the same directory.
+    It utilizes auxiliary data specified in 'load_aux' and 'save_aux' lists.
+
+    Args:
+        src_dir (str): The source directory from which to load the metadata.
+        load_aux (List[str]): A list of auxiliary data attributes to be loaded.
+        save_aux (List[str]): A list of auxiliary data attributes to be saved.
+        overwrite_path (bool):
+            Flag to indicate if the path in the metadata should be overwritten.
+        logger (Logger): Logger to use for logging.
+    """
+    if logger is None:
+        logger = logging.getLogger()
+    logger.info("Load metadata from auxiliary data ...")
+    source = LocalSource(src_dir, load_aux=load_aux, overwrite_path=overwrite_path)
+    source.export(
+        SaveExporter(
+            src_dir,
+            no_meta=False,
+            save_caption=True,
+            save_aux=save_aux,
+            in_place=True,
+        )
+    )

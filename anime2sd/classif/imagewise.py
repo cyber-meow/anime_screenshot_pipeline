@@ -127,10 +127,10 @@ def classify_characters_imagewise(
                 r_same_mean = batch_same[i][cluster_labels == best_id].mean()
                 r_same_sum = batch_same[i][cluster_labels == best_id].sum()
                 # if best_id == cluster_labels[i] == 3:
-                #     logging.info(str(img_files[i]))
-                #     logging.info(str(best_id))
-                #     logging.info(str(r_same_mean))
-                #     logging.info(str(r_same_sum))
+                #     logger.info(str(img_files[i]))
+                #     logger.info(str(best_id))
+                #     logger.info(str(r_same_mean))
+                #     logger.info(str(r_same_sum))
                 if (
                     r_same_mean >= same_threshold_rel
                     or r_same_sum >= same_threshold_abs
@@ -158,6 +158,7 @@ def extract_from_noise(
     ref_labels: Optional[np.ndarray] = None,
     same_threshold_rel: float = 0.6,
     same_threshold_abs: int = 10,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Classify characters for images that do not belong to any cluster (labeled as noise).
@@ -188,17 +189,22 @@ def extract_from_noise(
         same_threshold_abs (int, optional):
             The absolute threshold for determining whether images belong
             to the same cluster. Defaults to 10.
+        logger (Optional[logging.Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         None: The function performs in-place operations on the
               labels array and does not return a value.
     """
+    if logger is None:
+        logger = logging.getLogger()
     noise_indices = np.where(labels == -1)[0]
     images_noise = images[noise_indices]
     batch_diff_noise = batch_diff[noise_indices]
     batch_same_noise = batch_same[noise_indices]
 
-    logging.info("Matching for noises ...")
+    logger.info("Matching for noises ...")
     noise_new_labels = classify_characters_imagewise(
         img_files,
         images_noise,
@@ -224,11 +230,11 @@ def extract_from_noise(
             if np.sum(character_counts) == 1:
                 labels[idx] = np.argmax(character_counts)
 
-    logging.info("Noise extracting complete.")
+    logger.info("Noise extracting complete.")
     label_cnt = {
         i: (labels == i).sum() for i in np.unique(labels) if (labels == i).sum() > 0
     }
-    logging.info(f"Current label count: {label_cnt}")
+    logger.info(f"Current label count: {label_cnt}")
 
 
 def filter_characters_from_images(
@@ -239,6 +245,7 @@ def filter_characters_from_images(
     batch_same: np.ndarray,
     same_threshold_rel: float = 0.6,
     same_threshold_abs: int = 10,
+    logger: Optional[logging.Logger] = None,
 ) -> np.ndarray:
     """
     Filters out images with low character similarity based on CCIP embeddings.
@@ -260,12 +267,17 @@ def filter_characters_from_images(
         same_threshold_abs (int, optional):
             The absolute threshold for determining whether images belong
             to the same cluster. Defaults to 10.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         np.ndarray: The filtered labels array.
     """
+    if logger is None:
+        logger = logging.getLogger()
 
-    logging.info("Filtering characters from images ...")
+    logger.info("Filtering characters from images ...")
     filtered_labels = classify_characters_imagewise(
         img_files,
         images,
@@ -278,11 +290,11 @@ def filter_characters_from_images(
         to_filter=True,
     )
 
-    logging.info("Filtering complete.")
+    logger.info("Filtering complete.")
     label_cnt = {
         i: (filtered_labels == i).sum()
         for i in np.unique(filtered_labels)
         if (filtered_labels == i).sum() > 0
     }
-    logging.info(f"Current label count: {label_cnt}")
+    logger.info(f"Current label count: {label_cnt}")
     return filtered_labels

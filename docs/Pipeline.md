@@ -50,15 +50,14 @@ An even more aggressive approach would be to keep only the key frames (I may add
 
 ### Similar Image Removal
 
-This step uses `fiftyone` and mobilenet to remove similar images, reduces dataset size by a factor of 2 to 10 depending on the anime.
+This step uses mobilenetv3_large to detect and remove similar images, reduces dataset size by a factor of 2 to 10 depending on the anime.
 
 Since the extracted images can take a lot of place, I have made the decision to combine the two steps and perform removal for each episode independently after its frames are extracted. I also do a final pass on all the extracted images at the end to remove repeated images in notably OP and ED.
 
 - `no_remove_similar`: Put this argument to skip this step.
 - `similar_thresh`: The threshold above which we judge that two images are too similar. Default is 0.985.
-- `detect_duplicate_model`: You can use other model than the default mobilenet. Check `fiftyone` documentation to see what models are available.
-
-:warning: If you are also using Ubuntu 22.04 you may encounter problem importing `fiftyone` once it gets installed. Please check [this thread](https://github.com/voxel51/fiftyone/issues/1803) for some troubleshooting.
+- `detect_duplicate_model`: You can use any other model from `timm` for duplicate detection.
+- `detect_duplicate_batch_size`: Batch size for computing the features of images that are used for duplicate detection.
 
 
 ## Stage 2: Character Detection and Cropping
@@ -162,11 +161,11 @@ In this phase, we use a publicly available taggers to tag images.
 
 ### Tag pruning
 
-For now tag pruning goes through 3 steps. You can deactivate tag pruning by setting `--pruned_mode none`.
+For now tag pruning goes through 3 steps. You can deactivate tag pruning by setting `--prune_mode none`.
 
-- Pruned blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](../tag_filtering/blacklist_tags.txt) by default.
-- Pruned overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](../tag_filtering/overlap_tags.json) by default.
-- By default `pruned_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--pruned_mode minimal` to skip this step.
+- Prune blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](../tag_filtering/blacklist_tags.txt) by default.
+- Prune overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](../tag_filtering/overlap_tags.json) by default.
+- By default `prune_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--pruned_mode minimal` to skip this step.
 
 All the tags are saved to the field `processed_tags` of metadata. We also process by this field if it exists by default (unless `--overwrite_tags` is used). If you want to process from the field `tags`, you should use `--process_from_original_tags`. 
 

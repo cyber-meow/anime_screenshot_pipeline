@@ -1,0 +1,92 @@
+2023-12-01 20:36:14,033 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/Terakomari
+2023-12-01 20:36:14,033 - INFO - sampling probability: 0.039473684210526314
+2023-12-01 20:36:14,033 - INFO - number of images: 145
+2023-12-01 20:36:14,033 - INFO - original multipy: 1.0
+2023-12-01 20:36:14,033 - INFO - final multipy: 1.0
+
+2023-12-01 20:36:14,033 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/0_characters/character_others
+2023-12-01 20:36:14,033 - INFO - sampling probability: 0.125
+2023-12-01 20:36:14,033 - INFO - number of images: 337
+2023-12-01 20:36:14,033 - INFO - original multipy: 1.3625123639960437
+2023-12-01 20:36:14,033 - INFO - final multipy: 1.36
+
+2023-12-01 20:36:14,033 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/Terakomari
+2023-12-01 20:36:14,033 - INFO - sampling probability: 0.078125
+2023-12-01 20:36:14,033 - INFO - number of images: 147
+2023-12-01 20:36:14,033 - INFO - original multipy: 1.9522392290249437
+2023-12-01 20:36:14,033 - INFO - final multipy: 1.95
+
+2023-12-01 20:36:14,033 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/Villhaze
+2023-12-01 20:36:14,034 - INFO - sampling probability: 0.039473684210526314
+2023-12-01 20:36:14,034 - INFO - number of images: 53
+2023-12-01 20:36:14,034 - INFO - original multipy: 2.7358490566037736
+2023-12-01 20:36:14,034 - INFO - final multipy: 2.74
+
+2023-12-01 20:36:14,034 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/Villhaze
+2023-12-01 20:36:14,034 - INFO - sampling probability: 0.078125
+2023-12-01 20:36:14,034 - INFO - number of images: 70
+2023-12-01 20:36:14,034 - INFO - original multipy: 4.099702380952381
+2023-12-01 20:36:14,034 - INFO - final multipy: 4.1
+
+2023-12-01 20:36:14,034 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/2_characters/Terakomari+Villhaze
+2023-12-01 20:36:14,034 - INFO - sampling probability: 0.08928571428571429
+2023-12-01 20:36:14,034 - INFO - number of images: 53
+2023-12-01 20:36:14,034 - INFO - original multipy: 6.188230008984727
+2023-12-01 20:36:14,034 - INFO - final multipy: 6.19
+
+2023-12-01 20:36:14,034 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/character_others
+2023-12-01 20:36:14,034 - INFO - sampling probability: 0.031578947368421054
+2023-12-01 20:36:14,034 - INFO - number of images: 18
+2023-12-01 20:36:14,034 - INFO - original multipy: 6.4444444444444455
+2023-12-01 20:36:14,034 - INFO - final multipy: 6.44
+
+2023-12-01 20:36:14,034 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/Sakuna
+2023-12-01 20:36:14,034 - INFO - sampling probability: 0.078125
+2023-12-01 20:36:14,034 - INFO - number of images: 42
+2023-12-01 20:36:14,034 - INFO - original multipy: 6.832837301587302
+2023-12-01 20:36:14,034 - INFO - final multipy: 6.83
+
+2023-12-01 20:36:14,035 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/2+_characters/Terakomari+Villhaze
+2023-12-01 20:36:14,035 - INFO - sampling probability: 0.05555555555555556
+2023-12-01 20:36:14,035 - INFO - number of images: 28
+2023-12-01 20:36:14,035 - INFO - original multipy: 7.288359788359791
+2023-12-01 20:36:14,035 - INFO - final multipy: 7.29
+
+2023-12-01 20:36:14,035 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/Sakuna
+2023-12-01 20:36:14,035 - INFO - sampling probability: 0.039473684210526314
+2023-12-01 20:36:14,035 - INFO - number of images: 18
+2023-12-01 20:36:14,035 - INFO - original multipy: 8.055555555555555
+2023-12-01 20:36:14,035 - INFO - final multipy: 8.06
+
+2023-12-01 20:36:14,035 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/2+_characters/character_others
+2023-12-01 20:36:14,035 - INFO - sampling probability: 0.04444444444444445
+2023-12-01 20:36:14,035 - INFO - number of images: 15
+2023-12-01 20:36:14,035 - INFO - original multipy: 10.883950617283954
+2023-12-01 20:36:14,035 - INFO - final multipy: 10.88
+
+2023-12-01 20:36:14,035 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/Millicent
+2023-12-01 20:36:14,035 - INFO - sampling probability: 0.078125
+2023-12-01 20:36:14,035 - INFO - number of images: 21
+2023-12-01 20:36:14,035 - INFO - original multipy: 13.665674603174605
+2023-12-01 20:36:14,035 - INFO - final multipy: 13.67
+
+2023-12-01 20:36:14,035 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/2_characters/character_others
+2023-12-01 20:36:14,035 - INFO - sampling probability: 0.07142857142857144
+2023-12-01 20:36:14,035 - INFO - number of images: 10
+2023-12-01 20:36:14,036 - INFO - original multipy: 26.238095238095244
+2023-12-01 20:36:14,036 - INFO - final multipy: 26.24
+
+2023-12-01 20:36:14,036 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/character_others
+2023-12-01 20:36:14,036 - INFO - sampling probability: 0.0625
+2023-12-01 20:36:14,036 - INFO - number of images: 7
+2023-12-01 20:36:14,036 - INFO - original multipy: 32.79761904761905
+2023-12-01 20:36:14,036 - INFO - final multipy: 32.8
+
+2023-12-01 20:36:14,036 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/2_characters/Terakomari
+2023-12-01 20:36:14,036 - INFO - sampling probability: 0.08928571428571429
+2023-12-01 20:36:14,036 - INFO - number of images: 2
+2023-12-01 20:36:14,036 - INFO - original multipy: 163.98809523809527
+2023-12-01 20:36:14,036 - INFO - final multipy: 100.0
+
+2023-12-01 20:36:14,036 - INFO - Number of images: 966
+2023-12-01 20:36:14,036 - INFO - Virtual dataset size: 3544.5099999999998

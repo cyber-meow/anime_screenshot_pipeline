@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from anime2sd.basics import get_images_recursively, get_files_recursively
 from anime2sd.basics import get_corr_meta_names
+from anime2sd.character import Character
 
 
 def construct_aux_files_dict(paths):
@@ -64,8 +65,10 @@ def get_folder_name(folder_type, info_dict, max_character_number) -> str:
         return f"{count}_{suffix}"
     elif folder_type == "n_characters":
         characters = info_dict.get("characters", [])
-        if len(characters) > 0 and type(characters[0]) is list:
-            characters = [character[0] for character in characters]
+        characters = [
+            Character.from_string(character).character_name
+            for character in info_dict.get("characters", [])
+        ]
         characters = sorted(list(set(characters)))
         n_character = len(characters)
         if n_character >= max_character_number:
@@ -73,9 +76,10 @@ def get_folder_name(folder_type, info_dict, max_character_number) -> str:
         suffix = "character" if n_character == 1 else "characters"
         return f"{n_character}_{suffix}"
     elif folder_type == "character":
-        characters = info_dict.get("characters", [])
-        if len(characters) > 0 and type(characters[0]) is list:
-            characters = [character[0] for character in characters]
+        characters = [
+            Character.from_string(character).character_name
+            for character in info_dict.get("characters", [])
+        ]
         characters = sorted(list(set(characters)))
         if len(characters) == 0:
             return "character_others"
@@ -118,12 +122,14 @@ def count_n_images(filenames):
     return count
 
 
-def merge_folder(character_comb_dict, min_images_per_comb, aux_dict):
+def merge_folder(character_comb_dict, min_images_per_comb, aux_dict, logger):
+    if logger is None:
+        logger = logging.getLogger()
     for comb in tqdm(character_comb_dict):
         files = character_comb_dict[comb]
         n_images = count_n_images(files)
         if n_images < min_images_per_comb:
-            logging.info(
+            logger.info(
                 f"{comb} has fewer than {min_images_per_comb} images; "
                 + "renamed as character_others"
             )
@@ -141,16 +147,23 @@ def remove_empty_folders(path_abs):
 
 
 def arrange_folder(
-    src_dir, dst_dir, arrange_format, max_character_number, min_images_per_combination
+    src_dir,
+    dst_dir,
+    arrange_format,
+    max_character_number,
+    min_images_per_combination,
+    logger=None,
 ):
+    if logger is None:
+        logger = logging.getLogger()
     img_paths = get_images_recursively(src_dir)
     file_paths = get_files_recursively(src_dir)
 
-    logging.info("Constructing dictionary for auxiliary files...")
+    logger.info("Constructing dictionary for auxiliary files...")
     aux_dict = construct_aux_files_dict(file_paths)
     character_combination_dict = dict()
 
-    logging.info("Rearranging...")
+    logger.info("Rearranging...")
     for img_path in tqdm(img_paths):
         meta_file_path, _ = get_corr_meta_names(img_path)
 
@@ -174,11 +187,16 @@ def arrange_folder(
                 character_combination_dict[character_folder] = [new_path]
 
     # We need to cosntruct the dictionary again after moving the files
-    logging.info("Constructing dictionary for auxiliary files...")
+    logger.info("Constructing dictionary for auxiliary files...")
     file_paths = get_files_recursively(src_dir)
     aux_dict = construct_aux_files_dict(file_paths)
-    logging.info("Merging folders...")
+    logger.info("Merging folders...")
     if min_images_per_combination > 1:
-        merge_folder(character_combination_dict, min_images_per_combination, aux_dict)
+        merge_folder(
+            character_combination_dict,
+            min_images_per_combination,
+            aux_dict,
+            logger=logger,
+        )
     remove_empty_folders(src_dir)
     remove_empty_folders(dst_dir)

@@ -11,9 +11,10 @@ from transformers import AutoTokenizer
 def update_emb_init_info(
     filepath: str,
     characters: List[str],
-    image_type: str,
+    image_types: List[str],
     emb_init_dict: Optional[Dict[str, List[str]]] = None,
     overwrite: bool = False,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Updates the JSON file with character names and optionally with embedding
@@ -25,13 +26,19 @@ def update_emb_init_info(
             Path to the trigger word JSON file.
         characters (List[str]):
             List of character names to add.
-        image_type (str):
-            Type of the image ("screenshots", "booru", or other).
+        image_types (List[str):
+            Types of the images ("screenshots", "booru", or other).
         emb_init_dict (Optional[Dict[str, List[str]]]):
             Optional dictionary for embedding initializations.
         overwrite (bool):
             Whether to overwrite existing JSON content.
+        logger (Optional[logging.Logger]):
+            Optional logger to use. Defaults to None, which uses the default logger.
     """
+    if logger is None:
+        logger = logging.getLogger()
+    if isinstance(image_types, str):
+        image_types = [image_types]
     name_init_map = {}
 
     # Read existing content if not overwriting
@@ -46,14 +53,15 @@ def update_emb_init_info(
             name_init_map[embedding_name] = []
 
     # Add image_type to the map
-    if image_type not in name_init_map:
-        if image_type == "screenshots":
-            default_init_text = "anime screencap"
-        elif image_type == "booru":
-            default_init_text = "masterpiece"
-        else:
-            default_init_text = ""
-        name_init_map[image_type] = [default_init_text]
+    for image_type in image_types:
+        if image_type not in name_init_map:
+            if image_type == "screenshots":
+                default_init_text = "anime screencap"
+            elif image_type == "booru":
+                default_init_text = "masterpiece"
+            else:
+                default_init_text = ""
+            name_init_map[image_type] = [default_init_text]
 
     # Update with emb_init_dict
     if emb_init_dict:
@@ -75,7 +83,7 @@ def update_emb_init_info(
 
     # Log warning for invalid embedding names
     if invalid_embedding_names:
-        logging.warning(
+        logger.warning(
             "Some embedding names may not be valid for HCP training: "
             + ", ".join(invalid_embedding_names)
         )

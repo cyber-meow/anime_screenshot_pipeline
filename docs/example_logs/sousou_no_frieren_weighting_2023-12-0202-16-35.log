@@ -1,0 +1,122 @@
+2023-12-02 02:16:35,585 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/frieren
+2023-12-02 02:16:35,585 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,585 - INFO - number of images: 129
+2023-12-02 02:16:35,585 - INFO - original multipy: 1.0
+2023-12-02 02:16:35,585 - INFO - final multipy: 1.0
+
+2023-12-02 02:16:35,586 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/0_characters/character_others
+2023-12-02 02:16:35,586 - INFO - sampling probability: 0.09375
+2023-12-02 02:16:35,586 - INFO - number of images: 452
+2023-12-02 02:16:35,586 - INFO - original multipy: 1.3913163716814156
+2023-12-02 02:16:35,586 - INFO - final multipy: 1.39
+
+2023-12-02 02:16:35,586 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/2+_characters/character_others
+2023-12-02 02:16:35,586 - INFO - sampling probability: 0.028571428571428577
+2023-12-02 02:16:35,586 - INFO - number of images: 122
+2023-12-02 02:16:35,586 - INFO - original multipy: 1.57096018735363
+2023-12-02 02:16:35,586 - INFO - final multipy: 1.57
+
+2023-12-02 02:16:35,586 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/fern_(sousou_no_frieren)
+2023-12-02 02:16:35,586 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,587 - INFO - number of images: 50
+2023-12-02 02:16:35,587 - INFO - original multipy: 2.5799999999999996
+2023-12-02 02:16:35,587 - INFO - final multipy: 2.58
+
+2023-12-02 02:16:35,587 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/frieren
+2023-12-02 02:16:35,587 - INFO - sampling probability: 0.05625
+2023-12-02 02:16:35,587 - INFO - number of images: 119
+2023-12-02 02:16:35,587 - INFO - original multipy: 3.1707983193277305
+2023-12-02 02:16:35,587 - INFO - final multipy: 3.17
+
+2023-12-02 02:16:35,587 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/aura_(sousou_no_frieren)
+2023-12-02 02:16:35,587 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,587 - INFO - number of images: 37
+2023-12-02 02:16:35,587 - INFO - original multipy: 3.4864864864864864
+2023-12-02 02:16:35,587 - INFO - final multipy: 3.49
+
+2023-12-02 02:16:35,588 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/character_others
+2023-12-02 02:16:35,588 - INFO - sampling probability: 0.015384615384615385
+2023-12-02 02:16:35,588 - INFO - number of images: 29
+2023-12-02 02:16:35,588 - INFO - original multipy: 3.5586206896551724
+2023-12-02 02:16:35,588 - INFO - final multipy: 3.56
+
+2023-12-02 02:16:35,588 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/stark_(sousou_no_frieren)
+2023-12-02 02:16:35,588 - INFO - sampling probability: 0.05625
+2023-12-02 02:16:35,588 - INFO - number of images: 78
+2023-12-02 02:16:35,588 - INFO - original multipy: 4.8374999999999995
+2023-12-02 02:16:35,588 - INFO - final multipy: 4.84
+
+2023-12-02 02:16:35,588 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/linie_(sousou_no_frieren)
+2023-12-02 02:16:35,588 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,588 - INFO - number of images: 26
+2023-12-02 02:16:35,588 - INFO - original multipy: 4.961538461538462
+2023-12-02 02:16:35,588 - INFO - final multipy: 4.96
+
+2023-12-02 02:16:35,588 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/fern_(sousou_no_frieren)
+2023-12-02 02:16:35,588 - INFO - sampling probability: 0.05625
+2023-12-02 02:16:35,589 - INFO - number of images: 55
+2023-12-02 02:16:35,589 - INFO - original multipy: 6.860454545454545
+2023-12-02 02:16:35,589 - INFO - final multipy: 6.86
+
+2023-12-02 02:16:35,589 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/stark_(sousou_no_frieren)
+2023-12-02 02:16:35,589 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,589 - INFO - number of images: 15
+2023-12-02 02:16:35,589 - INFO - original multipy: 8.6
+2023-12-02 02:16:35,589 - INFO - final multipy: 8.6
+
+2023-12-02 02:16:35,589 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/himmel_(sousou_no_frieren)
+2023-12-02 02:16:35,589 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,589 - INFO - number of images: 11
+2023-12-02 02:16:35,589 - INFO - original multipy: 11.727272727272727
+2023-12-02 02:16:35,589 - INFO - final multipy: 11.73
+
+2023-12-02 02:16:35,589 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/1_character/lugner_(sousou_no_frieren)
+2023-12-02 02:16:35,589 - INFO - sampling probability: 0.019230769230769232
+2023-12-02 02:16:35,590 - INFO - number of images: 11
+2023-12-02 02:16:35,590 - INFO - original multipy: 11.727272727272727
+2023-12-02 02:16:35,590 - INFO - final multipy: 11.73
+
+2023-12-02 02:16:35,590 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/2+_characters/eisen_(sousou_no_frieren)+frieren+heiter+himmel_(sousou_no_frieren)
+2023-12-02 02:16:35,590 - INFO - sampling probability: 0.03571428571428572
+2023-12-02 02:16:35,590 - INFO - number of images: 13
+2023-12-02 02:16:35,590 - INFO - original multipy: 18.428571428571427
+2023-12-02 02:16:35,590 - INFO - final multipy: 18.43
+
+2023-12-02 02:16:35,590 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/kraft_(sousou_no_frieren)
+2023-12-02 02:16:35,590 - INFO - sampling probability: 0.05625
+2023-12-02 02:16:35,590 - INFO - number of images: 19
+2023-12-02 02:16:35,590 - INFO - original multipy: 19.85921052631579
+2023-12-02 02:16:35,590 - INFO - final multipy: 19.86
+
+2023-12-02 02:16:35,590 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/2+_characters/frieren+himmel_(sousou_no_frieren)
+2023-12-02 02:16:35,591 - INFO - sampling probability: 0.03571428571428572
+2023-12-02 02:16:35,591 - INFO - number of images: 11
+2023-12-02 02:16:35,591 - INFO - original multipy: 21.779220779220783
+2023-12-02 02:16:35,591 - INFO - final multipy: 21.78
+
+2023-12-02 02:16:35,591 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/2_characters/character_others
+2023-12-02 02:16:35,591 - INFO - sampling probability: 0.08333333333333334
+2023-12-02 02:16:35,591 - INFO - number of images: 18
+2023-12-02 02:16:35,591 - INFO - original multipy: 31.055555555555557
+2023-12-02 02:16:35,591 - INFO - final multipy: 31.06
+
+2023-12-02 02:16:35,591 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/1_character/himmel_(sousou_no_frieren)
+2023-12-02 02:16:35,591 - INFO - sampling probability: 0.05625
+2023-12-02 02:16:35,591 - INFO - number of images: 11
+2023-12-02 02:16:35,591 - INFO - original multipy: 34.30227272727272
+2023-12-02 02:16:35,591 - INFO - final multipy: 34.3
+
+2023-12-02 02:16:35,591 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/2_characters/fern_(sousou_no_frieren)+stark_(sousou_no_frieren)
+2023-12-02 02:16:35,591 - INFO - sampling probability: 0.10416666666666667
+2023-12-02 02:16:35,592 - INFO - number of images: 13
+2023-12-02 02:16:35,592 - INFO - original multipy: 53.75
+2023-12-02 02:16:35,592 - INFO - final multipy: 53.75
+
+2023-12-02 02:16:35,592 - INFO - /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/screenshots/3+_characters/fern_(sousou_no_frieren)+frieren+stark_(sousou_no_frieren)
+2023-12-02 02:16:35,592 - INFO - sampling probability: 0.1875
+2023-12-02 02:16:35,592 - INFO - number of images: 19
+2023-12-02 02:16:35,592 - INFO - original multipy: 66.19736842105262
+2023-12-02 02:16:35,592 - INFO - final multipy: 66.2
+
+2023-12-02 02:16:35,592 - INFO - Number of images: 1238
+2023-12-02 02:16:35,592 - INFO - Virtual dataset size: 6707.700000000001

@@ -1,4 +1,4 @@
-config_dir: 'hcp_configs'
+config_dir: 'configs/hcp'
 dataset_dir: 'data'
 
 data:

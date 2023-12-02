@@ -76,8 +76,15 @@ def read_weight_mapping(weight_mapping_csv):
 
 
 def get_repeat(
-    src_dir, weight_mapping, min_multiply=1, max_multiply=100, log_file=None
+    src_dir,
+    weight_mapping,
+    min_multiply=1,
+    max_multiply=100,
+    log_file=None,
+    logger=None,
 ):
+    if logger is None:
+        logger = logging.getLogger()
     n_images_totol = len(get_images_recursively(src_dir))
     bar = tqdm(total=n_images_totol)
 
@@ -101,12 +108,16 @@ def get_repeat(
     )
 
     if log_file is not None:
-        logger = logging.getLogger()
         original_handlers = logger.handlers[:]
         for handler in original_handlers:
             logger.removeHandler(handler)
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        logging.basicConfig(filename=log_file, level=logging.INFO, filemode="w")
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        logger.propagate = False
 
     n_images_total = 0
     n_images_virtual_total = 0
@@ -120,20 +131,21 @@ def get_repeat(
         with open(os.path.join(dirname, "multiply.txt"), "w") as f:
             f.write(str(multiply))
         if log_file is not None:
-            logging.info(dirname)
-            logging.info(f"sampling probability: {prob_list[k]}")
-            logging.info(f"number of images: {n_images}")
-            logging.info(f"original multipy: {per_image_multiply[k]}")
-            logging.info(f"final multipy: {multiply}\n")
+            logger.info(dirname)
+            logger.info(f"sampling probability: {prob_list[k]}")
+            logger.info(f"number of images: {n_images}")
+            logger.info(f"original multipy: {per_image_multiply[k]}")
+            logger.info(f"final multipy: {multiply}\n")
 
-    logging.info(f"Number of images: {n_images_totol}")
-    logging.info(f"Virtual dataset size: {n_images_virtual_total}")
+    logger.info(f"Number of images: {n_images_totol}")
+    logger.info(f"Virtual dataset size: {n_images_virtual_total}")
     time.sleep(1)
 
     if log_file is not None:
         logger.handlers = []  # Removing existing handlers
         for handler in original_handlers:
             logger.addHandler(handler)
-        logging.info(f"Number of images: {n_images_totol}")
-        logging.info(f"Virtual dataset size: {n_images_virtual_total}")
+        logger.propagate = True
+        logger.info(f"Number of images: {n_images_totol}")
+        logger.info(f"Virtual dataset size: {n_images_virtual_total}")
         time.sleep(1)

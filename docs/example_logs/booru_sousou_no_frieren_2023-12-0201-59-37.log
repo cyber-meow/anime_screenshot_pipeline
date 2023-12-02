@@ -1,0 +1,329 @@
+2023-12-02 01:59:37,252 - INFO - -------------Start stage 0-------------
+2023-12-02 01:59:37,252 - INFO - Downloading images to /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/raw ...
+2023-12-02 01:59:37,253 - INFO - Downloading images for sousou_no_frieren to /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/raw ...
+2023-12-02 02:09:11,415 - INFO - -------------Start stage 1-------------
+2023-12-02 02:09:11,416 - INFO - Loading mobilenetv3_large_100 ...
+2023-12-02 02:09:11,720 - INFO - Removing duplicates for '/home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/raw' ...
+2023-12-02 02:09:11,723 - INFO - Compute embeddings for 200 images ...
+2023-12-02 02:09:13,452 - INFO - Removing similar images ...
+2023-12-02 02:09:13,569 - INFO - -------------Start stage 2-------------
+2023-12-02 02:09:13,569 - INFO - Cropping individual characters to /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/cropped ...
+2023-12-02 02:11:57,379 - INFO - -------------Start stage 3-------------
+2023-12-02 02:11:57,380 - INFO - Classifying characters to /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/classified ...
+2023-12-02 02:11:57,422 - INFO - Extracting feature of 655 images ...
+2023-12-02 02:12:30,525 - INFO - Clustering ...
+2023-12-02 02:12:31,454 - INFO - Cluster complete, with 30 clusters.
+2023-12-02 02:12:31,454 - INFO - Current label count: {-1: 384, 0: 7, 1: 8, 2: 6, 3: 6, 4: 6, 5: 5, 6: 6, 7: 9, 8: 12, 9: 6, 10: 12, 11: 5, 12: 6, 13: 14, 14: 6, 15: 5, 16: 25, 17: 8, 18: 14, 19: 6, 20: 9, 21: 6, 22: 6, 23: 14, 24: 9, 25: 5, 26: 17, 27: 7, 28: 12, 29: 9, 30: 5}
+2023-12-02 02:12:31,455 - INFO - Matching for noises ...
+2023-12-02 02:12:31,716 - INFO - Noise extracting complete.
+2023-12-02 02:12:31,717 - INFO - Current label count: {-1: 80, 6: 3, 23: 8, 38: 2, 46: 6, 76: 3, 80: 3, 95: 118, 96: 35, 97: 18, 98: 11, 99: 10, 100: 7, 101: 15, 102: 9, 103: 36, 104: 19, 105: 15, 106: 10, 107: 30, 108: 30, 109: 6, 110: 10, 111: 26, 112: 9, 113: 14, 114: 6, 115: 10, 116: 6, 117: 12, 118: 15, 119: 13, 120: 5, 121: 21, 122: 8, 123: 12, 124: 9, 125: 5}
+2023-12-02 02:12:31,717 - INFO - Classifying using existing metadata characters ...
+2023-12-02 02:12:31,718 - WARNING - Label 102 has multiple potential representative characters: [ 1 21].
+2023-12-02 02:12:31,719 - WARNING - Label 116 has multiple potential representative characters: [ 1 14 16 23].
+2023-12-02 02:12:31,719 - WARNING - Label 117 has multiple potential representative characters: [1 5].
+2023-12-02 02:12:31,719 - WARNING - Label 118 has multiple potential representative characters: [1 5].
+2023-12-02 02:12:31,719 - WARNING - Label 124 has multiple potential representative characters: [ 0 11 12].
+2023-12-02 02:12:31,720 - WARNING - Label 125 has multiple potential representative characters: [ 0  1 11 12 20].
+2023-12-02 02:12:31,720 - INFO - Classifying complete, remained cluster ids: [-1, 0, 1, 5, 6, 14, 15, 16, 23, 38, 46, 56, 57, 59, 76, 80, 101, 102, 105, 115, 116, 117, 118, 123, 124, 125].
+2023-12-02 02:12:31,720 - INFO - Matching for noises ...
+2023-12-02 02:12:31,781 - INFO - Noise extracting complete.
+2023-12-02 02:12:31,781 - INFO - Current label count: {-1: 132, 0: 80, 1: 216, 5: 16, 6: 32, 14: 75, 15: 18, 16: 14, 23: 34, 38: 2, 46: 6, 56: 9, 57: 5, 59: 10, 76: 3, 80: 3}
+2023-12-02 02:12:31,781 - INFO - Filtering characters from images ...
+2023-12-02 02:12:31,792 - INFO - Filtering complete.
+2023-12-02 02:12:31,792 - INFO - Current label count: {-1.0: 204, 0.0: 72, 1.0: 204, 5.0: 16, 6.0: 22, 14.0: 66, 16.0: 14, 23.0: 25, 38.0: 2, 56.0: 9, 57.0: 5, 59.0: 10, 76.0: 3, 80.0: 3}
+2023-12-02 02:12:31,795 - INFO - Saving classified images to data/ref_images ...
+2023-12-02 02:12:31,795 - INFO - class fern_(sousou_no_frieren) has 20 images in total.
+2023-12-02 02:12:31,804 - INFO - class frieren has 20 images in total.
+2023-12-02 02:12:31,815 - INFO - class himmel_(sousou_no_frieren) has 13 images in total.
+2023-12-02 02:12:31,821 - INFO - class stark_(sousou_no_frieren) has 20 images in total.
+2023-12-02 02:12:31,832 - INFO - class aura_(sousou_no_frieren) has 20 images in total.
+2023-12-02 02:12:31,841 - INFO - class flamme_(sousou_no_frieren) has 15 images in total.
+2023-12-02 02:12:31,848 - INFO - class lugner_(sousou_no_frieren) has 14 images in total.
+2023-12-02 02:12:31,854 - INFO - class linie_(sousou_no_frieren) has 20 images in total.
+2023-12-02 02:12:31,865 - INFO - class kraft_(sousou_no_frieren) has 9 images in total.
+2023-12-02 02:12:31,869 - INFO - class solitar_(sousou_no_frieren) has 5 images in total.
+2023-12-02 02:12:31,872 - INFO - class macht_(sousou_no_frieren) has 10 images in total.
+2023-12-02 02:12:31,876 - INFO - Saving classified images to /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/classified ...
+2023-12-02 02:12:31,877 - INFO - class 0_noise has 204 images in total.
+2023-12-02 02:12:31,969 - INFO - class fern_(sousou_no_frieren) has 72 images in total.
+2023-12-02 02:12:32,002 - INFO - class frieren has 204 images in total.
+2023-12-02 02:12:32,102 - INFO - class himmel_(sousou_no_frieren) has 16 images in total.
+2023-12-02 02:12:32,112 - INFO - class stark_(sousou_no_frieren) has 22 images in total.
+2023-12-02 02:12:32,122 - INFO - class aura_(sousou_no_frieren) has 66 images in total.
+2023-12-02 02:12:32,156 - INFO - class lugner_(sousou_no_frieren) has 14 images in total.
+2023-12-02 02:12:32,165 - INFO - class linie_(sousou_no_frieren) has 25 images in total.
+2023-12-02 02:12:32,179 - INFO - class sein_(sousou_no_frieren) has 2 images in total.
+2023-12-02 02:12:32,181 - INFO - class kraft_(sousou_no_frieren) has 9 images in total.
+2023-12-02 02:12:32,185 - INFO - class solitar_(sousou_no_frieren) has 5 images in total.
+2023-12-02 02:12:32,187 - INFO - class macht_(sousou_no_frieren) has 10 images in total.
+2023-12-02 02:12:32,192 - INFO - class serie_(sousou_no_frieren) has 3 images in total.
+2023-12-02 02:12:32,194 - INFO - class sado_(kancolle) has 3 images in total.
+2023-12-02 02:12:32,200 - INFO - -------------Start stage 4-------------
+2023-12-02 02:12:32,201 - INFO - Loading mobilenetv3_large_100 ...
+2023-12-02 02:12:32,544 - INFO - Preparing dataset images to /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru ...
+2023-12-02 02:12:32,598 - INFO - Initialize metadata for raw images ...
+2023-12-02 02:12:32,690 - INFO - Saving characters to metadata ...
+2023-12-02 02:12:34,069 - INFO - Processing images from /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/classified ...
+2023-12-02 02:12:58,507 - INFO - Processing images from /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/intermediate/booru/raw ...
+2023-12-02 02:13:11,365 - INFO - Processing 0 no character images ...
+2023-12-02 02:13:11,368 - INFO - Removing duplicates for '/home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/classified' ...
+2023-12-02 02:13:11,381 - INFO - Compute embeddings for 372 images ...
+2023-12-02 02:13:14,204 - INFO - Removing similar images ...
+2023-12-02 02:13:14,632 - INFO - Removing duplicates for '/home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru/raw' ...
+2023-12-02 02:13:14,637 - INFO - Compute embeddings for 101 images ...
+2023-12-02 02:13:16,587 - INFO - Removing similar images ...
+2023-12-02 02:13:16,590 - INFO - -------------Start stage 5-------------
+2023-12-02 02:13:16,888 - INFO - Tagging and captioning images in /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru ...
+2023-12-02 02:16:17,628 - INFO - Search for core tags...
+2023-12-02 02:16:18,217 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:18,394 - WARNING - Character 'anya_(spy_x_family)' not found in core tag dictionary.
+2023-12-02 02:16:18,394 - WARNING - Character 'tanezaki_atsumi' not found in core tag dictionary.
+2023-12-02 02:16:18,471 - WARNING - Character 'anya_(spy_x_family)' not found in core tag dictionary.
+2023-12-02 02:16:18,471 - WARNING - Character 'tanezaki_atsumi' not found in core tag dictionary.
+2023-12-02 02:16:18,673 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:18,804 - WARNING - Character 'desler' not found in core tag dictionary.
+2023-12-02 02:16:18,996 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:19,056 - WARNING - Character 'astrologer_(elden_ring)' not found in core tag dictionary.
+2023-12-02 02:16:19,056 - WARNING - Character 'ranni_the_witch' not found in core tag dictionary.
+2023-12-02 02:16:19,056 - WARNING - Character 'tarnished_(elden_ring)' not found in core tag dictionary.
+2023-12-02 02:16:19,540 - WARNING - Character 'shimakaze_(kancolle)' not found in core tag dictionary.
+2023-12-02 02:16:19,731 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:19,731 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:20,618 - WARNING - Character 'stoltz_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:20,924 - WARNING - Character 'char_aznable' not found in core tag dictionary.
+2023-12-02 02:16:21,002 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:21,002 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:21,190 - WARNING - Character 'hiroi_kikuri' not found in core tag dictionary.
+2023-12-02 02:16:21,213 - WARNING - Character 'stoltz_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:21,321 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:21,321 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:21,395 - WARNING - Character 'nahida_(genshin_impact)' not found in core tag dictionary.
+2023-12-02 02:16:21,555 - WARNING - Character 'nakano_azusa' not found in core tag dictionary.
+2023-12-02 02:16:21,555 - WARNING - Character 'taketatsu_ayana' not found in core tag dictionary.
+2023-12-02 02:16:21,690 - WARNING - Character 'hiroi_kikuri' not found in core tag dictionary.
+2023-12-02 02:16:21,836 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:21,836 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:21,967 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:21,967 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:22,037 - WARNING - Character 'gotoh_hitori' not found in core tag dictionary.
+2023-12-02 02:16:22,125 - WARNING - Character 'freddy_fazbear' not found in core tag dictionary.
+2023-12-02 02:16:22,126 - WARNING - Character 'markiplier' not found in core tag dictionary.
+2023-12-02 02:16:22,286 - WARNING - Character 'aru_(blue_archive)' not found in core tag dictionary.
+2023-12-02 02:16:22,448 - WARNING - Character 'bardiche' not found in core tag dictionary.
+2023-12-02 02:16:22,448 - WARNING - Character 'fate_testarossa' not found in core tag dictionary.
+2023-12-02 02:16:22,448 - WARNING - Character 'raising_heart' not found in core tag dictionary.
+2023-12-02 02:16:22,448 - WARNING - Character 'raising_heart_(device_mode)' not found in core tag dictionary.
+2023-12-02 02:16:22,449 - WARNING - Character 'takamachi_nanoha' not found in core tag dictionary.
+2023-12-02 02:16:22,449 - WARNING - Character 'yuuno_scrya' not found in core tag dictionary.
+2023-12-02 02:16:22,776 - WARNING - Character 'meguru_(cookie)' not found in core tag dictionary.
+2023-12-02 02:16:22,776 - WARNING - Character 'yuuhi_(cookie)' not found in core tag dictionary.
+2023-12-02 02:16:23,032 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:23,032 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:23,032 - WARNING - Character 'ononoki_yotsugi' not found in core tag dictionary.
+2023-12-02 02:16:23,175 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:23,187 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:23,275 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:23,276 - WARNING - Character 'stoltz_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:23,646 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:23,646 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:23,764 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:23,807 - WARNING - Character 'doomguy' not found in core tag dictionary.
+2023-12-02 02:16:23,937 - WARNING - Character 'anya_(spy_x_family)' not found in core tag dictionary.
+2023-12-02 02:16:23,937 - WARNING - Character 'tanezaki_atsumi' not found in core tag dictionary.
+2023-12-02 02:16:24,017 - WARNING - Character 'tanezaki_atsumi' not found in core tag dictionary.
+2023-12-02 02:16:24,052 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:24,344 - WARNING - Character 'doomguy' not found in core tag dictionary.
+2023-12-02 02:16:24,864 - WARNING - Character 'wojak' not found in core tag dictionary.
+2023-12-02 02:16:25,024 - WARNING - Character 'yf-21' not found in core tag dictionary.
+2023-12-02 02:16:25,128 - WARNING - Character 'megumin' not found in core tag dictionary.
+2023-12-02 02:16:25,660 - WARNING - Character 'gotoh_hitori' not found in core tag dictionary.
+2023-12-02 02:16:25,744 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:25,843 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:25,844 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:26,205 - WARNING - Character 'low_tier_god' not found in core tag dictionary.
+2023-12-02 02:16:26,371 - WARNING - Character 'draht_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:26,461 - WARNING - Character 'gluck_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:26,512 - WARNING - Character 'eldali_ilma_fanomenel' not found in core tag dictionary.
+2023-12-02 02:16:26,512 - WARNING - Character 'high_elf_archer_(goblin_slayer!)' not found in core tag dictionary.
+2023-12-02 02:16:26,512 - WARNING - Character 'sylphiette_(mushoku_tensei)' not found in core tag dictionary.
+2023-12-02 02:16:26,543 - WARNING - Character 'yf-19' not found in core tag dictionary.
+2023-12-02 02:16:26,561 - WARNING - Character 'matoya_(ff14)' not found in core tag dictionary.
+2023-12-02 02:16:26,562 - WARNING - Character 'y'shtola_rhul' not found in core tag dictionary.
+2023-12-02 02:16:26,606 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:26,606 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:26,680 - WARNING - Character 'draht_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:26,726 - WARNING - Character 'hiroi_kikuri' not found in core tag dictionary.
+2023-12-02 02:16:26,726 - WARNING - Character 'ijichi_seika' not found in core tag dictionary.
+2023-12-02 02:16:26,762 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:26,762 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:26,817 - WARNING - Character 'pomu_rainpuff' not found in core tag dictionary.
+2023-12-02 02:16:26,837 - WARNING - Character 'ichinose_kana' not found in core tag dictionary.
+2023-12-02 02:16:26,837 - WARNING - Character 'lauda_neill' not found in core tag dictionary.
+2023-12-02 02:16:26,848 - WARNING - Character 'miorine_rembran' not found in core tag dictionary.
+2023-12-02 02:16:26,848 - WARNING - Character 'suletta_mercury' not found in core tag dictionary.
+2023-12-02 02:16:26,893 - WARNING - Character 'eren_yeager' not found in core tag dictionary.
+2023-12-02 02:16:26,893 - WARNING - Character 'kaji_yuuki' not found in core tag dictionary.
+2023-12-02 02:16:26,894 - WARNING - Character 'taketatsu_ayana' not found in core tag dictionary.
+2023-12-02 02:16:26,982 - WARNING - Character 'qual_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,148 - WARNING - Character 'diavolo' not found in core tag dictionary.
+2023-12-02 02:16:27,314 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,314 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:27,418 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,418 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:27,470 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,470 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:27,470 - WARNING - Character 'stark's_father' not found in core tag dictionary.
+2023-12-02 02:16:27,470 - WARNING - Character 'stoltz_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,528 - WARNING - Character 'ichinose_kana' not found in core tag dictionary.
+2023-12-02 02:16:27,528 - WARNING - Character 'suletta_mercury' not found in core tag dictionary.
+2023-12-02 02:16:27,563 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,563 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:27,624 - WARNING - Character 'chitanda_eru' not found in core tag dictionary.
+2023-12-02 02:16:27,624 - WARNING - Character 'oreki_houtarou' not found in core tag dictionary.
+2023-12-02 02:16:27,684 - WARNING - Character 'villager_(animal_crossing)' not found in core tag dictionary.
+2023-12-02 02:16:27,787 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:27,787 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:27,819 - WARNING - Character 'moona_hoshinova' not found in core tag dictionary.
+2023-12-02 02:16:27,819 - WARNING - Character 'usada_pekora' not found in core tag dictionary.
+2023-12-02 02:16:27,880 - WARNING - Character 'gotoh_hitori' not found in core tag dictionary.
+2023-12-02 02:16:27,905 - WARNING - Character 'blue_poison_(arknights)' not found in core tag dictionary.
+2023-12-02 02:16:28,137 - WARNING - Character 'stoltz_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:28,179 - WARNING - Character 'nahida_(genshin_impact)' not found in core tag dictionary.
+2023-12-02 02:16:28,261 - WARNING - Character 'conte_di_cavour_(kancolle)' not found in core tag dictionary.
+2023-12-02 02:16:28,342 - WARNING - Character 'gotoh_hitori' not found in core tag dictionary.
+2023-12-02 02:16:28,371 - WARNING - Character 'draht_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:28,391 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:28,392 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:28,420 - WARNING - Character 'gluck_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:28,439 - WARNING - Character 'moomintroll' not found in core tag dictionary.
+2023-12-02 02:16:28,483 - WARNING - Character 'doctor_(arknights)' not found in core tag dictionary.
+2023-12-02 02:16:28,483 - WARNING - Character 'taketatsu_ayana' not found in core tag dictionary.
+2023-12-02 02:16:28,483 - WARNING - Character 'w_(arknights)' not found in core tag dictionary.
+2023-12-02 02:16:28,533 - WARNING - Character 'ranni_the_witch' not found in core tag dictionary.
+2023-12-02 02:16:28,583 - WARNING - Character 'ninomae_ina'nis' not found in core tag dictionary.
+2023-12-02 02:16:28,638 - WARNING - Character 'patchouli_knowledge' not found in core tag dictionary.
+2023-12-02 02:16:28,638 - WARNING - Character 'ui_(blue_archive)' not found in core tag dictionary.
+2023-12-02 02:16:28,701 - WARNING - Character 'himari_(blue_archive)' not found in core tag dictionary.
+2023-12-02 02:16:28,794 - WARNING - Character 'anya_(spy_x_family)' not found in core tag dictionary.
+2023-12-02 02:16:28,795 - WARNING - Character 'gyokuyou_(kusuriya_no_hitorigoto)' not found in core tag dictionary.
+2023-12-02 02:16:28,795 - WARNING - Character 'tanezaki_atsumi' not found in core tag dictionary.
+2023-12-02 02:16:28,837 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:28,837 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:28,970 - WARNING - Character 'eldali_ilma_fanomenel' not found in core tag dictionary.
+2023-12-02 02:16:28,971 - WARNING - Character 'marcille' not found in core tag dictionary.
+2023-12-02 02:16:29,153 - WARNING - Character 'eimi_(blue_archive)' not found in core tag dictionary.
+2023-12-02 02:16:29,153 - WARNING - Character 'himari_(blue_archive)' not found in core tag dictionary.
+2023-12-02 02:16:29,299 - WARNING - Character 'draht_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:29,299 - WARNING - Character 'granat_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:29,317 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:29,318 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:29,436 - WARNING - Character 'ichinose_kana' not found in core tag dictionary.
+2023-12-02 02:16:29,436 - WARNING - Character 'miorine_rembran' not found in core tag dictionary.
+2023-12-02 02:16:29,436 - WARNING - Character 'suletta_mercury' not found in core tag dictionary.
+2023-12-02 02:16:29,581 - WARNING - Character 'marcille' not found in core tag dictionary.
+2023-12-02 02:16:29,649 - WARNING - Character 'cu_chulainn_(fate)' not found in core tag dictionary.
+2023-12-02 02:16:29,649 - WARNING - Character 'cu_chulainn_(fate/stay_night)' not found in core tag dictionary.
+2023-12-02 02:16:29,649 - WARNING - Character 'kotomine_kirei' not found in core tag dictionary.
+2023-12-02 02:16:29,694 - WARNING - Character 'shima_rin' not found in core tag dictionary.
+2023-12-02 02:16:29,724 - WARNING - Character 'elaina_(majo_no_tabitabi)' not found in core tag dictionary.
+2023-12-02 02:16:29,740 - WARNING - Character 'mona_(genshin_impact)' not found in core tag dictionary.
+2023-12-02 02:16:29,740 - WARNING - Character 'roxy_migurdia' not found in core tag dictionary.
+2023-12-02 02:16:29,771 - WARNING - Character 'gundam_aerial' not found in core tag dictionary.
+2023-12-02 02:16:29,771 - WARNING - Character 'ichinose_kana' not found in core tag dictionary.
+2023-12-02 02:16:29,771 - WARNING - Character 'suletta_mercury' not found in core tag dictionary.
+2023-12-02 02:16:29,804 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:29,862 - WARNING - Character 'eisen_(sousou_no_frieren)' not found in core tag dictionary.
+2023-12-02 02:16:29,862 - WARNING - Character 'heiter' not found in core tag dictionary.
+2023-12-02 02:16:29,892 - WARNING - Character 'inoue_takina' not found in core tag dictionary.
+2023-12-02 02:16:29,892 - WARNING - Character 'nishikigi_chisato' not found in core tag dictionary.
+2023-12-02 02:16:29,947 - WARNING - Character 'regrush_lionheart' not found in core tag dictionary.
+2023-12-02 02:16:29,947 - WARNING - Character 'rindou_mikoto' not found in core tag dictionary.
+2023-12-02 02:16:30,016 - WARNING - Character 'ryu_lion' not found in core tag dictionary.
+2023-12-02 02:16:30,020 - INFO - -------------Start stage 6-------------
+2023-12-02 02:16:30,020 - INFO - Rearranging /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training/booru ...
+2023-12-02 02:16:30,118 - INFO - Constructing dictionary for auxiliary files...
+2023-12-02 02:16:30,124 - INFO - Rearranging...
+2023-12-02 02:16:30,891 - INFO - Constructing dictionary for auxiliary files...
+2023-12-02 02:16:31,006 - INFO - Merging folders...
+2023-12-02 02:16:31,007 - INFO - frieren+low_tier_god has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,034 - INFO - anya_(spy_x_family)+frieren+tanezaki_atsumi has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,053 - INFO - kraft_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,073 - INFO - solitar_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,096 - INFO - desler+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,105 - INFO - astrologer_(elden_ring)+fern_(sousou_no_frieren)+frieren+ranni_the_witch+tarnished_(elden_ring) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,106 - INFO - serie_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,107 - INFO - aura_(sousou_no_frieren)+shimakaze_(kancolle) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,113 - INFO - linie_(sousou_no_frieren)+lugner_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,136 - INFO - macht_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,154 - INFO - stark_(sousou_no_frieren)+stoltz_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,156 - INFO - char_aznable+fern_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,157 - INFO - aura_(sousou_no_frieren)+hiroi_kikuri has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,174 - INFO - frieren+nahida_(genshin_impact) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,175 - INFO - fern_(sousou_no_frieren)+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,209 - INFO - aura_(sousou_no_frieren)+nakano_azusa+taketatsu_ayana has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,209 - INFO - frieren+gotoh_hitori has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,210 - INFO - fern_(sousou_no_frieren)+freddy_fazbear+frieren+markiplier has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,211 - INFO - aru_(blue_archive)+aura_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,211 - INFO - aura_(sousou_no_frieren)+linie_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,212 - INFO - kraft_(sousou_no_frieren)+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,213 - INFO - fern_(sousou_no_frieren)+frieren+meguru_(cookie)+yuuhi_(cookie) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,213 - INFO - eisen_(sousou_no_frieren)+frieren+heiter+himmel_(sousou_no_frieren)+ononoki_yotsugi has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,213 - INFO - sein_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,214 - INFO - eisen_(sousou_no_frieren)+stark_(sousou_no_frieren)+stoltz_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,214 - INFO - doomguy+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,214 - INFO - frieren+tanezaki_atsumi has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,215 - INFO - aura_(sousou_no_frieren)+frieren+low_tier_god has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,215 - INFO - fern_(sousou_no_frieren)+flamme_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,215 - INFO - aura_(sousou_no_frieren)+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,216 - INFO - aura_(sousou_no_frieren)+frieren+wojak has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,216 - INFO - fern_(sousou_no_frieren)+yf-21 has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,217 - INFO - frieren+megumin has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,217 - INFO - sado_(kancolle) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,217 - INFO - flamme_(sousou_no_frieren)+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,219 - INFO - gluck_(sousou_no_frieren)+macht_(sousou_no_frieren)+solitar_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,220 - INFO - eldali_ilma_fanomenel+frieren+high_elf_archer_(goblin_slayer!)+sylphiette_(mushoku_tensei) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,220 - INFO - frieren+yf-19 has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,220 - INFO - fern_(sousou_no_frieren)+frieren+matoya_(ff14)+y'shtola_rhul has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,221 - INFO - flamme_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,222 - INFO - aura_(sousou_no_frieren)+hiroi_kikuri+ijichi_seika has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,222 - INFO - macht_(sousou_no_frieren)+solitar_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,241 - INFO - frieren+pomu_rainpuff has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,241 - INFO - aura_(sousou_no_frieren)+eren_yeager+kaji_yuuki+taketatsu_ayana has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,242 - INFO - fern_(sousou_no_frieren)+frieren+qual_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,243 - INFO - fern_(sousou_no_frieren)+frieren+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,243 - INFO - aura_(sousou_no_frieren)+diavolo has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,244 - INFO - aura_(sousou_no_frieren)+fern_(sousou_no_frieren)+frieren+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,244 - INFO - fern_(sousou_no_frieren)+frieren+kraft_(sousou_no_frieren)+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,245 - INFO - ubel_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,245 - INFO - fern_(sousou_no_frieren)+ichinose_kana+suletta_mercury has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,246 - INFO - chitanda_eru+fern_(sousou_no_frieren)+oreki_houtarou+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,246 - INFO - frieren+villager_(animal_crossing) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,247 - INFO - aura_(sousou_no_frieren)+frieren+linie_(sousou_no_frieren)+lugner_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,248 - INFO - fern_(sousou_no_frieren)+frieren+moona_hoshinova+usada_pekora has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,248 - INFO - blue_poison_(arknights)+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,249 - INFO - fern_(sousou_no_frieren)+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,250 - INFO - fern_(sousou_no_frieren)+frieren+himmel_(sousou_no_frieren)+stark_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,250 - INFO - conte_di_cavour_(kancolle)+frieren has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,251 - INFO - gluck_(sousou_no_frieren)+macht_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,251 - INFO - frieren+moomintroll has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,251 - INFO - aura_(sousou_no_frieren)+doctor_(arknights)+taketatsu_ayana+w_(arknights) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,251 - INFO - fern_(sousou_no_frieren)+frieren+ranni_the_witch has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,252 - INFO - frieren+ninomae_ina'nis has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,252 - INFO - fern_(sousou_no_frieren)+patchouli_knowledge+ui_(blue_archive) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,252 - INFO - frieren+himari_(blue_archive) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,253 - INFO - eldali_ilma_fanomenel+frieren+marcille has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,253 - INFO - eimi_(blue_archive)+fern_(sousou_no_frieren)+frieren+himari_(blue_archive) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,253 - INFO - aura_(sousou_no_frieren)+fern_(sousou_no_frieren)+frieren+kraft_(sousou_no_frieren) has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,253 - INFO - fern_(sousou_no_frieren)+frieren+ichinose_kana+miorine_rembran+suletta_mercury has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,254 - INFO - frieren+marcille has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,254 - INFO - aura_(sousou_no_frieren)+cu_chulainn_(fate)+cu_chulainn_(fate/stay_night)+frieren+kotomine_kirei has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,254 - INFO - frieren+shima_rin has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,254 - INFO - elaina_(majo_no_tabitabi)+frieren+mona_(genshin_impact)+roxy_migurdia has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,255 - INFO - fern_(sousou_no_frieren)+gundam_aerial+ichinose_kana+suletta_mercury has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,255 - INFO - fern_(sousou_no_frieren)+frieren+inoue_takina+nishikigi_chisato has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,255 - INFO - fern_(sousou_no_frieren)+frieren+regrush_lionheart+rindou_mikoto has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:31,255 - INFO - frieren+ryu_lion has fewer than 10 images; renamed as character_others
+2023-12-02 02:16:35,483 - INFO - -------------Start stage 7-------------
+2023-12-02 02:16:35,484 - INFO - Computing repeat for /home/sashi/Documents/Projects/Anime/extract-training-from-anime/data/training ...
+2023-12-02 02:16:36,593 - INFO - Number of images: 1238
+2023-12-02 02:16:36,594 - INFO - Virtual dataset size: 6707.700000000001

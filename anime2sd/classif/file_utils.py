@@ -8,23 +8,42 @@ from natsort import natsorted
 from hbutils.string import plural_word
 
 import numpy as np
-
 from imgutils.metrics import ccip_extract_feature
-from anime2sd.basics import random_string
-from anime2sd.basics import get_images_recursively
-from anime2sd.basics import get_corr_meta_names, get_corr_ccip_names
-from anime2sd.basics import get_default_metadata
+
+from ..basics import (
+    random_string,
+    get_images_recursively,
+    get_corr_meta_names,
+    get_corr_ccip_names,
+    get_default_metadata,
+)
+from ..character import Character
 
 
 def load_image_features_and_characters(
-    src_dir: str,
-) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Dict[int, str]]:
+    src_dir: Optional[str] = None,
+    image_files: Optional[List[str]] = None,
+    save_ccip_cache: bool = True,
+    tqdm_desc: Optional[str] = None,
+    logger: Optional[logging.Logger] = None,
+) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Dict[int, Character]]:
     """Load image features and associated character information
     from a given source directory.
 
     Args:
-        src_dir (str): The source directory where image files and
-                       their corresponding metadata are stored.
+        src_dir (Optional[str]):
+            The source directory where image files and their corresponding
+            metadata are stored.
+        image_files (Optional[List[str]]):
+            A list of image file paths to load.
+            If provided it overwrites the effect of src_dir.
+        save_ccip_cache (bool):
+            Whether to save the extracted image features to a cache file.
+        tqdm_desc (Optional[str]):
+            A description of the progress bar.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[int, str]]:
@@ -32,10 +51,21 @@ def load_image_features_and_characters(
             - A numpy array of extracted image features.
             - A boolean array indicating the presence of characters in each image.
               None if no characters are found.
-            - A dictionary mapping label indices to class names.
+            - A dictionary mapping label indices to character information.
     """
-    image_files = np.array(natsorted(get_images_recursively(src_dir)))
-    logging.info(f'Extracting feature of {plural_word(len(image_files), "image")} ...')
+    if logger is None:
+        logger = logging.getLogger()
+
+    assert (
+        src_dir is not None or image_files is not None
+    ), "Either src_dir or image_files must be provided."
+
+    if image_files:
+        image_files = np.array(image_files)
+    else:
+        image_files = np.array(natsorted(get_images_recursively(src_dir)))
+    logger.info(f'Extracting feature of {plural_word(len(image_files), "image")} ...')
+
     images = []
     characters_list = []
     character_to_index = {}  # Mapping from character name to label index
@@ -43,12 +73,15 @@ def load_image_features_and_characters(
     label_counter = 0
 
     # Iterate over image files to extract features and metadata
-    for img_path in tqdm(image_files, desc="Extract dataset features"):
+    for img_path in tqdm(image_files, desc=tqdm_desc):
         ccip_path, _ = get_corr_ccip_names(img_path)
         if os.path.exists(ccip_path):
             images.append(np.load(ccip_path))
         else:
-            images.append(ccip_extract_feature(img_path))
+            img_embedding = ccip_extract_feature(img_path)
+            images.append(img_embedding)
+            if save_ccip_cache:
+                np.save(ccip_path, img_embedding)
 
         meta_path, _ = get_corr_meta_names(img_path)
         characters = []
@@ -57,6 +90,7 @@ def load_image_features_and_characters(
                 meta_data = json.load(meta_file)
                 if "characters" in meta_data:
                     for character in meta_data["characters"]:
+                        character = Character.from_string(character)
                         if character not in character_to_index:
                             character_to_index[character] = label_counter
                             index_to_character[label_counter] = character
@@ -77,16 +111,18 @@ def load_image_features_and_characters(
             for character_index in character_indices:
                 characters_per_image[i, character_index] = True
     else:
-        logging.info(
+        logger.info(
             "No character metadata found; returning None for 'characters_per_image'."
         )
 
     return image_files, images, characters_per_image, index_to_character
 
 
-def parse_ref_dir(ref_dir: str) -> Tuple[List[str], np.ndarray, Dict[int, str]]:
+def parse_ref_dir(
+    ref_dir: str,
+) -> Tuple[List[Character], np.ndarray, Dict[int, Character]]:
     """
-    Parse the reference directory to extract image files, their labels, and class names.
+    Parse the reference directory to extract image files, their labels, and characters.
     This function assumes that either
         - The directory contains subdirectories named after their class names,
           each containing relevant images.
@@ -97,54 +133,57 @@ def parse_ref_dir(ref_dir: str) -> Tuple[List[str], np.ndarray, Dict[int, str]]:
         ref_dir (str): Path to the reference directory.
 
     Returns:
-        Tuple[List[str], np.ndarray, Dict[int, str]]:
+        Tuple[List[str], np.ndarray, Dict[int, Character]]:
             - A list of paths to image files.
             - An array of integer labels corresponding to each image,
-              where each label is an index in class_names.
-            - A dictionary mapping label indices to class names.
+              where each label is an index in character_objects.
+            - A dictionary mapping label indices to Character objects.
     """
     ref_image_files = []
     labels = []
-    class_names = {}
+    character_mapping = {}
     label_counter = 0
 
     # Supported image extensions
     image_extensions = [".png", ".jpg", ".jpeg", ".webp", ".gif"]
 
-    # Check if there are class folders containing images
-    subdirs = [
-        d for d in os.listdir(ref_dir) if os.path.isdir(os.path.join(ref_dir, d))
-    ]
-    if subdirs:
-        for subdir in subdirs:
-            class_name = subdir
-            class_names[label_counter] = class_name
-            for filename in os.listdir(os.path.join(ref_dir, subdir)):
-                if os.path.splitext(filename)[1].lower() in image_extensions:
-                    ref_image_files.append(os.path.join(ref_dir, subdir, filename))
-                    labels.append(label_counter)
-            label_counter += 1
-    else:
-        # Images directly in the ref_dir
-        for filename in os.listdir(ref_dir):
+    for root, dirs, files in os.walk(ref_dir):
+        if root != ref_dir:
+            relative_path = os.path.relpath(root, ref_dir)
+            character = Character.from_string(relative_path, outer_sep=os.path.sep)
+            if character not in character_mapping.values():
+                character_mapping[label_counter] = character
+                current_label = label_counter
+                label_counter += 1
+            else:
+                current_label = [
+                    k for k, v in character_mapping.items() if v == character
+                ][0]
+        else:
+            current_label = None
+
+        for filename in files:
             if os.path.splitext(filename)[1].lower() in image_extensions:
-                class_name = (
-                    filename.split("_")[0]
-                    if "_" in filename
-                    else os.path.splitext(filename)
-                )[0]
-                if class_name not in class_names.values():
-                    class_names[label_counter] = class_name
-                    current_label = label_counter
-                    label_counter += 1
-                else:
-                    current_label = [
-                        k for k, v in class_names.items() if v == class_name
-                    ][0]
-                ref_image_files.append(os.path.join(ref_dir, filename))
+                if root == ref_dir:
+                    class_name = (
+                        filename.split("_")[0]
+                        if "_" in filename
+                        else os.path.splitext(filename)[0]
+                    )
+                    character = Character.from_string(class_name)
+                    if character not in character_mapping.values():
+                        character_mapping[label_counter] = character
+                        current_label = label_counter
+                        label_counter += 1
+                    else:
+                        current_label = [
+                            k for k, v in character_mapping.items() if v == character
+                        ][0]
+
+                ref_image_files.append(os.path.join(root, filename))
                 labels.append(current_label)
 
-    return ref_image_files, np.array(labels).astype(int), class_names
+    return ref_image_files, np.array(labels).astype(int), character_mapping
 
 
 def save_to_dir(
@@ -152,8 +191,9 @@ def save_to_dir(
     images: np.ndarray,
     dst_dir: str,
     labels: np.ndarray,
-    class_names: Optional[Dict[int, str]] = None,
+    character_mapping: Optional[Dict[int, Character]] = None,
     move: bool = False,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
     """
     Save or move image files to a destination directory, organized into
@@ -168,24 +208,36 @@ def save_to_dir(
             The destination directory where image files will be saved or moved.
         labels (np.ndarray):
             An array of integer labels corresponding to each image.
-        class_names (Optional[Dict[int, str]]):
-            A dictionary mapping integer labels to class names.
+        character_mapping (Optional[Dict[int, Character]]):
+            A dictionary mapping integer labels to characters.
             Defaults to None, in which case random strings will be used.
         move (bool):
             If True, move files instead of copying. Defaults to False.
+        logger (Optional[Logger]):
+            A logger to use for logging. Defaults to None, in which case
+            the default logger will be used.
     """
+    if logger is None:
+        logger = logging.getLogger()
+
     unique_labels = sorted(set(labels))
+    os.makedirs(dst_dir, exist_ok=True)
+
+    logger.info(f"Saving classified images to {dst_dir} ...")
     for label in unique_labels:
-        if class_names and label in class_names:
-            folder_name = f"{int(label)}_{class_names[label]}"
+        if character_mapping and label in character_mapping:
+            character = character_mapping[label]
+            folder_name = character.to_string(
+                inner_sep="+", outer_sep=os.path.sep, caption_style=False
+            )
         elif label == -1:
-            folder_name = "-1_noise"
+            folder_name = "0_noise"
         else:
-            folder_name = f"{int(label)}_{random_string()}"
+            folder_name = random_string()
 
         os.makedirs(os.path.join(dst_dir, folder_name), exist_ok=True)
         total = (labels == label).sum()
-        logging.info(f'class {folder_name} has {plural_word(total, "image")} in total.')
+        logger.info(f'class {folder_name} has {plural_word(total, "image")} in total.')
 
         for img_path, img in zip(image_files[labels == label], images[labels == label]):
             img_path_dst = os.path.join(
