@@ -107,6 +107,8 @@ tag_threshold = 0.35
 [tag_processing]
 # Mode to sort the tags
 sort_mode = "score"
+# Whether to append dropped character tags to the caption
+append_dropped_character_tags = false
 # Max number of tags to include in caption
 max_tag_number = 30
 # Path to the file containing blacklisted tags
@@ -126,7 +128,7 @@ prune_mode = "character_core"
 # Set to 1 here so that we compute a single time for all the image types
 compute_core_tag_up_levels = 1
 # Minimum frequency for a tag to be considered a core tag
-core_frequency_thresh = 0.4
+core_frequency_thresh = 0.3
 # Use existing core tag json instead of recomputing them
 use_existing_core_tag_file = false
 # The difficulty level up to which tags should be dropped
@@ -140,8 +142,8 @@ emb_max_difficulty = 2
 # Whether to use all core tags for embedding initialization
 emb_init_all_core = false
 
-# Captioning Configuration
-[captioning]
+# Captioning Separation Configuration
+[captioning_separation]
 # For separating items of a single field of caption
 caption_inner_sep = ", "
 # For separating different fields of caption
@@ -152,6 +154,15 @@ character_sep = ", "
 character_inner_sep = " "
 # For separating different fields of character
 character_outer_sep = ", "
+# Separator for keep tokens for Kohya trainer
+keep_tokens_sep = {}
+# Where to put --keep_tokens_sep before
+keep_tokens_before = "tags"
+
+# Captioning Components Configuration
+[captioning_components]
+# Order of captions
+caption_ordering = ["npeople", "character", "copyright", "image_type", "artist", "rating", "tags"]
 # Probability to include number of people in captions
 use_npeople_prob = 0
 # Probability to include character info in captions

@@ -47,6 +47,8 @@ class TaggingManager(object):
         sort_mode (str):
             The mode for sorting tags.
             Options are 'score', 'shuffle', 'original'.
+        append_dropped_character_tags (bool):
+            Flag to indicate whether to append dropped character tags.
         max_tag_number (int):
             The maximum number of tags to retain.
         blacklisted_tags (set):
@@ -66,6 +68,7 @@ class TaggingManager(object):
         character_tag_processor,
         process_from_original_tags,
         sort_mode,
+        append_dropped_character_tags,
         max_tag_number,
         logger,
     ):
@@ -76,6 +79,7 @@ class TaggingManager(object):
         self.character_tag_processor = character_tag_processor
         self.process_from_original_tags = process_from_original_tags
         self.sort_mode = sort_mode
+        self.append_dropped_character_tags = append_dropped_character_tags
         self.max_tag_number = max_tag_number
         self.logger = logging.getLogger() if logger is None else logger
 
@@ -129,10 +133,6 @@ class TaggingManager(object):
             TagPruningAction:
                 An instance for pruning tags as per the current settings.
         """
-        if self.process_from_original_tags or self.overwrite_tags:
-            tags_attribute = "tags"
-        else:
-            tags_attribute = "processed_tags"
         if self.prune_mode == "character_core":
             prune_mode = "minimal"
         else:
@@ -141,10 +141,24 @@ class TaggingManager(object):
             self.blacklisted_tags,
             self.overlap_tags_dict,
             prune_mode=prune_mode,
-            tags_attribute=tags_attribute,
             character_tag_processor=self.character_tag_processor,
             logger=self.logger,
         )
+
+    def get_tag_removing_underscore_action(self):
+        """
+        Creates and returns a TagRemovingUnderscoreAction instance based
+        on whether to process from original tags.
+
+        Returns:
+            TagRemovingUnderscoreAction:
+                An instance for removing underscores as per the current settings.
+        """
+        if self.process_from_original_tags or self.overwrite_tags:
+            tags_attribute = "tags"
+        else:
+            tags_attribute = "processed_tags"
+        return TagRemovingUnderscoreAction(tags_attribute=tags_attribute)
 
     def get_tag_sorting_action(self):
         """
@@ -156,7 +170,10 @@ class TaggingManager(object):
                 An instance for sorting tags as per the current settings.
         """
         return TagSortingAction(
-            self.sort_mode, max_tag_number=self.max_tag_number, logger=self.logger
+            self.sort_mode,
+            append_dropped_character_tags=self.append_dropped_character_tags,
+            max_tag_number=self.max_tag_number,
+            logger=self.logger,
         )
 
 
@@ -200,8 +217,9 @@ def tag_and_caption_from_directory(
     source = LocalSource(dir, load_aux=load_aux, overwrite_path=overwrite_path)
     source = source.attach(
         tagging_manager.get_tagging_action(),
+        # Maybe it makes more sense to deal with process_from_original_tags here
+        tagging_manager.get_tag_removing_underscore_action(),
         tagging_manager.get_basic_tag_pruning_action(),
-        TagRemovingUnderscoreAction(),
     )
 
     if tagging_manager.prune_mode == "character_core":

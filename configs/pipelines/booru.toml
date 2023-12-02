@@ -82,54 +82,14 @@ overwrite_tags = true
 [tag_processing]
 # Mode to sort the tags
 sort_mode = "score"
+# Whether to append dropped character tags to the caption
+append_dropped_character_tags = false
 # Max number of tags to include in caption
 max_tag_number = 30
 # Process tags from original tags instead of processed tags
 process_from_original_tags = true
 # Different ways to prune tags
 prune_mode = "character_core"
-
-# Core Tag Processing Configuration
-[core_tag_processing]
-# Minimum frequency for a tag to be considered a core tag
-core_frequency_thresh = 0.4
-# The difficulty level up to which tags should be dropped
-drop_difficulty = 2
-# Whether to drop all core tags or not
-drop_all_core = false
-# The difficulty level from which tags should be used for embedding initialization
-emb_min_difficulty = 1
-# The difficulty level up to which tags should be used for embedding initialization
-emb_max_difficulty = 2
-# Whether to use all core tags for embedding initialization
-emb_init_all_core = false
-
-# Captioning Configuration
-[captioning]
-# For separating items of a single field of caption
-caption_inner_sep = ", "
-# For separating different fields of caption
-caption_outer_sep = ", "
-# For separating characters
-character_sep = ", "
-# For separating items of a single field of character
-character_inner_sep = " "
-# For separating different fields of character
-character_outer_sep = ", "
-# Probability to include number of people in captions
-use_npeople_prob = 0
-# Probability to include character info in captions
-use_character_prob = 1
-# Probability to include copyright info in captions
-use_copyright_prob = 0
-# Probability to include image type info in captions
-use_image_type_prob = 1
-# Probability to include artist info in captions
-use_artist_prob = 0
-# Probability to include rating info in captions
-use_rating_prob = 1
-# Probability to include tag info in captions
-use_tags_prob = 1
 
 # Folder Organization Configuration
 [folder_organization]

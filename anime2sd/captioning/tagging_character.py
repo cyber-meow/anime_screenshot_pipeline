@@ -165,38 +165,23 @@ class CharacterTagProcessor(object):
 
     def drop_character_tags(self, tags):
         """
-        Drop basic character tags from the given list or mapping of tags.
-
-        This method filters out character tags from a provided list or dictionary
-        (mapping) of tags.
+        Drop basic character tags from the given list of tags.
 
         Args:
-            tags (Union[List[str], Mapping[str, float]]):
-                The tags to be filtered. Can be either a list of strings (tag names) or
-                a dictionary with tags as keys and their corresponding values
-                (e.g., probabilities or scores).
+            tags (List[str]): The tags to be filtered.
 
         Returns:
-            Union[List[str], Mapping[str, float]]:
-                The filtered tags, in the same format as the input
-                (either a list or a dictionary).
-
-        Raises:
-            TypeError: If the input 'tags' is neither a list nor a dictionary.
+            List[str]: Filtered list of tags.
+            List[str]: List of tags that were dropped.
         """
-        if isinstance(tags, dict):
-            return {
-                tag: value
-                for tag, value in tags.items()
-                if not self.is_character_tag(tag, "drop")
-            }
-        elif isinstance(tags, list):
-            return [tag for tag in tags if not self.is_character_tag(tag, "drop")]
-        else:
-            raise TypeError(
-                "Unsupported types of tags, dict or list expected, "
-                f"but {tags!r} found."
-            )
+        kept = []
+        dropped = []
+        for tag in tags:
+            if self.is_character_tag(tag, mode="drop"):
+                dropped.append(tag)
+            else:
+                kept.append(tag)
+        return kept, dropped
 
     def categorize_tags(self, tags):
         """
@@ -431,6 +416,7 @@ class CoreTagProcessor(object):
 
         Returns:
             List[str]: Filtered list of tags.
+            List[str]: List of tags that were dropped.
         """
         filtered_tags = tags.copy()
         to_drop = []
@@ -450,7 +436,7 @@ class CoreTagProcessor(object):
         # Remove the tags from the filtered_tags list
         filtered_tags = [tag for tag in filtered_tags if tag not in to_drop]
 
-        return filtered_tags
+        return filtered_tags, to_drop
 
     def categorize_core_tags(self, char_tag_proc: CharacterTagProcessor):
         """

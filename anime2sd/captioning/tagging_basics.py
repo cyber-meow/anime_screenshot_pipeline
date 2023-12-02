@@ -1,5 +1,5 @@
-import json
 import random
+from typing import List, Dict, Union, Optional
 
 from hbutils.string import singular_form, plural_form
 
@@ -57,6 +57,20 @@ def sort_tags(tags, sort_mode):
         random.shuffle(remaining_tags)
 
     return npeople_tags + remaining_tags
+
+
+def drop_tags_from_dictionary(
+    tags: Union[List[str], Dict[str, float]],
+    kept_tags: List[str],
+    dropped_tags: Optional[List[str]] = None,
+):
+    if isinstance(tags, dict):
+        kept_tags = {tag: value for tag, value in tags.items() if tag in kept_tags}
+        if dropped_tags is not None:
+            dropped_tags = {
+                tag: value for tag, value in tags.items() if tag in dropped_tags
+            }
+    return kept_tags, dropped_tags
 
 
 def drop_blacklisted_tags(tags, blacklisted_tags):

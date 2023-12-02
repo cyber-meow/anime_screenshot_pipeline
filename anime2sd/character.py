@@ -1,6 +1,3 @@
-import os
-
-
 class Character(object):
     """
     Represents a character with various attributes including name, appearance,

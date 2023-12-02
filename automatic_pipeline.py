@@ -75,11 +75,13 @@ def update_args_from_toml(
                 # Handle nested sections by flattening them
                 for nested_key, nested_value in value.items():
                     if not hasattr(new_args, nested_key):
-                        logging.warning(f"Key {nested_key} is not a valid argument.")
+                        logging.warning(
+                            f"Key {nested_key} in .toml is not a valid argument."
+                        )
                     setattr(new_args, nested_key, nested_value)
             else:
                 if not hasattr(new_args, key):
-                    logging.warning(f"Key {key} is not a valid argument.")
+                    logging.warning(f"Key {key} in .toml is not a valid argument.")
                 setattr(new_args, key, value)
     except Exception as e:
         print(f"Error loading config from {toml_path}: {e}")
@@ -101,15 +103,17 @@ def setup_args(args):
         6: ["arrange"],
         7: ["balance", "compute_multiply"],
     }
-    if not args.image_type:
-        args.image_type = config.pipeline_type
-    if not config.anime_name_booru:
+    if not args.anime_name_booru:
         args.anime_name_booru = args.anime_name
+    if not args.image_type:
+        args.image_type = args.pipeline_type
     if not config.log_prefix:
         if args.anime_name:
             args.log_prefix = args.anime_name
         else:
             args.log_prefix = "logfile"
+    if not args.keep_tokens_sep:
+        args.keep_tokens_sep = args.caption_outer_sep
 
     start_stage = args.start_stage
     end_stage = args.end_stage
@@ -397,6 +401,7 @@ async def tag_and_caption(
         character_tag_processor=char_tag_proc,
         process_from_original_tags=args.process_from_original_tags,
         sort_mode=args.sort_mode,
+        append_dropped_character_tags=args.append_dropped_character_tags,
         max_tag_number=args.max_tag_number,
         logger=logger,
     )
@@ -407,6 +412,9 @@ async def tag_and_caption(
         character_outer_sep=args.character_outer_sep,
         caption_inner_sep=args.caption_inner_sep,
         caption_outer_sep=args.caption_outer_sep,
+        keep_tokens_sep=args.keep_tokens_sep,
+        keep_tokens_before=args.keep_tokens_before,
+        caption_ordering=args.caption_ordering,
         use_npeople_prob=args.use_npeople_prob,
         use_character_prob=args.use_character_prob,
         use_copyright_prob=args.use_copyright_prob,

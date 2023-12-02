@@ -62,7 +62,7 @@ def parse_arguments():
         "--log_dir",
         type=str,
         default="logs",
-        help="Directory to save logs. Set to None or none to disable.",
+        help="Directory to save logs. Set to 'None' or 'none' to disable.",
     )
     parser.add_argument(
         "--log_prefix",
@@ -465,7 +465,7 @@ def parse_arguments():
     parser.add_argument(
         "--overwrite_tags",
         action="store_true",
-        help="Whether to overwrite existing tags.",
+        help="Whether to overwrite existing tags",
     )
     parser.add_argument(
         "--tagging_method",
@@ -478,7 +478,7 @@ def parse_arguments():
         ),
     )
     parser.add_argument(
-        "--tag_threshold", type=float, default=0.35, help="Threshold for tagging."
+        "--tag_threshold", type=float, default=0.35, help="Threshold for tagging"
     )
 
     # General arguments for tag processing
@@ -494,28 +494,33 @@ def parse_arguments():
         ),
     )
     parser.add_argument(
+        "--append_dropped_character_tags",
+        action="store_true",
+        help="Whether to append dropped character tags",
+    )
+    parser.add_argument(
         "--max_tag_number",
         type=int,
         default=30,
-        help="Max number of tags to include in caption.",
+        help="Max number of tags to include in caption",
     )
     parser.add_argument(
         "--blacklist_tags_file",
         type=str,
         default="configs/tag_filtering/blacklist_tags.txt",
-        help="Path to the file containing blacklisted tags.",
+        help="Path to the file containing blacklisted tags",
     )
     parser.add_argument(
         "--overlap_tags_file",
         type=str,
         default="configs/tag_filtering/overlap_tags.json",
-        help="Path to the file containing overlap tag information.",
+        help="Path to the file containing overlap tag information",
     )
     parser.add_argument(
         "--character_tags_file",
         type=str,
         default="configs/tag_filtering/character_tags.json",
-        help="Path to the file containing character tag information.",
+        help="Path to the file containing character tag information",
     )
     parser.add_argument(
         "--process_from_original_tags",
@@ -600,6 +605,24 @@ def parse_arguments():
 
     # Arguments for captioning
     parser.add_argument(
+        "--caption_ordering",
+        nargs="*",
+        default=[
+            "npeople",
+            "character",
+            "copyright",
+            "image_type",
+            "artist",
+            "rating",
+            "tags",
+        ],
+        help=(
+            "For specifying the order of captions. "
+            "Defaults to ['npeople', 'character', 'copyright', "
+            "'image_type', 'artist', 'rating']"
+        ),
+    )
+    parser.add_argument(
         "--caption_inner_sep",
         type=str,
         default=", ",
@@ -630,10 +653,28 @@ def parse_arguments():
         help="For separating different fields of character",
     )
     parser.add_argument(
+        "--keep_tokens_sep",
+        type=str,
+        default=None,
+        help=(
+            "Separator for keep tokens for Kohya trainer. "
+            "Defaults to None which uses --character_outer_sep."
+        ),
+    )
+    parser.add_argument(
+        "--keep_tokens_before",
+        type=str,
+        default="tags",
+        help="Where to put --keep_token_sep before. Defaults to 'tags'.",
+    )
+    parser.add_argument(
         "--use_npeople_prob",
         type=float,
         default=0,
-        help="Probability to include number of people in captions",
+        help=(
+            "Probability to include number of people in captions. "
+            "Including number of people in captions however is not yet implemented."
+        ),
     )
     parser.add_argument(
         "--use_character_prob",

@@ -106,7 +106,11 @@ Contributions are welcome
 - [x] Improved classification workflow that takes existing character metadata into account [2023.11.10]
 - [x] Embedding initialization with hard tags [2023.11.11]
 - [x] Ref directory hierarchy and Character class to account for different appearances of the same character [2023.11.28]
+- [x] Keep tokens separator support Kohya trainer, possibility to add dropped character tags to the end [2023.12.02]
 - [ ] Do not crop images that are already cropped before unless otherwise specified
+- [ ] Text detection
+- [ ] Improve core tag detection by using halfbody or full body images
+- [ ] Bag of words clustering for wildcard
 - [ ] Prepare HCP with multiple datasets
 - [ ] Arguments to optionally remove subfolders with too few images
 - [ ] Replace ffmpeg command by built-in python functions
