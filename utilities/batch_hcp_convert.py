@@ -507,7 +507,7 @@ if __name__ == "__main__":
     lora_converter = LoraConverter(save_fp16=args.save_fp16)
     base_converter = None
 
-    lora_files = gather_files_from_list(args.lora_path, args.lora_ext)
+    lora_files = gather_files_from_list(args.lora_path, args.lora_ext, args.recursive)
 
     if args.from_webui:
         for file_path in lora_files:
