@@ -42,7 +42,7 @@ booru_download_limit_per_character = 500
 allowed_ratings = []
 # List of allowed classes for filtering images, set to empty list to disable
 allowed_image_classes = ["illustration", "bangumi"]
-# List of allowed ratings for filtering images
+# Maximum size for the smaller dimension of too large downloaded images to resize to
 max_download_size = 1024
 
 # Character Cropping Configuration

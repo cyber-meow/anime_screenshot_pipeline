@@ -17,7 +17,7 @@ The script `automatic_pipeline.py` allows you to construct a text-to-image train
 
 ```bash
 python automatic_pipeline.py \
-    --anime_name name_of_my_favorite_anime \
+    --anime name_of_my_favorite_anime \
     --base_config_file configs/pipelines/base.toml \
     --config_file configs/pipelines/screenshot.toml configs/pipelines/booru.toml [...]
 ```
@@ -40,49 +40,42 @@ python automatic_pipeline.py \
     --log_prefix my_favorite_anime
 ```
 
+:bulb: You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 3 to 7 with `--character_ref_dir` now given. See [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.  
+:bulb:  Although it is possible to run from stage 0 which downloads anime automatically, it is still recommended to prepare the animes yourself as the downloading part is not fully optimized (may just hang if there are no seeders etc).
 
-:bulb: To filter out characters or random people that you are not interested in, you can use **noise** or any character name that starts with **noise**. This will not be put in the captions or used for embedding initialization later on.  
-:bulb: You can first run from stages 1 to 3 without `--character_ref_dir` to cluster characters. Then you go through the clusters to quickly construct your reference folder and run again from stages 3 to 7 with `--character_ref_dir` now given. See [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) for details.  
-:warning: Although it is possible to run from stage 0 which downloads anime automatically, it is still recommended to prepare the animes yourself as the downloading part is not fully optimized (may just hang if there are no seeders etc).
-
-There are a lot of arguments (more than 100) that allow you to configure the entire process. See all of them in the aforementioned config files or with
+There are a lot of arguments (more than 100) that allow you to configure the entire process. See all of them in the aforementioned configuration files or with
 ```bash
 python automatic_pipeline.py --help
 ```
+
+It is highly recommended to read at least [Main Arguments](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Main-Arguments) so that you know how to set up things correctly.
 
 ## Advanced Usage
 
 There are three ways that you can use the script.
 
-- **Use it as a black box:** Type the anime name, go watching two episodes of anime, come back, and the dataset is ready.
-- **Use it as a powerful dataset creation assistant:** You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume. You can provide character reference images, correct character classification results, adjust core tags, edit tags with other tools. This will allow you to construct a better dataset than what we get with the fully automatic process.
-- **Use it as a tool box:** Each stage can be run independently for the task in question, with many parameters that you can adjust.
-Besides the main script, there are also other numerous scripts in this repository that are useful for dataset preparation.
-However, [waifuc](https://github.com/deepghs/waifuc) which this project heavily makes use of may be more appropriate in this case.
+- **Use it as a black box:** Type the anime name, go to watching episodes of anime, come back, and the dataset is ready.
+- **Use it powerful dataset creation assistant:** You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume. You can provide character reference images, correct character classification results, adjust core tags, edit tags with other tools. This will allow you to construct a better dataset than what we get with the fully automatic process.
+- **Use it as a tool box:** Each stage can be run independently for the task in question, with many parameters that you can adjust. Besides the main script, there are also other numerous scripts in this repository that are useful for dataset preparation. However, [waifuc](https://github.com/deepghs/waifuc) which this project heavily makes use of may be more appropriate in this case.
 
 ## Pipeline Overview
 
-The script performs all the following automatically.
+The script performs all the following automatically (note that the docs are not yet fully up to date).
 
-- [Stage 0] Anime and fanart downloading
-- [Stage 1] Frame extraction and similar image removal
-- [Stage 2] Character cropping 
-- [Stage 3] Character classification
-- [Stage 4] Dataset image selection and resizing
-- [Stage 5] Tagging, captioning, and generating wildcards and embedding initialization information
-- [Stage 6] Dataset arrangement
-- [Stage 7] Repeat computation for concept balancing
-
-More details are found in [Pipeline Explained](docs/Pipeline.md) / [Wiki](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki) (to be updated).
-
-
-
+- [Stage 0] [Anime and fanart downloading](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-0:-Anime-and-Fanart-Downloading)
+- [Stage 1] [Frame extraction and similar image removal](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-1:-Frame-Extraction-and-Similar-Image-Removal)
+- [Stage 2] [Character detection and cropping ](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-2:-Character-Detection-and-Cropping)
+- [Stage 3] [Character classification](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-3:-Character-Classification)
+- [Stage 4] [Image selection and resizing](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-4:-Image-Selection-and-Resizing)
+- [Stage 5] [Tagging, captioning, and generating wildcards and embedding initialization information](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-5:-Tagging-and-Captioning)
+- [Stage 6] [Dataset arrangement](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-6:-Dataset-Arrangement)
+- [Stage 7] [Repeat computation for concept balancing](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-7:-Repeat-Computation-for-Concept-Balancing)
 
 
 ## Dataset Organization and Training
 
-- Once we go through the pipeline, the dataset is hierarchically organized in `/path/to/dataset_dir/training` with `multiply.txt` in each subfolder indicating the repeat of the images from this directory. More details on this are provided in [Dataset Organization](docs/Dataset_organization.md).
-- Since each trainer reads data differently. Some more steps may be required before training is performed. See [Start Training](docs/Start_training.md) for what to do for [EveryDream2](https://github.com/victorchall/EveryDream2trainer), [kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts), and [HCP-Diffusion](https://github.com/7eu7d7/HCP-Diffusion).
+- Once we go through the pipeline, the dataset is hierarchically organized in `/path/to/dataset_dir/training` with `multiply.txt` in each subfolder indicating the repeat of the images from this directory. More details on this are provided in [Dataset Organization](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Dataset-Organization).
+- Since each trainer reads data differently. Some more steps may be required before training is performed. See [Start Training](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Start-Training) for what to do for [EveryDream2](https://github.com/victorchall/EveryDream2trainer), [kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts), and [HCP-Diffusion](https://github.com/7eu7d7/HCP-Diffusion).
 
 ## Installation
 

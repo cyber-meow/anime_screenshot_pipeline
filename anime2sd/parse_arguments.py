@@ -543,10 +543,10 @@ def parse_arguments():
     parser.add_argument(
         "--compute_core_tag_up_levels",
         type=int,
-        default=0,
+        default=1,
         help=(
             "Number of directory levels to go up from the captioned directory when "
-            "computing core tags. Defaults to 0."
+            "computing core tags. Defaults to 1 which computes for all the image types."
         ),
     )
     parser.add_argument(

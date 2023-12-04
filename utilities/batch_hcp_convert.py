@@ -451,7 +451,11 @@ if __name__ == "__main__":
         type=str,
         default=[],
         required=True,
-        help="Paths to LoRAs or folders containing LoRA models.",
+        help=(
+            "Paths to LoRAs or folders containing LoRA models. "
+            "Both unet and text encoder paths should be provided here in case of "
+            "conversion to webui format."
+        ),
     )
     parser.add_argument(
         "--base_path",

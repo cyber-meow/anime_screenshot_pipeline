@@ -8,6 +8,8 @@ from typing import Optional, List, Dict
 from transformers import AutoTokenizer
 
 
+# TODO: Separate function that take directly embedding names from those that take
+# characters and image type, and deal with outfits embedding etc properly
 def update_emb_init_info(
     filepath: str,
     characters: List[str],

@@ -482,7 +482,6 @@ async def tag_and_caption(
             core_tag_path,
             tagging_manager,
             caption_generator,
-            args.load_aux,
             args.save_aux,
             logger,
         )
