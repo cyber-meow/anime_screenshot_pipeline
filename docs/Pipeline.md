@@ -1,23 +1,67 @@
 # Dataset Construction Explained
 
-#### Table of Contents
+This document details the pipeline of the dataset construction workflow. It is highly recommended to first go through other documents for a more high-level understanding of the script. Note that there two different pipeline types (set with `--pipeline_type`) which could result in slightly different treatments.
 
-1. [Frame Extraction and Similar Image Removal](#stage-1-frame-extraction-and-similar-image-removal)
-1. [Character Detection and Cropping](#stage-2-character-detection-and-cropping)
-1. [Character Clustering / Classification](#stage-3-character-clustering-or-classification)
-1. [Image Selection and Resizing](#stage-4-image-selection-and-resizing)
-1. [Tagging and Captioning](#stage-5-tagging-and-captioning)
-1. [Folder Arrangement](#stage-6-folder-arrangement)
-1. [Dataset Balancing](#stage-7-dataset-balancing)
+For your reference, I also provide below approximate running time of each stage on my own laptop with an RTX 3070 Ti. 
 
-I will also provide below approximate running time on my own laptop with a RTX 3070 Ti. The command line arguments listed here are not exhaustive. Please use `--help` to get the entire list.
+#### Table of contents
 
-:bulb: In total it takes me a little more than 2 hours to process four episodes (24 mins each).
+- [Stage 0] [Anime and Fanart Downloading](#stage-0-anime-and-fanart-downloading)
+- [Stage 1] [Frame Extraction and Similar Image Removal](#stage-1-frame-extraction-and-similar-image-removal)
+- [Stage 2] [Character Detection and Cropping](#stage-2-character-detection-and-cropping)
+- [Stage 3] [Character Classification](#stage-3-character-classification)
+- [Stage 4] [Image Selection and Resizing](#stage-4-image-selection-and-resizing)
+- [Stage 5] [Tagging and Captioning](#stage-5-tagging-and-captioning)
+- [Stage 6] [Dataset Arrangement](#stage-6-dataset-arrangement)
+- [Stage 7] [Repeat Computation for Concept Balancing](#stage-7-repeat-computation-for-concept-balancing)
+
+## Stage 0: Anime and Fanart Downloading
+
+**Automatically download animes and images respectively from nyaa.si and Danbooru**
+
+* `--src_dir` is not relevant here
+* Output folder for anime: `/path/to/dataset_dir/intermediate/{extra_path_component}/{image_type}/animes`
+* Output folder for fanarts: `/path/to/dataset_dir/intermediate/{extra_path_component}/{image_type}/raw`
+
+### Anime downloading
+
+We download anime by searching with the keyword "{submitter name} {anime name} {resolution}", and filter by episode number when possible. Torrent is used for downloading, which means that this stage would hang if there were no seeders. Moreover, the parsing of anime name and episode number is hard coded an may not always work. Therefore it could be simpler for you just to download the animes yourself instead of invoking this stage.
+
+- `anime_name`: Anime name used in the keyword search.  
+**Example usage:** --anime_name "yuuki_yuuna_wa_yuusha_de_aru"
+- `candidate_submitters`: A list of candidates submitters from which we try to search for anime. Only the first one with which we manage to find an anime to download will be used.  
+**Example usage:** --candidate_submitters erai subsplease
+- `anime_resolution`: Anime resolution to use in keyword search. Typical choices are 480, 720, and 1080. Defaults to 720.  
+**Example usage:** --anime_resolution 1080
+- `min_download_episode` and `max_download_episode`: This gives the range of episodes that you want to download. If you want to download all the episodes just leave them as None (the default value).  
+**Example usage:** --min_download_episode 2 --max_download_episode 10
+
+
+### Farart Downloading
+
+For now the fanarts are simply downloaded from Danbooru as they come with existing character information. I may add possibility of downloading from other sources later. The downloading can be slow and needs improvement from the waifuc side.
+
+- `anime_name_booru`: Name to search for downloading from booru. It requires it to match exactly the name used on booru. If this is not provided and `--anime_name` is provided, the latter is used.  
+**Example usage:** --anime_name_booru "yama_no_susume"
+- `character_info_file`: Path to an optional csv file providing correspondence between booru character names and the character names you want to use for training. The character names which are not specified insides remain untouched. Alternatively, you can use it to specify characters that you want to download (in which case you can leave the second column empty). Any characters that are not encountered in the anime downloading phase will then get downloaded if `--download_for_characters` is given.  
+**Example usage:** --character_info_file "configs/csv_examples/character_mapping_example.csv"
+- `download_for_characters`: Whether to download characters in `--character_info_file` as explained above.  
+**Example usage:** --download_for_characters
+- `booru_download_limit`: Limit on the total number of images to download from Danbooru. Defaults to no limit. Setting to 0 will download all images as well. Note that if both `--booru_download_limit` and `--booru_download_limit_per_character` are set, we are not guaranteed to download `--booru_download_limit` number of images.  
+**Example usage:** --booru_download_limit 1000
+- `booru_download_limit_per_character`: Sets a limit on the number of images to download for each character from Danbooru. If set to 0, there will be no limit for each character. The default value is 500.  
+**Example usage:** --booru_download_limit_per_character 300
+- `allowed_ratings`: Specifies a list of allowed ratings to filter the images downloaded from Danbooru. Options include `s` (safe), `g` (general), `q` (questionable), and `e` (explicit). By default, this list is empty, indicating no filtering based on ratings.  
+**Example usage:** --allowed_ratings s g
+- `allowed_image_classes`: Defines a list of allowed image classes for filtering the images. Options include `illustration`, `bangumi` (anime), `comic`, and `3d`. By default, only `illustration` and `bangumi` images are downloaded. Set this to an empty list to disable class-based filtering.  
+**Example usage:** --allowed_image_classes illustration comic
+- `max_download_size`: Sets the maximum size for the smaller dimension of downloaded images. If an image's smaller dimension exceeds this limit, it will be resized. The default value is 1024.  
+**Example usage:** --max_download_size 800
 
 
 ## Stage 1: Frame Extraction and Similar Image Removal
 
-**Extract 5000~10000 frames per episode of 24 minutes and remove similar images**
+**Extract thousands of frames per episode of 24 minutes and remove similar images**
 
 - This stage take 5~10 minutes per episode on my laptop.
 - `--src_dir` should be a folder containing the videos to process.
@@ -60,6 +104,7 @@ Since the extracted images can take a lot of place, I have made the decision to 
 - `detect_duplicate_batch_size`: Batch size for computing the features of images that are used for duplicate detection.
 
 
+
 ## Stage 2: Character Detection and Cropping
 
 **Crop independent characters into a separate folder**
@@ -76,7 +121,7 @@ Since the extracted images can take a lot of place, I have made the decision to 
 - `crop_with_face`: Do not save images without face during cropping (this can be problematic if you want to learn how to draw characters from behind).
 
 
-## Stage 3: Character Clustering or Classification
+## Stage 3: Character Classification
 
 **0-shot character clustering or few-shot character classification without training**
 
@@ -163,9 +208,9 @@ In this phase, we use a publicly available taggers to tag images.
 
 For now tag pruning goes through 3 steps. You can deactivate tag pruning by setting `--prune_mode none`.
 
-- Prune blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](../tag_filtering/blacklist_tags.txt) by default.
-- Prune overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](../tag_filtering/overlap_tags.json) by default.
-- By default `prune_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--pruned_mode minimal` to skip this step.
+- Prune blacklisted tags. Remove tags in the file `--blacklist_tags_file` (one tag per line). Use [blacklist_tags.txt](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/configs/tag_filtering/blacklist_tags.txt) by default.
+- Prune overlap tags. This includes tags that are sub-string of other tags, and overlapped tags specified in `--overlap_tags_file`. Use [overlap_tags.json](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/configs/tag_filtering/overlap_tags.json) by default.
+- By default `prune_mode` is set to `character`. In this case, if an image contains character, we try to remove hair, eye, and skin related tags using hard defined rules. Set `--prune_mode minimal` to skip this step.
 
 All the tags are saved to the field `processed_tags` of metadata. We also process by this field if it exists by default (unless `--overwrite_tags` is used). If you want to process from the field `tags`, you should use `--process_from_original_tags`. 
 
@@ -196,7 +241,7 @@ Typically, you can run with `--save_aux processed_tags characters`. You then get
 - It is better to correct detected characters after stage 3. Here you can edit `XXX.characters` to add non-detected characters (like viewed from behind).
 - :warning: If you edit caption directly, running this stage again will overwrite the changes.
 
-## Stage 6: Folder Arrangement
+## Stage 6: Dataset Arrangement
 
 **Arrange folder in n_characters/character format**
 
@@ -204,10 +249,10 @@ Typically, you can run with `--save_aux processed_tags characters`. You then get
 - If you start from this stage, please set `--src_dir` to the training folder to arrange (`/path/to/dataset_dir/training/{image_type}` by default).
 - In-place operation.
 
-Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in [Dataset Organization](Dataset_organization.md). You can also set `--arrange_format character` to remove the level that specifies the number of characters. You can also set `--arrange_format character` to remove the level that specifies the number of characters.
+Effect of `--max_character_number` and `--min_images_per_combination` are readily mentioned in [Dataset Organization](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Dataset-Organization). You can also set `--arrange_format character` to remove the level that specifies the number of characters.
 
 
-## Stage 7: Dataset Balancing
+## Stage 7: Repeat Computation for Concept Balancing
 
 **Balanced dataset by computing repeat/multiply for each sub-folder**
 
@@ -221,7 +266,7 @@ I assume that we have multiple types of images. They should be all put in the tr
 
 We generate her the `multipy.txt` in each image folder to indicate the number of times that the images of this folder should be used in a repeat, with the goal to balance between different concepts during training.
 
-To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with the csv file provided through `--weight_csv` ([default_weighting.csv](../csv_examples/default_weighting.csv) is used by dedfault). It first searches for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
+To compute the multiply of each image folder, we first compute its sampling probability. We do this by going through the hierarchy, and at each node, we sample each child with probability proportional to its weight. Its weight is default to 1 but can be changed with the csv file provided through `--weight_csv` ([default_weighting.csv](https://github.com/cyber-meow/anime_screenshot_pipeline/blob/main/configs/csv_examples/default_weighting.csv) is used by dedfault). It first searches for the folder name of the child directory and next searches for the pattern of the entire path (path of `src_dir` plus path from `src_dir` to the directory) as understood by `fnmatch`.
 
 For example, consider the folder structure
 ```

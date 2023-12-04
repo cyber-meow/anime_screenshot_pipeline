@@ -37,7 +37,7 @@ python prepare_hcp \
     --config_dst_dir /path/to/training_config_dir \
     --dataset_dir /path/to/dataset_dir/training
     --pivotal \
-    --trigger_word_file /path/to/dataset_dir/trigger_word.csv
+    --trigger_word_file /path/to/dataset_dir/emb_init.json
 ```
 
 Once this is done, the embeddings are created in `/path/to/training_config_dir/embs` and you can start training with
@@ -49,11 +49,10 @@ accelerate launch -m hcpdiff.train_ac_single \
 
 ### Further details
 - `--pivotal` indicates pivotal tuning, i.e. training of embedding and network at the same time (this is not possible with neither kohya nor EveryDream). Remove this argument if you do not want to train embedding.
-- You can customize the embedding you want to create and how they are initialized by modifying the content of `trigger_word_file`.
-- Use `--help` to see more arguments. Notably you can set `--emb_dir`, `--exp_dir`, and `main_config_file` (which defaults to `hcp_configs/lora_conventional.yaml`), among others.
+- You can customize the embedding you want to create and how they are initialized by modifying the content of `emb_init.json`.
+- Use `--help` to see more arguments. Notably you can set `--emb_dir`, `--exp_dir`, and `--main_config_file` (which defaults to `hcp_configs/lora_conventional.yaml`), among others.
 - To modify training and dataset parameters, you can modify either directly the files in `hcp_configs` before running the script or modify `dataset.yaml` and `lora_conventional.yaml` (or other config file you use) in `/path/to/training_config_dir` after running the script.
 - You should not move the generated config files because some absolute paths are used.
-- Currently the generated config files are only to be used on Unix systems.
 
 
 ## Training with ...

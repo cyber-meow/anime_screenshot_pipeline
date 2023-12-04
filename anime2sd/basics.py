@@ -130,7 +130,11 @@ def read_class_mapping(class_mapping_csv):
     with open(class_mapping_csv, "r") as f:
         reader = csv.reader(f)
         for row in reader:
-            old_class, new_class = row
+            if len(row) == 1:
+                old_class = row[0]
+                new_class = old_class
+            elif len(row) >= 2:
+                old_class, new_class = row[:2]
             class_mapping[old_class] = new_class
     return class_mapping
 

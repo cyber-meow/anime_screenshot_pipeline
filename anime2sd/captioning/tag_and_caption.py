@@ -319,7 +319,6 @@ def tag_and_caption_from_directory_core_final(
     core_tag_path: str,
     tagging_manager: TaggingManager,
     caption_generator: CaptionGenerator,
-    load_aux: List[str],
     save_aux: List[str],
     logger: Optional[logging.Logger] = None,
 ):
@@ -335,8 +334,6 @@ def tag_and_caption_from_directory_core_final(
             The tagging manager for managing tag operations.
         caption_generator (CaptionGenerator):
             The caption generator for generating captions.
-        load_aux (list):
-            List of auxiliary attributes to load.
         save_aux (list):
             List of auxiliary attributes to save.
         logger (Logger):
@@ -345,7 +342,7 @@ def tag_and_caption_from_directory_core_final(
     if logger is None:
         logger = logging.getLogger()
 
-    source = LocalSource(dir, load_aux=load_aux)
+    source = LocalSource(dir)
     core_tag_processor = CoreTagProcessor(
         core_tag_path=core_tag_path,
         logger=logger,
