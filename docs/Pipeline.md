@@ -6,14 +6,14 @@ For your reference, I also provide below approximate running time of each stage 
 
 #### Table of contents
 
-- [Stage 0 Anime and Fanart Downloading](#stage-0-anime-and-fanart-downloading)
-- [Stage 1 Frame Extraction and Similar Image Removal](#stage-1-frame-extraction-and-similar-image-removal)
-- [Stage 2 Character Detection and Cropping](#stage-2-character-detection-and-cropping)
-- [Stage 3 Character Classification](#stage-3-character-classification)
-- [Stage 4 Image Selection and Resizing](#stage-4-image-selection-and-resizing)
-- [Stage 5 Tagging and Captioning](#stage-5-tagging-and-captioning)
-- [Stage 6 Dataset Arrangement](#stage-6-dataset-arrangement)
-- [Stage 7 Repeat Computation for Concept Balancing](#stage-7-repeat-computation-for-concept-balancing)
+- [Stage 0] [Anime and Fanart Downloading](#stage-0-anime-and-fanart-downloading)
+- [Stage 1] [Frame Extraction and Similar Image Removal](#stage-1-frame-extraction-and-similar-image-removal)
+- [Stage 2] [Character Detection and Cropping](#stage-2-character-detection-and-cropping)
+- [Stage 3] [Character Classification](#stage-3-character-classification)
+- [Stage 4] [Image Selection and Resizing](#stage-4-image-selection-and-resizing)
+- [Stage 5] [Tagging and Captioning](#stage-5-tagging-and-captioning)
+- [Stage 6] [Dataset Arrangement](#stage-6-dataset-arrangement)
+- [Stage 7] [Repeat Computation for Concept Balancing](#stage-7-repeat-computation-for-concept-balancing)
 
 ## Stage 0: Anime and Fanart Downloading
 
