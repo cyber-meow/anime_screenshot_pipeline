@@ -104,14 +104,15 @@ class CoreCharacterTagPruningAction(ProcessAction):
             kept_tags, dropped_tags = drop_tags_from_dictionary(
                 tags, kept_tags, dropped_tags
             )
-        return ImageItem(
-            item.image,
-            {
-                **item.meta,
-                "processed_tags": kept_tags,
-                "dropped_character_tags": dropped_tags,
-            },
-        )
+            return ImageItem(
+                item.image,
+                {
+                    **item.meta,
+                    "processed_tags": kept_tags,
+                    "dropped_character_tags": dropped_tags,
+                },
+            )
+        return item
 
 
 class TagSortingAction(ProcessAction):
