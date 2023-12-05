@@ -9,7 +9,6 @@ The old scripts and readme have been moved into [scripts_v1](scripts_v1).
 Note that the new naming of metadata follows the convention of [waifuc](https://github.com/deepghs/waifuc) and is thus different from the name given to the older version.
 For conversion please use [utilities/convert_metadata.py](utilities/convert_metadata.py).
 
-**Ensure that you run this script on gpu to have reasonable processing time.**
 
 ## Basic Usage
 
@@ -82,9 +81,8 @@ The script performs all the following automatically (note that the docs are not 
 Clone this directory and install dependencies with
 ```bash
 git clone https://github.com/cyber-meow/anime_screenshot_pipeline
-git submodule update --init --recursive
-
 cd anime_screenshot_pipeline
+git submodule update --init --recursive
 
 # Use venv, conda or whatever you like here
 python -m venv venv
@@ -97,10 +95,11 @@ cd waifuc && pip install . && cd ..
 # cd waifuc ; pip install . ; cd . for powershell
 ```
 
-**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpeg from the command line (ideally with cuda support) for this stage.**  
-**python >= 3.11.0 is not yet suppoted due to the use of the libtorrent library**
+**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpeg from the command line (ideally with cuda support) for this stage.**
 
-** While I personally work on Linux, others have successfully run the scripts on Windows.
+:warning: onnxruntime-gpu uses cuda 11.8; if you want to use onnx with gpu make sure cuda 11.8 is installed and can be found on path  
+:warning: python >= 3.11.0 is not yet supported due to the use of the libtorrent library
+ 
 
 
 ## Change Logs
