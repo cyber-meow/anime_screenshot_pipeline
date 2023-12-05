@@ -355,7 +355,7 @@ def resize_image(image: Image, max_size: int) -> Image:
     new_height = int(height * scaling_factor)
 
     # Resize the image
-    return image.resize((new_width, new_height), Image.ANTIALIAS)
+    return image.resize((new_width, new_height), Image.LANCZOS)
 
 
 def save_image_and_meta(
