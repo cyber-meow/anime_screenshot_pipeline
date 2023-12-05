@@ -1,13 +1,12 @@
-dghs_imgutils==0.2.9
+dghs_imgutils==0.2.10
 natsort==8.4.0
-numpy==1.22.4
-Pillow==10.0.1
+numpy==1.26.2
+Pillow==10.1.0
 tqdm==4.64.0
 toml==0.10.2
-scikit_learn==1.3.1
+scikit_learn==1.3.2
 timm==0.9.12
-gchar>=0.1.0
-hbutils>=0.9.3
+hbutils==0.9.3
 pynyaasi==0.0.1
 torrentp==0.1.6
 transformers==4.35.0    # Only used for embedding name checking

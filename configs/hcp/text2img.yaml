@@ -1,13 +1,15 @@
 # base_state*base_model_alpha + (lora_state[i]*lora_scale[i]*lora_alpha[i]) + (part_state[k]*part_alpha[k])
+exp_dir: 'exps/2023-07-26-01-05-35'  # experiment directory
+model_steps: 1000  # steps of selected model
+emb_dir: '${exp_dir}/ckpts/'
 
-pretrained_model: ''
+pretrained_model: 'deepghs/animefull-latest'
 prompt: ''
 neg_prompt: 'lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry'
-emb_dir: 'embs/'
 N_repeats: 1
-clip_skip: 0
+clip_skip: 1
 clip_final_norm: True
-bs: 4
+bs: 1
 num: 1
 seed: null
 dtype: 'fp16'
@@ -42,10 +44,35 @@ interface:
 
 infer_args:
   width: 512
-  height: 512
+  height: 640
   guidance_scale: 7.5
-  num_inference_steps: 50
+  num_inference_steps: 25
 
-new_components: {}
+new_components:
+  scheduler:
+    _target_: diffusers.EulerAncestralDiscreteScheduler # change Sampler
+    beta_start: 0.00085
+    beta_end: 0.012
+    beta_schedule: 'scaled_linear'
 
-merge: null
+merge:
+  plugin_cfg: loha.yaml
+  alpha: 1
+
+  group_unet:
+    type: 'unet'
+    base_model_alpha: 1.0
+    plugin:
+      loha:
+        path: '${.....exp_dir}/ckpts/unet-${.....model_steps}.safetensors'
+        alpha: ${....alpha}
+        layers: 'all'
+
+  group_TE:
+    type: 'TE'
+    base_model_alpha: 1.0
+    plugin:
+      loha:
+        path: '${.....exp_dir}/ckpts/text_encoder-${.....model_steps}.safetensors'
+        alpha: ${....alpha}
+        layers: 'all'

@@ -1,4 +1,4 @@
-# Anime Dataset Pipeline
+# Anime2SD
 
 A 99% automatized pipeline to construct training set from anime and more for text-to-image model training
 
@@ -97,7 +97,8 @@ cd waifuc && pip install . && cd ..
 # cd waifuc ; pip install . ; cd . for powershell
 ```
 
-**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpeg from the command line (ideally with cuda support) for this stage.**
+**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpeg from the command line (ideally with cuda support) for this stage.**  
+**python >= 3.11.0 is not yet suppoted due to the use of the libtorrent library**
 
 ** While I personally work on Linux, others have successfully run the scripts on Windows.
 
