@@ -78,28 +78,23 @@ The script performs all the following automatically (note that the docs are not 
 
 ## Installation
 
-Clone this directory and install dependencies with
-```bash
-git clone https://github.com/cyber-meow/anime_screenshot_pipeline
-cd anime_screenshot_pipeline
-git submodule update --init --recursive
+1. Clone this directory
+    ```bash
+    git clone https://github.com/cyber-meow/anime_screenshot_pipeline
+    cd anime_screenshot_pipeline
+    ```
+    
+2. Run the installation script `install.sh` or `install.bat` in terminal depending on your operating system
+3. Don't forget to activate the environment before running the main script
 
-# Use venv, conda or whatever you like here
-python -m venv venv
-source venv/bin/activate  # Syntax changes according to OS
-
-pip3 install torch torchvision torchaudio \
-    --index-url https://download.pytorch.org/whl/cu118
-pip install -r requirements.txt
-cd waifuc && pip install . && cd ..
-# cd waifuc ; pip install . ; cd . for powershell
-```
-
-**The first stage of the process uses [ffmpeg](https://ffmpeg.org/) from command line. Please make sure you can run ffmpeg from the command line (ideally with cuda support) for this stage.**
-
-:warning: onnxruntime-gpu uses cuda 11.8; if you want to use onnx with gpu make sure cuda 11.8 is installed and can be found on path  
-:warning: python >= 3.11.0 is not yet supported due to the use of the libtorrent library
+**Additional Steps and Known Issues**
  
+- The first stage of the `screenshots` pipeline uses [ffmpeg](https://ffmpeg.org/) from command line. You can install it with
+    - Ubuntu: `sudo apt update && sudo apt install ffmpeg`
+    - Windows: `choco install ffmpeg`provided that [Chocolatey](https://chocolatey.org/install) is installed
+- If you want to use onnx with gpu make sure cuda 11.8 is properly installed as [onnxruntime-gpu 1.16 uses cuda 11.8](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements)
+- python >= 3.11.0 is not yet supported due to the use of the libtorrent library
+- Anime downloading is not working on Windows again due to the use of libtorrent library: https://github.com/arvidn/libtorrent/issues/6689
 
 
 ## Change Logs
