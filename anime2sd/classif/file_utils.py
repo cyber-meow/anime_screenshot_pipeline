@@ -11,11 +11,11 @@ import numpy as np
 from imgutils.metrics import ccip_extract_feature
 
 from ..basics import (
-    random_string,
     get_images_recursively,
     get_corr_meta_names,
     get_corr_ccip_names,
     get_default_metadata,
+    random_string,
 )
 from ..character import Character
 

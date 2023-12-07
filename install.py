@@ -38,11 +38,13 @@ def is_installed(package):
 
 def prepare_environment():
     # Install PyTorch
+    # Use cuda 11.8 here for consistency with onnxruntime but that
+    # does not really matter since they use cuda from different places anyway
     install_package(
         "torch",
         (
             f"{sys.executable} -m pip install torch torchvision torchaudio "
-            "--index-url https://download.pytorch.org/whl/cu121"
+            "--index-url https://download.pytorch.org/whl/cu118"
         ),
     )
 

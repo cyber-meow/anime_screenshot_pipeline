@@ -10,17 +10,22 @@ printf "\n%s\n" "${delimiter}"
 printf "\e[1m\e[32mPython Environment Setup Script\n\e[0m"
 printf "\n%s\n" "${delimiter}"
 
+
+# Update Git submodules
+printf "\e[1m\e[34mUpdating Git submodules...\e[0m\n"
+git submodule update --init --recursive
+if [ $? -ne 0 ]; then
+    printf "\e[1m\e[31mERROR: Failed to update Git submodules.\e[0m\n"
+    exit 1
+fi
+
+
 # Check if the script is being run as root
 if [[ $(id -u) -eq 0 ]]; then
     printf "\e[1m\e[31mERROR: This script should not be run as root.\e[0m\n"
     exit 1
 fi
 
-# Check for 32-bit OS
-if [[ $(getconf LONG_BIT) = 32 ]]; then
-    printf "\e[1m\e[31mERROR: Unsupported 32-bit OS.\e[0m\n"
-    exit 1
-fi
 
 # Prompt user for environment setup choice
 echo "Select environment setup:"
@@ -110,6 +115,7 @@ case $env_choice in
 esac
 
 printf "\e[1m\e[32mEnvironment setup complete.\e[0m\n"
+printf "\n%s\n" "${delimiter}"
 
 # Run the install.py script and check for errors
 if ! ${python_cmd} install.py; then
@@ -118,14 +124,31 @@ if ! ${python_cmd} install.py; then
 fi
 
 printf "\e[1m\e[32mInstallation complete.\e[0m\n"
+printf "\n%s\n" "${delimiter}"
+
+
+# Add notices at the end of the script
+if [ $? -eq 0 ]; then
+    printf "\e[1m\e[33mNOTICE:\e[0m If you want to run frame extraction (stage 1 of the 'screenshots' pipeline), "
+    printf "please make sure ffmpeg is installed and can be run from the command line.\n"
+    printf "\e[1m\e[33mOn Ubuntu, run:\e[0m sudo apt update && sudo apt install ffmpeg\n\n"
+
+    printf "\e[1m\e[33mNOTICE:\e[0m If you want to use onnxruntime on GPU, "
+    printf "please make sure that CUDA 11.8 toolkit is installed and can be found on LD_LIBRARY_PATH\n"
+    printf "\e[1m\e[33mFor installation, go to:\e[0m https://developer.nvidia.com/cuda-11-8-0-download-archive\n"
+fi
+printf "\n%s\n" "${delimiter}"
+
 
 # Provide instructions based on the chosen environment setup
 case $env_choice in
     1)
         printf "\e[1m\e[32mTo activate the venv environment, run:\e[0m source venv/bin/activate\n"
+        printf "\n%s\n" "${delimiter}"
         ;;
     2)
         printf "\e[1m\e[32mTo activate the conda environment, run:\e[0m conda activate anime2sd\n"
+        printf "\n%s\n" "${delimiter}"
         ;;
     3)
         # No additional instructions needed for existing environment

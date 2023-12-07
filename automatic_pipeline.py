@@ -677,5 +677,6 @@ if __name__ == "__main__":
             )
         dst_folder_set.add(dst_folder)
 
+    # TODO: there is some logger issue, no logging to stdout from stage 6 for example
     logging.getLogger().setLevel(logging.INFO)
     asyncio.run(main(configs))
