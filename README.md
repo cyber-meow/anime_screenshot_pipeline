@@ -1,6 +1,6 @@
 # Anime2SD
 
-A 99% automatized pipeline to construct training set from anime and more for text-to-image model training
+**A 99% automatized pipeline to construct training set from anime and more for text-to-image model training**
 
 Demonstration: [https://youtu.be/-Nzj6SEU9XY?si=8-o9vN6ToTRTeGea](https://youtu.be/-Nzj6SEU9XY?si=8-o9vN6ToTRTeGea)
 
@@ -83,8 +83,8 @@ The script performs all the following automatically (note that the docs are not 
     git clone https://github.com/cyber-meow/anime_screenshot_pipeline
     cd anime_screenshot_pipeline
     ```
-    
-2. Run the installation script `install.sh` or `install.bat` in terminal depending on your operating system
+
+2.  Depending on your operating system, run either `install.sh` or `install.bat` in terminal
 3. Don't forget to activate the environment before running the main script
 
 **Additional Steps and Known Issues**
@@ -92,7 +92,7 @@ The script performs all the following automatically (note that the docs are not 
 - The first stage of the `screenshots` pipeline uses [ffmpeg](https://ffmpeg.org/) from command line. You can install it with
     - Ubuntu: `sudo apt update && sudo apt install ffmpeg`
     - Windows: `choco install ffmpeg`provided that [Chocolatey](https://chocolatey.org/install) is installed
-- If you want to use onnx with gpu make sure cuda 11.8 is properly installed as [onnxruntime-gpu 1.16 uses cuda 11.8](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements)
+- If you want to use onnx with gpu, make sure cuda 11.8 is properly installed as [onnxruntime-gpu 1.16 uses cuda 11.8](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements) 
 - python >= 3.11.0 is not yet supported due to the use of the libtorrent library
 - Anime downloading is not working on Windows again due to the use of libtorrent library: https://github.com/arvidn/libtorrent/issues/6689
 
@@ -151,3 +151,4 @@ Contributions are welcome
 - The new workflow is largely inspired by the fully automatic procedure for single character of [narugo1992](https://github.com/narugo1992) and is largely based on the library [waifuc](https://github.com/deepghs/waifuc)
 - The [tag_filtering/overlap_tags.json](tag_filtering/overlap_tags.json) file is provided by gensen2ee
 - See the [old readme](scripts_v1/README.md) as well
+
