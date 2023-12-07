@@ -1,7 +1,7 @@
 # General Configuration
 [general]
 # Directory containing source files
-src_dir = "data/intermediate/screenshots/raw"
+src_dir = "data/intermediate/screenshots/animes"
 # Directory to save output files
 dst_dir = "data"
 # Extra path component to add between dst_dir/[training|intermediate] and image type

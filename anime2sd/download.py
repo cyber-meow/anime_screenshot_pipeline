@@ -2,7 +2,6 @@ import logging
 from typing import List, Dict, Optional, Union
 
 from pynyaasi.nyaasi import NyaaSiClient
-from torrentp import TorrentDownloader
 
 from waifuc.action import (
     ModeConvertAction,
@@ -58,6 +57,9 @@ def download_animes(
         logger (Optional[logging.Logger]):
             The logger to use. Defaults to None which uses the default logger.
     """
+    # Hide import in function since it does not work on Windows
+    from torrentp import TorrentDownloader
+
     if logger is None:
         logger = logging.getLogger()
     if isinstance(anime_names, str):

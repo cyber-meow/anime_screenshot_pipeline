@@ -1,3 +1,6 @@
+import re
+
+
 class Character(object):
     """
     Represents a character with various attributes including name, appearance,
@@ -112,6 +115,21 @@ class Character(object):
             extra_embeddings=extra_embeddings,
         )
 
+    @staticmethod
+    def _sanitize_path_component(component: str) -> str:
+        """
+        Sanitizes inidividual names to make them compatible with Windows file system.
+
+        Args:
+            component (str): The path component to be sanitized.
+
+        Returns:
+            str: A sanitized version of the path component.
+        """
+        # Replace invalid characters with an underscore
+        invalid_chars = r'[<>:"/\\?*]'
+        return re.sub(invalid_chars, "_", component)
+
     def to_string(self, inner_sep="+", outer_sep="|", caption_style=False):
         """Gets the text representation of the character
 
@@ -151,7 +169,7 @@ class Character(object):
             while elements and elements[-1] == "none":
                 elements.pop()
 
-        return outer_sep.join(elements)
+        return self._sanitize_path_component(outer_sep.join(elements))
 
     def __hash__(self):
         return hash(
