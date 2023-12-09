@@ -5,8 +5,12 @@ import shutil
 import logging
 from tqdm import tqdm
 
-from anime2sd.basics import get_images_recursively, get_files_recursively
-from anime2sd.basics import get_corr_meta_names
+from anime2sd.basics import (
+    get_images_recursively,
+    get_files_recursively,
+    get_corr_meta_names,
+    sanitize_path,
+)
 from anime2sd.character import Character
 
 
@@ -54,13 +58,19 @@ def move_img_with_aux(img_path, dst_dir, aux_dict):
 
 def get_folder_name(folder_type, info_dict, max_character_number) -> str:
     valid_folder_types = [
-        "n_people",
+        # "n_people",
         "n_characters",
         "character",
+        "image_type",
+        "character_string",
     ]
     assert folder_type in valid_folder_types, f"invalid folder type {folder_type}"
     if folder_type == "n_people":
-        count = info_dict["n_people"]
+        count = info_dict.get("n_people", None)
+        if count is None:
+            return "none"
+        if count >= max_character_number:
+            return f"{max_character_number}+_people"
         suffix = "person" if count == 1 else "people"
         return f"{count}_{suffix}"
     elif folder_type == "n_characters":
@@ -75,11 +85,13 @@ def get_folder_name(folder_type, info_dict, max_character_number) -> str:
             return f"{max_character_number}+_characters"
         suffix = "character" if n_character == 1 else "characters"
         return f"{n_character}_{suffix}"
-    elif folder_type == "character":
-        characters = [
-            Character.from_string(character).character_name
-            for character in info_dict.get("characters", [])
-        ]
+    elif folder_type in ["character", "character_string"]:
+        characters = info_dict.get("characters", [])
+        if folder_type == "character":
+            characters = [
+                Character.from_string(character).character_name
+                for character in info_dict.get("characters", [])
+            ]
         characters = sorted(list(set(characters)))
         if len(characters) == 0:
             return "character_others"
@@ -89,6 +101,11 @@ def get_folder_name(folder_type, info_dict, max_character_number) -> str:
             return "character_others"
         else:
             return character_folder.replace(".", "")
+    elif folder_type == "image_type":
+        image_type = info_dict.get("type", None)
+        if image_type is None:
+            return "none"
+        return image_type
     # This cannot happen
     else:
         exit(1)
@@ -104,9 +121,9 @@ def get_dst_dir(info_dict, dst_dir, arrange_format, max_character_number):
         folder_name = get_folder_name(folder_type, info_dict, max_character_number)
         dst_dir = os.path.join(dst_dir, folder_name)
         if folder_type == "character":
-            character_folder = folder_name
+            character_folder = sanitize_path(folder_name)
 
-    return dst_dir, character_folder
+    return sanitize_path(dst_dir), character_folder
 
 
 def count_n_images(filenames):
@@ -122,6 +139,7 @@ def count_n_images(filenames):
     return count
 
 
+# TODO: should merge at other level as well
 def merge_folder(character_comb_dict, min_images_per_comb, aux_dict, logger):
     if logger is None:
         logger = logging.getLogger()
