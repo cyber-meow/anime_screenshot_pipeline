@@ -47,6 +47,21 @@ class Character(object):
         self.embedding_name = "_".join(self.embedding_name.split())
         self.extra_embeddings = extra_embeddings if extra_embeddings is not None else []
 
+    @staticmethod
+    def _sanitize_path_component(component: str) -> str:
+        """
+        Sanitizes inidividual names to make them compatible with Windows file system.
+
+        Args:
+            component (str): The path component to be sanitized.
+
+        Returns:
+            str: A sanitized version of the path component.
+        """
+        # Replace invalid characters with an underscore
+        invalid_chars = r'[<>:"/\\?*]'
+        return re.sub(invalid_chars, "_", component)
+
     @classmethod
     def _parse_attribute(cls, attribute_str, inner_sep, extra_embeddings):
         """
@@ -66,8 +81,9 @@ class Character(object):
         items = attribute_str.split(inner_sep)
         parsed_items = []
         for item in items:
+            item = cls._sanitize_path_component(item)
             if item.startswith("_"):
-                extra_embeddings.append(item[1:])
+                extra_embeddings.append(item)
             parsed_items.append(item)
         return parsed_items
 
@@ -86,9 +102,9 @@ class Character(object):
         """
         parts = text.split(outer_sep)
         extra_embeddings = []
-        character_name = parts[0]
+        character_name = cls._sanitize_path_component(parts[0])
         if len(parts) > 1 and parts[1].lower() != "none":
-            appearance = parts[1]
+            appearance = cls._sanitize_path_component(parts[1])
         else:
             appearance = None
 
@@ -114,21 +130,6 @@ class Character(object):
             extra_features,
             extra_embeddings=extra_embeddings,
         )
-
-    @staticmethod
-    def _sanitize_path_component(component: str) -> str:
-        """
-        Sanitizes inidividual names to make them compatible with Windows file system.
-
-        Args:
-            component (str): The path component to be sanitized.
-
-        Returns:
-            str: A sanitized version of the path component.
-        """
-        # Replace invalid characters with an underscore
-        invalid_chars = r'[<>:"/\\?*]'
-        return re.sub(invalid_chars, "_", component)
 
     def to_string(self, inner_sep="+", outer_sep="|", caption_style=False):
         """Gets the text representation of the character
@@ -169,7 +170,7 @@ class Character(object):
             while elements and elements[-1] == "none":
                 elements.pop()
 
-        return self._sanitize_path_component(outer_sep.join(elements))
+        return outer_sep.join(elements)
 
     def __hash__(self):
         return hash(
