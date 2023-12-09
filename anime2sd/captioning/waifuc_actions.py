@@ -44,8 +44,8 @@ class TagPruningAction(ProcessAction):
             tags = item.meta["tags"]
         else:
             self.logger.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
+                f"{self.tags_attribute} unfound "
+                f"for {item.meta['current_path']}, skip"
             )
             return item
         # TODO: We should not deal with dictionary type within functions
@@ -92,8 +92,8 @@ class CoreCharacterTagPruningAction(ProcessAction):
             tags = item.meta["tags"]
         else:
             self.logger.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
+                f"{self.tags_attribute} unfound "
+                f"for {item.meta['current_path']}, skip"
             )
             return item
         # Only pruned character related tags for character images
@@ -139,8 +139,8 @@ class TagSortingAction(ProcessAction):
             tags = item.meta["tags"]
         else:
             self.logger.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
+                f"{self.tags_attribute} unfound "
+                f"for {item.meta['current_path']}, skip"
             )
             return item
         tags = sort_tags(tags, self.sort_mode)
@@ -171,8 +171,8 @@ class TagRemovingUnderscoreAction(ProcessAction):
             tags = item.meta["tags"]
         else:
             self.logger.warning(
-                f"{self.tags_attribute} unfound ",
-                f"for {item.meta['current_path']}, skip",
+                f"{self.tags_attribute} unfound "
+                f"for {item.meta['current_path']}, skip"
             )
             return item
         if isinstance(tags, list):

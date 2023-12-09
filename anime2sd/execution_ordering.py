@@ -20,16 +20,16 @@ def setup_logging(log_dir: str, log_prefix: str, logger_name: str):
     for handler in original_handlers:
         logger.removeHandler(handler)
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
     # Stop propagation to parent loggers
-    # logger.propagate = False
+    logger.propagate = False
 
     # Create console handler and set level to info
-    # ch = logging.StreamHandler()
-    # ch.setLevel(logger.info)
-    # logger.addHandler(ch)
-    # ch.setFormatter(formatter)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+    formatter = logging.Formatter(f"{log_prefix} - %(levelname)s - %(message)s")
+    ch.setFormatter(formatter)
 
     # Create file handler and set level to info
     if log_dir.lower() != "none":
@@ -40,6 +40,7 @@ def setup_logging(log_dir: str, log_prefix: str, logger_name: str):
         fh = logging.FileHandler(log_file)
         fh.setLevel(logging.INFO)
         logger.addHandler(fh)
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         fh.setFormatter(formatter)
     return logger
 

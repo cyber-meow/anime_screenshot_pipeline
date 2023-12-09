@@ -117,7 +117,7 @@ def get_repeat(
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
         logger.addHandler(fh)
-        logger.propagate = False
+        # logger.propagate = False
 
     n_images_total = 0
     n_images_virtual_total = 0
@@ -145,7 +145,7 @@ def get_repeat(
         logger.handlers = []  # Removing existing handlers
         for handler in original_handlers:
             logger.addHandler(handler)
-        logger.propagate = True
+        # logger.propagate = True
         logger.info(f"Number of images: {n_images_totol}")
         logger.info(f"Virtual dataset size: {n_images_virtual_total}")
         time.sleep(1)

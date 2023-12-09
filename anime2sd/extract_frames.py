@@ -119,7 +119,7 @@ def extract_and_remove_similar(
         # Create the output directory
         dst_ep_dir = os.path.join(dst_dir, filename_without_ext)
         os.makedirs(dst_ep_dir, exist_ok=True)
-        file_pattern = os.path.join(dst_ep_dir, f"{prefix_anime}EP{i+ep_num}_%d.png")
+        file_pattern = os.path.join(dst_ep_dir, f"{prefix_anime}EP{ep_num}_%d.png")
 
         # Run ffmpeg on the file, saving the output to the output directory
         ffmpeg_command = get_ffmpeg_command(file, file_pattern, extract_key, logger)
