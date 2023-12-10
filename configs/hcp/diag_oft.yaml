@@ -36,7 +36,7 @@ plugin_unet:
     _target_: lycoris.hcp.DiagOFTBlock.wrap_model
     _partial_: True
     rescaled: True
-    lr: 5e-5
+    lr: 2e-5
     dim: 32
     layers:
       - 're:.*\.attn.?$'
@@ -47,7 +47,7 @@ plugin_TE:
     _target_: lycoris.hcp.DiagOFTBlock.wrap_model
     _partial_: True
     rescaled: True
-    lr: 6e-5
+    lr: 5e-7
     dim: 32
     layers:
       - 're:.*self_attn$'

@@ -558,7 +558,7 @@ def run_stage(config, stage_num, logger):
 async def run_pipeline(config, config_index, execution_config, stage_events, executor):
     logger = setup_logging(
         config.log_dir,
-        f"{config.pipeline_type}_{config.log_prefix}",
+        f"{config.image_type}_{config.log_prefix}",
         f"pipeline_{config_index}",
     )
     # Loop through the stages and execute them

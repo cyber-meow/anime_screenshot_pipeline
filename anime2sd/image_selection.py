@@ -73,7 +73,11 @@ def initialize_character_for_original(
 
     # Initialize characters list if the path hasn't been encountered yet
     if original_img_path not in encountered_paths.keys():
-        if "characters" not in orig_meta_data or overwrite_characters:
+        if (
+            "characters" not in orig_meta_data
+            or orig_meta_data["characters"] == []
+            or overwrite_characters
+        ):
             encountered_paths[original_img_path] = True
             orig_meta_data["characters"] = []
             updated = True
