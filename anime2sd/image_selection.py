@@ -64,6 +64,10 @@ def initialize_character_for_original(
         character_names (set):
             Set of character names obtained from the classified directory
 
+    Returns:
+        str: The path to the updated metadata file.
+        dict: The updated metadata.
+
     Raises:
         IOError: If there is an issue in reading or writing the metadata file.
     """
@@ -98,6 +102,8 @@ def initialize_character_for_original(
         with open(original_meta_path, "w") as orig_meta_file:
             json.dump(orig_meta_data, orig_meta_file, indent=4)
 
+    return original_meta_path, orig_meta_data
+
 
 def update_character_for_original(
     character: Character,
@@ -131,12 +137,10 @@ def update_character_for_original(
     Raises:
         IOError: If there is an issue in reading or writing the metadata file.
     """
-    original_meta_path, _ = get_corr_meta_names(original_img_path)
-    orig_meta_data = get_or_generate_metadata(original_img_path, warn=False)
     updated = False
     character_string = character.to_string()
 
-    initialize_character_for_original(
+    original_meta_path, orig_meta_data = initialize_character_for_original(
         original_img_path,
         encountered_paths,
         overwrite_characters,
