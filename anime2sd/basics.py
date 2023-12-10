@@ -50,6 +50,49 @@ def random_string(length=6):
     return "".join(random.choice(string.ascii_letters) for _ in range(length))
 
 
+def sanitize_path_component(component: str) -> str:
+    """
+    Sanitizes an individual component of a file path to be compatible
+    with Windows file system.
+
+    Args:
+        component (str): The path component to be sanitized.
+
+    Returns:
+        str: A sanitized version of the path component.
+    """
+    # replace invalid characters with an underscore
+    invalid_chars = r'[<>:"/\\|?*]'
+    return re.sub(invalid_chars, "_", component)
+
+
+def sanitize_path(path: str) -> str:
+    """
+    Sanitizes a file path by sanitizing each component of the path,
+    except for the drive letter on Windows.
+
+    Args:
+        path (str): The original file path.
+
+    Returns:
+        str: A sanitized version of the file path.
+    """
+    # Split the path into components
+    components = path.split(os.path.sep)
+
+    # Special handling for Windows drive letter
+    if len(components) > 1 and re.match(r"^[a-zA-Z]:$", components[0]):
+        drive = components.pop(0)
+        sanitized_components = [drive] + [
+            sanitize_path_component(comp) for comp in components
+        ]
+    else:
+        sanitized_components = [sanitize_path_component(comp) for comp in components]
+
+    # Reassemble the sanitized path
+    return os.path.sep.join(sanitized_components)
+
+
 def remove_empty_folders(path_abs):
     """Remove empty folders recursively.
 
