@@ -452,7 +452,11 @@ def get_unet_te_pairs(files: List[str]) -> Dict[str, Dict[str, str]]:
 
 
 def save_and_print_path(sd, path):
-    ckpt_manager = auto_manager(path)()
+    try:
+        # Old HCP
+        ckpt_manager = auto_manager(path)()
+    except TypeError:
+        ckpt_manager = auto_manager(path)
     os.makedirs(args.dump_path, exist_ok=True)
     ckpt_manager._save_ckpt(sd, save_path=path)
     print("Saved to:", path)
@@ -538,7 +542,11 @@ if __name__ == "__main__":
 
     if args.from_webui:
         for file_path in lora_files:
-            ckpt_manager = auto_manager(file_path)()
+            try:
+                # Old HCP
+                ckpt_manager = auto_manager(file_path)()
+            except TypeError:
+                ckpt_manager = auto_manager(file_path)
             print(f"Converting {file_path}")
             state = ckpt_manager.load_ckpt(file_path, map_location=args.device)
             if args.save_network_type == "base":
@@ -563,7 +571,11 @@ if __name__ == "__main__":
         for name, file_paths in file_pairs.items():
             if file_paths["TE"] and file_paths["unet"]:
                 # Assume here that unet and TE have the same extension
-                ckpt_manager = auto_manager(file_paths["TE"])()
+                try:
+                    # Old HCP
+                    ckpt_manager = auto_manager(file_paths["TE"])()
+                except TypeError:
+                    ckpt_manager = auto_manager(file_paths["TE"])
                 sd_unet = ckpt_manager.load_ckpt(
                     file_paths["unet"], map_location=args.device
                 )
