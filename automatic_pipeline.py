@@ -419,6 +419,7 @@ async def tag_and_caption(
         use_image_type_prob=args.use_image_type_prob,
         use_artist_prob=args.use_artist_prob,
         use_rating_prob=args.use_rating_prob,
+        use_crop_info_prob=args.use_crop_info_prob,
         use_tags_prob=args.use_tags_prob,
     )
 

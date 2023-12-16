@@ -164,7 +164,7 @@ keep_tokens_before = "tags"
 # Captioning Components Configuration
 [captioning_components]
 # Order of captions
-caption_ordering = ["npeople", "character", "copyright", "image_type", "artist", "rating", "tags"]
+caption_ordering = ["npeople", "character", "copyright", "image_type", "artist", "rating", "crop_info", "tags"]
 # Probability to include number of people in captions
 use_npeople_prob = 0
 # Probability to include character info in captions
@@ -177,6 +177,8 @@ use_image_type_prob = 1
 use_artist_prob = 0
 # Probability to include rating info in captions
 use_rating_prob = 1
+# Probability to include crop info in captions
+use_crop_info_prob = 1
 # Probability to include tag info in captions
 use_tags_prob = 1
 

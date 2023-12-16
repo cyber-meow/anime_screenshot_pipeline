@@ -619,12 +619,13 @@ def parse_arguments():
             "image_type",
             "artist",
             "rating",
+            "crop_info",
             "tags",
         ],
         help=(
             "For specifying the order of captions. "
             "Defaults to ['npeople', 'character', 'copyright', "
-            "'image_type', 'artist', 'rating']"
+            "'image_type', 'artist', 'rating', 'crop_info', 'tags']"
         ),
     )
     parser.add_argument(
@@ -710,6 +711,12 @@ def parse_arguments():
         type=float,
         default=1,
         help="Probability to include rating info in captions",
+    )
+    parser.add_argument(
+        "--use_crop_info_prob",
+        type=float,
+        default=1,
+        help="Probability to include crop info in captions",
     )
     parser.add_argument(
         "--use_tags_prob",
