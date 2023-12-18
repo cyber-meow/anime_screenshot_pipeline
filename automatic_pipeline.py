@@ -225,9 +225,7 @@ def crop_characters(args, stage, logger):
     dst_dir = get_and_create_dst_dir(args, "intermediate", "cropped")
     logger.info(f"Cropping individual characters to {dst_dir} ...")
 
-    overwrite_path = args.start_stage == stage and args.overwrite_path
-
-    source = LocalSource(src_dir, overwrite_path=overwrite_path)
+    source = LocalSource(src_dir)
     detect_config_person = {"level": args.detect_level}
     if args.detect_level in ["s", "n"]:
         detect_level_head_halfbody = args.detect_level
@@ -313,10 +311,8 @@ def select_dataset_images(args, stage, logger):
     # Get the path to the image_type subfolder of the training directory
     dst_dir = get_and_create_dst_dir(args, "training")
 
+    # TODO: We may not need overwrite path here anymore
     is_start_stage = args.start_stage == stage
-    if is_start_stage:
-        # rearrange json and ccip in case of manual inspection
-        rearrange_related_files(classified_dir, logger)
     overwrite_path = is_start_stage and args.overwrite_path
 
     if args.filter_again:
@@ -493,11 +489,6 @@ def rearrange(args, stage, logger):
     # Get path to the directiry containing images to be rearranged
     src_dir = get_src_dir(args, stage)
     logger.info(f"Rearranging {src_dir} ...")
-    if args.start_stage == stage and args.load_aux:
-        load_metadata_from_aux(
-            src_dir, args.load_aux, args.save_aux, args.overwrite_path, logger=logger
-        )
-        rearrange_related_files(src_dir, logger)
     arrange_folder(
         src_dir,
         src_dir,
@@ -512,11 +503,6 @@ def balance(args, stage, logger):
     """Compute the repeat for the images in the directory."""
     # Get path to the directiry containing images for which repeat needs to be computed
     src_dir = get_src_dir(args, stage)
-    if args.start_stage == stage and args.load_aux:
-        load_metadata_from_aux(
-            src_dir, args.load_aux, args.save_aux, args.overwrite_path, logger=logger
-        )
-        rearrange_related_files(src_dir, logger)
     logger.info(f"Computing repeat for {src_dir} ...")
     if args.weight_csv is not None:
         weight_mapping = read_weight_mapping(args.weight_csv)
@@ -552,6 +538,19 @@ def run_stage(config, stage_num, logger):
         6: rearrange,
         7: balance,
     }
+
+    src_dir = get_src_dir(config, stage_num)
+    if config.start_stage == stage_num and stage_num >= 1:
+        rearrange_related_files(src_dir, logger)
+        if config.load_aux or config.overwrite_path:
+            save_aux = args.save_aux if stage_num >= 6 else []
+            load_metadata_from_aux(
+                src_dir,
+                config.load_aux,
+                save_aux,
+                config.overwrite_path,
+                logger=logger,
+            )
 
     STAGE_FUNCTIONS[stage_num](config, stage_num, logger)
 

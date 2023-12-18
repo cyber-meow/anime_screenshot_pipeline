@@ -222,17 +222,17 @@ class LocalSource(BaseDataSource):
             except UnidentifiedImageError:
                 continue
 
-            meta = origin_item.meta or {
-                "path": os.path.abspath(file),
-                "group_id": group_name,
-                "filename": os.path.basename(file),
-            }
+            meta = origin_item.meta
             meta["current_path"] = os.path.abspath(file)
             if "path" not in meta or self.overwrite_path:
                 meta["path"] = meta["current_path"]
             if "image_size" not in meta:
                 width, height = origin_item.image.size
                 meta["image_size"] = [width, height]
+            if "filename" not in meta:
+                meta["filename"] = os.path.basename(file)
+            if "group_id" not in meta:
+                meta["group_id"] = group_name
 
             # Load auxiliary data
             file_basename = os.path.splitext(meta["filename"])[0]
