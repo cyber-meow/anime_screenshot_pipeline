@@ -464,10 +464,6 @@ def save_and_print_path(sd, path):
 
 def get_network_types(sd_unet, sd_te):
     network_types = []
-    if sd_unet is None:
-        sd_unet = dict()
-    if sd_te is None:
-        sd_te = dict()
     for network_type in ["lora", "plugin", "base"]:
         if network_type in sd_unet.keys() or network_type in sd_te.keys():
             network_types.append(network_type)
@@ -584,12 +580,12 @@ if __name__ == "__main__":
                 sd_unet = (
                     ckpt_manager.load_ckpt(file_paths["unet"], map_location=args.device)
                     if file_paths["unet"]
-                    else None
+                    else dict()
                 )
                 sd_te = (
                     ckpt_manager.load_ckpt(file_paths["TE"], map_location=args.device)
                     if file_paths["TE"]
-                    else None
+                    else dict()
                 )
                 network_types = get_network_types(sd_unet, sd_te)
                 for network_type in network_types:
