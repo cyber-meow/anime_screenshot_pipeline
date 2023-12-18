@@ -464,8 +464,12 @@ def save_and_print_path(sd, path):
 
 def get_network_types(sd_unet, sd_te):
     network_types = []
+    if sd_unet is None:
+        sd_unet = dict()
+    if sd_te is None:
+        sd_te = dict()
     for network_type in ["lora", "plugin", "base"]:
-        if network_type in sd_unet.keys() and network_type in sd_te.keys():
+        if network_type in sd_unet.keys() or network_type in sd_te.keys():
             network_types.append(network_type)
     return network_types
 
@@ -569,18 +573,23 @@ if __name__ == "__main__":
         file_pairs = get_unet_te_pairs(lora_files)
 
         for name, file_paths in file_pairs.items():
-            if file_paths["TE"] and file_paths["unet"]:
+            if file_paths["TE"] or file_paths["unet"]:
+                file_path = file_paths["TE"] or file_paths["unet"]
                 # Assume here that unet and TE have the same extension
                 try:
                     # Old HCP
-                    ckpt_manager = auto_manager(file_paths["TE"])()
+                    ckpt_manager = auto_manager(file_path)()
                 except TypeError:
-                    ckpt_manager = auto_manager(file_paths["TE"])
-                sd_unet = ckpt_manager.load_ckpt(
-                    file_paths["unet"], map_location=args.device
+                    ckpt_manager = auto_manager(file_path)
+                sd_unet = (
+                    ckpt_manager.load_ckpt(file_paths["unet"], map_location=args.device)
+                    if file_paths["unet"]
+                    else None
                 )
-                sd_te = ckpt_manager.load_ckpt(
-                    file_paths["TE"], map_location=args.device
+                sd_te = (
+                    ckpt_manager.load_ckpt(file_paths["TE"], map_location=args.device)
+                    if file_paths["TE"]
+                    else None
                 )
                 network_types = get_network_types(sd_unet, sd_te)
                 for network_type in network_types:
@@ -597,13 +606,13 @@ if __name__ == "__main__":
                                 sdxl=args.sdxl,
                             )
                         state = base_converter.convert_to_webui(
-                            sd_unet[network_type],
-                            sd_te[network_type],
+                            sd_unet.get(network_type, dict()),
+                            sd_te.get(network_type, dict()),
                         )
                     else:
                         state = lora_converter.convert_to_webui(
-                            sd_unet[network_type],
-                            sd_te[network_type],
+                            sd_unet.get(network_type, dict()),
+                            sd_te.get(network_type, dict()),
                             network_type=network_type,
                             auto_scale_alpha=args.auto_scale_alpha,
                             sdxl=args.sdxl,
