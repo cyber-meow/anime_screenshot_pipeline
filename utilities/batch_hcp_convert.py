@@ -558,13 +558,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    lora_converter = LoraConverter(save_fp16=args.save_fp16)
-    base_converter = None
-
-    lora_files = gather_files_from_list(
-        args.network_path, args.network_ext, args.recursive
-    )
-
     # Deprecation warnings
     if args.dump_path is not None:
         warnings.warn(
@@ -596,6 +589,13 @@ if __name__ == "__main__":
             UserWarning,
         )
         args.dst_dir = "converted"
+
+    lora_converter = LoraConverter(save_fp16=args.save_fp16)
+    base_converter = None
+
+    lora_files = gather_files_from_list(
+        args.network_path, args.network_ext, args.recursive
+    )
 
     if args.from_webui:
         for file_path in lora_files:

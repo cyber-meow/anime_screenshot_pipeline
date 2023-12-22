@@ -268,10 +268,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    network_paths = gather_files_from_list(
-        args.network_path, args.network_ext, args.recursive
-    )
-
     # Deprecation warnings
     if args.lora_path is not None:
         warnings.warn(
@@ -287,6 +283,10 @@ if __name__ == "__main__":
             DeprecationWarning,
         )
         args.network_ext = args.lora_ext
+
+    network_paths = gather_files_from_list(
+        args.network_path, args.network_ext, args.recursive
+    )
 
     if args.from_bundle:
         dst_dir = "bundles_unpack" if args.dst_dir is None else args.dst_dir
