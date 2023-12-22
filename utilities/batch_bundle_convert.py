@@ -145,7 +145,7 @@ def gather_files_from_list(
     return files
 
 
-def get_lora_embs_step_correspondance(lora_files: List[str], emb_files: List[str]):
+def get_lora_embs_step_correspondence(lora_files: List[str], emb_files: List[str]):
     """Associate LoRA model files with embedding files based on their step count.
 
     This function takes in lists of LoRA file paths and embedding file paths,
@@ -245,7 +245,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             "Pack all embeddings to all LoRA files"
-            " instead of using step correspondance."
+            " instead of using step correspondence."
         ),
     )
     parser.add_argument("--verbose", default=1, type=int, help="Verbosity level.")
@@ -315,7 +315,7 @@ if __name__ == "__main__":
             for i, network_path in enumerate(network_paths):
                 lora_embs_dict[i] = {"lora": network_path, "embs": emb_paths}
         else:
-            lora_embs_dict = get_lora_embs_step_correspondance(network_paths, emb_paths)
+            lora_embs_dict = get_lora_embs_step_correspondence(network_paths, emb_paths)
         for _, lora_embs_pair in lora_embs_dict.items():
             network_path = lora_embs_pair["lora"]
             if args.verbose >= 1:

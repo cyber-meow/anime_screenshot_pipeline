@@ -54,6 +54,9 @@ accelerate launch -m hcpdiff.train_ac_single \
 - To modify training and dataset parameters, you can modify either directly the files in `hcp_configs` before running the script or modify `dataset.yaml` and `lora_conventional.yaml` (or other config file you use) in `/path/to/training_config_dir` after running the script.
 - You should not move the generated config files because some absolute paths are used.
 
+### Post training conversion
+After training, the output files from HCP diffusion cannot be readily used by [a1111/sd-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui). For conversion please refer to [Conversion_scripts.md](Conversion_scripts.md).
+
 
 ## Training with ...
 
