@@ -420,6 +420,16 @@ def parse_arguments():
         ),
     )
     parser.add_argument(
+        "--no_cropped_in_dataset",
+        action="store_true",
+        help="Do not include cropped images in dataset",
+    )
+    parser.add_argument(
+        "--no_original_in_dataset",
+        action="store_true",
+        help="Do not include original images in dataset",
+    )
+    parser.add_argument(
         "--no_resize", action="store_true", help="Do not perform image resizing"
     )
     parser.add_argument(

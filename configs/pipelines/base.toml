@@ -76,6 +76,10 @@ same_threshold_abs = 20
 [dataset_construction]
 # Overwrite existing trigger word csv
 overwrite_emb_init_info = false
+# Do not include cropped images in dataset
+no_cropped_in_dataset = false
+# Do not include original images in dataset
+no_original_in_dataset = false
 # Do not perform image resizing
 no_resize = false
 # Max image size that shorter edge aligns to

@@ -594,6 +594,9 @@ def select_dataset_images_from_directory(
     # For 3 stage cropping
     use_3stage_crop: bool,
     detect_level: str,
+    # Determine what images to be included in dataset
+    no_cropped_in_dataset: bool,
+    no_original_in_dataset: bool,
     # For resizing/copying images to destination
     max_size: int,
     image_save_ext: str,
@@ -623,6 +626,8 @@ def select_dataset_images_from_directory(
         use_3stage_crop (bool): Flag to use three-stage cropping.
         detect_level (str): Detection level for cropping.
         overwrite_path (bool): Flag to overwrite existing paths in metadata.
+        no_cropped_in_dataset (bool): Flag to exclude cropped images in dataset.
+        no_original_in_dataset (bool): Flag to exclude original images in dataset.
         max_size (int): Maximum size for image resizing.
         image_save_ext (str): Extension for saving images.
         to_resize (bool): Flag to resize images.
@@ -635,7 +640,6 @@ def select_dataset_images_from_directory(
         ValueError: If there is an error in processing the images.
         IOError: If there is an error in reading or writing images.
     """
-    # [Function body]
 
     overwrite_uncropped = (
         pipeline_type == "screenshots" or character_overwrite_uncropped
@@ -681,9 +685,15 @@ def select_dataset_images_from_directory(
         ).export(SaveExporter(classified_dir, in_place=True))
 
     n_reg = n_anime_reg if pipeline_type == "screenshots" else 0
+
+    source_dirs = []
+    if not no_cropped_in_dataset:
+        source_dirs.append(classified_dir)
+    if not no_original_in_dataset:
+        source_dirs.append(full_dir)
     # select images, resize, and save to training
     resize_character_images(
-        [classified_dir, full_dir],
+        source_dirs,
         dst_dir,
         max_size=max_size,
         ext=image_save_ext,

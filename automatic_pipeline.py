@@ -217,6 +217,8 @@ def extract_frames_and_or_remove_similar(args, stage, logger):
 
 
 # TODO: Avoid cropping for already cropped data
+# Better: add argument "--ignore_images_from_dir" so that images from this directory
+# will not be repeteadly downloaded or processed at stage 0-4.
 def crop_characters(args, stage, logger):
     """Crops individual characters from images in the source directory."""
     # Get the path to the source directory containing the images to crop from
@@ -342,6 +344,9 @@ def select_dataset_images(args, stage, logger):
         # For 3 stage cropping
         use_3stage_crop=args.use_3stage_crop == 4,
         detect_level=args.detect_level,
+        # Determine what images to be included in dataset
+        no_cropped_in_dataset=args.no_cropped_in_dataset,
+        no_original_in_dataset=args.no_original_in_dataset,
         # For resizing/copying images to destination
         max_size=args.max_size,
         image_save_ext=args.image_save_ext,
