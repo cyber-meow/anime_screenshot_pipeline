@@ -112,6 +112,35 @@ def parse_arguments():
         ),
     )
 
+    # Loading and saving of metadata using auxiliary files
+    parser.add_argument(
+        "--load_grabber_ext",
+        type=str,
+        default=None,
+        help=(
+            "Extension of the grabber information files to load. "
+            "Attributes from this file would overwrite those loaded from --load_aux."
+        ),
+    )
+    parser.add_argument(
+        "--load_aux",
+        type=str,
+        nargs="*",
+        # default=['processed_tags', 'characters'],
+        help="List of auxiliary attributes to load"
+        # "Default is processed_tags and characters. "
+        "E.g., --load_aux attr1 attr2 attr3",
+    )
+    parser.add_argument(
+        "--save_aux",
+        type=str,
+        nargs="*",
+        # default=['processed_tags', 'characters'],
+        help="List of auxiliary attributes to save; only used at stage 0 and 5"
+        # "Default is processed_tags and characters. "
+        "E.g., --save_aux attr1 attr2 attr3",
+    )
+
     # Arguments for downloading animes from nyaa.si
     parser.add_argument(
         "--anime_name",
@@ -359,9 +388,9 @@ def parse_arguments():
         help=(
             "Whether we try to attribute label when multiple candidates are available "
             "when performing classification with metadata character information. "
-            "This typically coressponds to the case where we have one character that "
+            "This typically corresponds to the case where we have one character that "
             "always appear with another specific character, or to some specific form "
-            "of a character that is recognized as character tag in Danbooru."
+            "of a character that is recognized as a character tag in Danbooru."
         ),
     )
     parser.add_argument(
@@ -420,6 +449,16 @@ def parse_arguments():
         ),
     )
     parser.add_argument(
+        "--no_cropped_in_dataset",
+        action="store_true",
+        help="Do not include cropped images in dataset",
+    )
+    parser.add_argument(
+        "--no_original_in_dataset",
+        action="store_true",
+        help="Do not include original images in dataset",
+    )
+    parser.add_argument(
         "--no_resize", action="store_true", help="Do not perform image resizing"
     )
     parser.add_argument(
@@ -439,26 +478,6 @@ def parse_arguments():
     )
     parser.add_argument(
         "--filter_again", action="store_true", help="Filter repeated images again here"
-    )
-
-    # Loading and saving of metadata for tagging and captioning stage
-    parser.add_argument(
-        "--load_aux",
-        type=str,
-        nargs="*",
-        # default=['processed_tags', 'characters'],
-        help="List of auxiliary attributes to load. "
-        # "Default is processed_tags and characters. "
-        "E.g., --load_aux attr1 attr2 attr3",
-    )
-    parser.add_argument(
-        "--save_aux",
-        type=str,
-        nargs="*",
-        # default=['processed_tags', 'characters'],
-        help="List of auxiliary attributes to save. "
-        # "Default is processed_tags and characters. "
-        "E.g., --save_aux attr1 attr2 attr3",
     )
 
     # Arguments for tagging
@@ -538,6 +557,17 @@ def parse_arguments():
             "Default is 'character_core'."
         ),
     )
+    parser.add_argument(
+        "--drop_difficulty",
+        type=int,
+        default=2,
+        help=(
+            "The difficulty level up to which tags should be dropped. Tags with "
+            "difficulty less than this value will be added to the drop lists. "
+            "0: nothing is dropped; 1: human-related tag; 2: furry, demon, mecha, etc."
+            "Defaults to 2."
+        ),
+    )
 
     # Specific arguments for core tag processing
     parser.add_argument(
@@ -561,20 +591,9 @@ def parse_arguments():
         help="Use existing core tag json instead of recomputing them.",
     )
     parser.add_argument(
-        "--drop_difficulty",
-        type=int,
-        default=2,
-        help=(
-            "The difficulty level up to which tags should be dropped. Tags with "
-            "difficulty less than this value will be added to the drop lists. "
-            "0: nothing is dropped; 1: human-related tag; 2: furry, demon, mecha, etc."
-            "Defaults to 2."
-        ),
-    )
-    parser.add_argument(
         "--drop_all_core",
         action="store_true",
-        help=("Whether to drop all core tags or not. Overwrites --drop_difficulty."),
+        help="Whether to drop all core tags or not. Overrides --drop_difficulty.",
     )
     parser.add_argument(
         "--emb_min_difficulty",
@@ -599,7 +618,7 @@ def parse_arguments():
         action="store_true",
         help=(
             "Whether to use all core tags for embedding initialization. "
-            "Overwrites --emb_min_difficulty and --emb_max_difficulty."
+            "Overrides --emb_min_difficulty and --emb_max_difficulty."
         ),
     )
     parser.add_argument(
@@ -619,12 +638,13 @@ def parse_arguments():
             "image_type",
             "artist",
             "rating",
+            "crop_info",
             "tags",
         ],
         help=(
             "For specifying the order of captions. "
             "Defaults to ['npeople', 'character', 'copyright', "
-            "'image_type', 'artist', 'rating']"
+            "'image_type', 'artist', 'rating', 'crop_info', 'tags']"
         ),
     )
     parser.add_argument(
@@ -712,6 +732,12 @@ def parse_arguments():
         help="Probability to include rating info in captions",
     )
     parser.add_argument(
+        "--use_crop_info_prob",
+        type=float,
+        default=1,
+        help="Probability to include crop info in captions",
+    )
+    parser.add_argument(
         "--use_tags_prob",
         type=float,
         default=1,
@@ -746,7 +772,7 @@ def parse_arguments():
         type=int,
         default=10,
         help=(
-            "Put others instead of character name if number of images "
+            "Put 'character_others' instead of character name if number of images "
             "of the character combination is smaller then this number"
         ),
     )

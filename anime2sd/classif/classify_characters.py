@@ -262,8 +262,7 @@ def classify_from_directory(
         * Mapping clusters to characters using reference images (if provided).
         * Using image metadata to determine character labels for clusters
           (if available).
-        * Merging clusters based on similarity
-          (if no reference images or metadata is available).
+        * Merging reamaining clusters based on similarity.
     5. (Optional) Apply a final filtering step to ensure character consistency.
 
     Args:

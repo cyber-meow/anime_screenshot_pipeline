@@ -7,7 +7,7 @@ Once we go through the pipeline, the dataset is hierarchically organized in `/pa
 
 With `multiply.txt` in each folder, the above structure is directly compatible with [EveryDream2](https://github.com/victorchall/EveryDream2trainer). 
 
-## Training with kohya trainer
+## Training with Kohya Trainer
 
 For [kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts) you need to perform one more step with `flatten_folder.py`
 
@@ -53,6 +53,9 @@ accelerate launch -m hcpdiff.train_ac_single \
 - Use `--help` to see more arguments. Notably you can set `--emb_dir`, `--exp_dir`, and `--main_config_file` (which defaults to `hcp_configs/lora_conventional.yaml`), among others.
 - To modify training and dataset parameters, you can modify either directly the files in `hcp_configs` before running the script or modify `dataset.yaml` and `lora_conventional.yaml` (or other config file you use) in `/path/to/training_config_dir` after running the script.
 - You should not move the generated config files because some absolute paths are used.
+
+### Post training conversion
+After training, the output files from HCP diffusion cannot be readily used by [a1111/sd-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui). For conversion please refer to [Conversion_scripts.md](Conversion_scripts.md).
 
 
 ## Training with ...

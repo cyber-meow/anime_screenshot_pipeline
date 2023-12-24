@@ -259,6 +259,10 @@ class CoreTagProcessor(object):
         "close-up",
         "window",
         "curtains",
+        "forest",
+        "sitting",
+        "standing",
+        "portrait",
     ]
 
     def __init__(

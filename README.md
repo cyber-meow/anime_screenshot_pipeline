@@ -53,13 +53,13 @@ It is highly recommended to read at least [Main Arguments](https://github.com/cy
 
 There are three ways that you can use the script.
 
-- **Use it as a black box:** Type the anime name, go to watching episodes of anime, come back, and the dataset is ready.
+- **Use it as a black box:** Type the anime name, go watching several episodes of anime, come back, and the dataset is ready.
 - **Use it powerful dataset creation assistant:** You can decide yourself where to start and where to end, with possibility to manually inspect and modify the dataset after each stage and resume. You can provide character reference images, correct character classification results, adjust core tags, edit tags with other tools. This will allow you to construct a better dataset than what we get with the fully automatic process.
 - **Use it as a tool box:** Each stage can be run independently for the task in question, with many parameters that you can adjust. Besides the main script, there are also other numerous scripts in this repository that are useful for dataset preparation. However, [waifuc](https://github.com/deepghs/waifuc) which this project heavily makes use of may be more appropriate in this case.
 
 ## Pipeline Overview
 
-The script performs all the following automatically (note that the docs are not yet fully up to date).
+The script performs all the following automatically.
 
 - [Stage 0] [Anime and fanart downloading](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-0:-Anime-and-Fanart-Downloading)
 - [Stage 1] [Frame extraction and similar image removal](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-1:-Frame-Extraction-and-Similar-Image-Removal)
@@ -101,6 +101,7 @@ The script performs all the following automatically (note that the docs are not 
 
 ### Main
 
+- Update documentation [2023.12.24]
 - Fully automatic with only need for specifying anime name [2023.12.02]
 - Multi-anime support [2023.12.01]
 - Fanart support [2023.12.01]
@@ -109,6 +110,7 @@ The script performs all the following automatically (note that the docs are not 
 
 ### Secondary
 
+- Load metadata from text file saved by imgbrd-grabber [2023.12.25]
 - Keep tokens separator support for Kohya trainer, possibility to add dropped character tags to the end [2023.12.02]
 - Ref directory hierarchy and Character class to account for different appearances of the same character [2023.11.28]
 - Embedding initialization with hard tags [2023.11.11]
@@ -120,11 +122,6 @@ The script performs all the following automatically (note that the docs are not 
 ## TODO / Potential improvements
 
 Contributions are welcome
-
-### Main
-
-- [ ] Update documentation
-
 
 ### Secondary
 

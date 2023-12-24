@@ -13,6 +13,7 @@ from waifuc.action import PersonSplitAction
 from waifuc.action import MinSizeFilterAction
 from waifuc.action import ThreeStageSplitAction
 
+from anime2sd import rearrange_related_files, load_metadata_from_aux
 from anime2sd import download_animes, download_images
 from anime2sd import extract_and_remove_similar
 from anime2sd import classify_from_directory
@@ -27,11 +28,7 @@ from anime2sd import read_weight_mapping, get_repeat
 from anime2sd import DuplicateRemover
 from anime2sd import CharacterTagProcessor, TaggingManager, CaptionGenerator
 
-from anime2sd.basics import (
-    read_class_mapping,
-    rearrange_related_files,
-    load_metadata_from_aux,
-)
+from anime2sd.basics import read_class_mapping
 from anime2sd.execution_ordering import (
     setup_logging,
     get_src_dir,
@@ -217,6 +214,8 @@ def extract_frames_and_or_remove_similar(args, stage, logger):
 
 
 # TODO: Avoid cropping for already cropped data
+# Better: add argument "--ignore_images_from_dir" so that images from this directory
+# will not be repeteadly downloaded or processed at stage 0-4.
 def crop_characters(args, stage, logger):
     """Crops individual characters from images in the source directory."""
     # Get the path to the source directory containing the images to crop from
@@ -225,9 +224,7 @@ def crop_characters(args, stage, logger):
     dst_dir = get_and_create_dst_dir(args, "intermediate", "cropped")
     logger.info(f"Cropping individual characters to {dst_dir} ...")
 
-    overwrite_path = args.start_stage == stage and args.overwrite_path
-
-    source = LocalSource(src_dir, overwrite_path=overwrite_path)
+    source = LocalSource(src_dir)
     detect_config_person = {"level": args.detect_level}
     if args.detect_level in ["s", "n"]:
         detect_level_head_halfbody = args.detect_level
@@ -313,12 +310,6 @@ def select_dataset_images(args, stage, logger):
     # Get the path to the image_type subfolder of the training directory
     dst_dir = get_and_create_dst_dir(args, "training")
 
-    is_start_stage = args.start_stage == stage
-    if is_start_stage:
-        # rearrange json and ccip in case of manual inspection
-        rearrange_related_files(classified_dir, logger)
-    overwrite_path = is_start_stage and args.overwrite_path
-
     if args.filter_again:
         duplicate_remover = DuplicateRemover(
             args.detect_duplicate_model,
@@ -336,7 +327,6 @@ def select_dataset_images(args, stage, logger):
         full_dir,
         dst_dir,
         pipeline_type=args.pipeline_type,
-        overwrite_path=overwrite_path,
         # For saving character to metadata
         character_overwrite_uncropped=args.character_overwrite_uncropped,
         character_remove_unclassified=args.character_remove_unclassified,
@@ -346,6 +336,9 @@ def select_dataset_images(args, stage, logger):
         # For 3 stage cropping
         use_3stage_crop=args.use_3stage_crop == 4,
         detect_level=args.detect_level,
+        # Determine what images to be included in dataset
+        no_cropped_in_dataset=args.no_cropped_in_dataset,
+        no_original_in_dataset=args.no_original_in_dataset,
         # For resizing/copying images to destination
         max_size=args.max_size,
         image_save_ext=args.image_save_ext,
@@ -371,11 +364,6 @@ async def tag_and_caption(
     """
     # Get path to the directiry containing images to be tagged and captioned
     src_dir = get_src_dir(args, stage)
-    is_start_stage = args.start_stage == stage
-    if is_start_stage:
-        # rearrange json and ccip in case of manual inspection
-        rearrange_related_files(src_dir, logger)
-    overwrite_path = is_start_stage and args.overwrite_path
 
     if "character" in args.prune_mode:
         char_tag_proc = CharacterTagProcessor(
@@ -419,6 +407,7 @@ async def tag_and_caption(
         use_image_type_prob=args.use_image_type_prob,
         use_artist_prob=args.use_artist_prob,
         use_rating_prob=args.use_rating_prob,
+        use_crop_info_prob=args.use_crop_info_prob,
         use_tags_prob=args.use_tags_prob,
     )
 
@@ -432,9 +421,7 @@ async def tag_and_caption(
         src_dir,
         tagging_manager,
         caption_generator,
-        args.load_aux,
         args.save_aux,
-        overwrite_path,
         logger,
     )
     stage_events[config_index]["5_phase1"].set()
@@ -450,7 +437,7 @@ async def tag_and_caption(
             )
         )
         # Do not use character tag processor for computing core tags
-        # in mode "character" as this causes classifcation into different types
+        # in mode "character" as this causes classification into different types
         if args.prune_mode == "character":
             char_tag_proc = None
         await loop.run_in_executor(
@@ -492,11 +479,6 @@ def rearrange(args, stage, logger):
     # Get path to the directiry containing images to be rearranged
     src_dir = get_src_dir(args, stage)
     logger.info(f"Rearranging {src_dir} ...")
-    if args.start_stage == stage and args.load_aux:
-        load_metadata_from_aux(
-            src_dir, args.load_aux, args.save_aux, args.overwrite_path, logger=logger
-        )
-        rearrange_related_files(src_dir, logger)
     arrange_folder(
         src_dir,
         src_dir,
@@ -511,11 +493,6 @@ def balance(args, stage, logger):
     """Compute the repeat for the images in the directory."""
     # Get path to the directiry containing images for which repeat needs to be computed
     src_dir = get_src_dir(args, stage)
-    if args.start_stage == stage and args.load_aux:
-        load_metadata_from_aux(
-            src_dir, args.load_aux, args.save_aux, args.overwrite_path, logger=logger
-        )
-        rearrange_related_files(src_dir, logger)
     logger.info(f"Computing repeat for {src_dir} ...")
     if args.weight_csv is not None:
         weight_mapping = read_weight_mapping(args.weight_csv)
@@ -537,6 +514,24 @@ def balance(args, stage, logger):
         log_file,
         logger=logger,
     )
+
+
+def common_preprocess(args, logger):
+    """Common preprocessing at the beginning of the pipeline."""
+    rearrange_related_files(args.src_dir, logger)
+    if args.load_grabber_ext or args.load_aux or args.overwrite_path:
+        if args.character_info_file and os.path.exists(args.character_info_file):
+            character_mapping = read_class_mapping(args.character_info_file)
+        else:
+            character_mapping = None
+        load_metadata_from_aux(
+            args.src_dir,
+            args.load_grabber_ext,
+            args.load_aux,
+            args.overwrite_path,
+            character_mapping,
+            logger=logger,
+        )
 
 
 def run_stage(config, stage_num, logger):
@@ -561,6 +556,14 @@ async def run_pipeline(config, config_index, execution_config, stage_events, exe
         f"{config.image_type}_{config.log_prefix}",
         f"pipeline_{config_index}",
     )
+
+    # Rearranging related files from multiple threads could be problematic if
+    # the folders have overlap. We assume this is not the case.
+    if config.start_stage >= 1:
+        loop = asyncio.get_running_loop()
+        logger.info(f"-------------Preprocessing {config.src_dir}-------------")
+        await loop.run_in_executor(executor, common_preprocess, config, logger)
+
     # Loop through the stages and execute them
     for stage_num in range(config.start_stage, config.end_stage + 1):
         if stage_num == 3:
@@ -594,8 +597,9 @@ async def run_pipeline(config, config_index, execution_config, stage_events, exe
                 )
             )
 
-        logger.info(f"-------------Start stage {stage_num}-------------")
         loop = asyncio.get_running_loop()
+
+        logger.info(f"-------------Start stage {stage_num}-------------")
         if stage_num == 5:
             await tag_and_caption(
                 config,
@@ -677,6 +681,5 @@ if __name__ == "__main__":
             )
         dst_folder_set.add(dst_folder)
 
-    # TODO: there is some logger issue, no logging to stdout from stage 6 for example
     logging.getLogger().setLevel(logging.INFO)
     asyncio.run(main(configs))

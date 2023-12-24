@@ -25,13 +25,25 @@ overwrite_path = false
 # Pipeline type that is used to construct dataset
 remove_intermediate = false
 
+# Metadata Loading and Saving
+[metadata_handling]
+# Extension of the grabber information files to load. Attributes from this file would overwrite those loaded from --load_aux.
+# load_grabber_ext = ".tags"
+load_grabber_ext = {}
+# List of auxiliary attributes to load
+# load_aux = ["processed_tags", "characters"] 
+load_aux = []
+# List of auxiliary attributes to save
+# save_aux = ["processed_tags", "characters"]
+save_aux = []
+
 # Duplicate Detection Configuration
 [duplicate_detection]
 # Do not remove similar images
 no_remove_similar = false
 # Model used for duplicate detection
 detect_duplicate_model = "mobilenetv3_large_100"
-# Batch size for embendding computation used in duplicate detection
+# Batch size for embedding computation used in duplicate detection
 detect_duplicate_batch_size = 16
 # Cosine similarity threshold for image duplicate detection
 similar_thresh = 0.95
@@ -76,6 +88,10 @@ same_threshold_abs = 20
 [dataset_construction]
 # Overwrite existing trigger word csv
 overwrite_emb_init_info = false
+# Do not include cropped images in dataset
+no_cropped_in_dataset = false
+# Do not include original images in dataset
+no_original_in_dataset = false
 # Do not perform image resizing
 no_resize = false
 # Max image size that shorter edge aligns to
@@ -84,15 +100,6 @@ max_size = 768
 image_save_ext = ".webp"
 # Filter repeated images again here
 filter_again = true
-
-# Metadata Loading and Saving for Tagging and Captioning
-[metadata_handling]
-# List of auxiliary attributes to load
-# load_aux = ["processed_tags", "characters"] 
-load_aux = []
-# List of auxiliary attributes to save
-# save_aux = ["processed_tags", "characters"]
-save_aux = []
 
 # Tagging Configuration
 [tagging]
@@ -164,7 +171,7 @@ keep_tokens_before = "tags"
 # Captioning Components Configuration
 [captioning_components]
 # Order of captions
-caption_ordering = ["npeople", "character", "copyright", "image_type", "artist", "rating", "tags"]
+caption_ordering = ["npeople", "character", "copyright", "image_type", "artist", "rating", "crop_info", "tags"]
 # Probability to include number of people in captions
 use_npeople_prob = 0
 # Probability to include character info in captions
@@ -177,6 +184,8 @@ use_image_type_prob = 1
 use_artist_prob = 0
 # Probability to include rating info in captions
 use_rating_prob = 1
+# Probability to include crop info in captions
+use_crop_info_prob = 1
 # Probability to include tag info in captions
 use_tags_prob = 1
 

@@ -61,6 +61,19 @@ Of course, it is important to tell the script what to download.
 
 :bulb: For `booru` pipeline, you can provide only `character_info_file` with neither `anime_name` nor `anime_name_booru` to download for the characters.
 
+### Download images using [imgbrd-grabber](https://github.com/Bionus/imgbrd-grabber)
+
+Alternatively, you can download images using [imgbrd-grabber](https://github.com/Bionus/imgbrd-grabber) before further processing. In this case, you should also save separate log files with a certain suffix, say `.info`, and with text file content of the following format.
+```
+character: %character:spaces,separator=^, %
+copyright: %copyright:spaces,separator=^, %
+artist: %artist:spaces,separator=^, %
+general: %general:spaces,separator=^, %
+rating: %rating%
+score: %score%
+```
+Then, by setting `--load_grabber_ext .info` these fields would also get imported in metadata.
+
 
 ## Other Important Arguments
 
@@ -69,5 +82,5 @@ For the remaining phases the default arguments are mostly good. Still, there are
 - `extract_key`: Set this if you only want to extract key frames in stage 1 of `screenshots` pipeline.
 - `use_3stage_crop`: This additionally crops out half body shots and heads of characters, which can be helpful in enhancing the details of the fine-tuned networks. Set it to either to 2 or 4 to indicate at which stage this should be performed. In my provided configuration files this is done for `booru` pipeline at stage 2 but it is not done for `screenshots` pipeline as anime screenshots generally have enough close-up shots.
 - `n_add_to_ref_per_character`: How many images to add back to character reference directory after classification phase. This is indispensable for the fully automatic process as it allows fanart images, which come with existing character tags, to be used as reference images to classify screenshot images.
-- `keep_unnamed_cluster`: Setting this can be helpful if you want to pause at stage 3 and perform manual inspection, as it allows you to see what exactly are the clusters that are not mapped to known characters. However, if you keep these clusters and perform stage 4, these random strings would appear in final captions and embedding names (well, with pivotal tuning you can always rename the embedding afterwards).
+- `keep_unnamed_clusters`: Setting this can be helpful if you want to pause at stage 3 and perform manual inspection, as it allows you to see what exactly are the clusters that are not mapped to known characters. However, if you keep these clusters and perform stage 4, these random strings would appear in final captions and embedding names (well, with pivotal tuning you can always rename the embedding afterwards).
 - `overwrite_tags`: Set this if you want to overwrite existing tags (mainly influences whether you use tags from booru or tags from tagger).

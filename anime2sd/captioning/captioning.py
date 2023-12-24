@@ -24,6 +24,8 @@ class CaptionGenerator(object):
         "artist": "artist",
         "artists": "artist",
         "rating": "rating",
+        "crop_info": "crop",
+        "crop": "crop",
         "tag": "tags",
         "tags": "tags",
     }
@@ -44,6 +46,7 @@ class CaptionGenerator(object):
         use_image_type_prob: float = 1,
         use_artist_prob: float = 1,
         use_rating_prob: float = 1,
+        use_crop_info_prob: float = 1,
         use_tags_prob: float = 1,
     ):
         """
@@ -52,7 +55,7 @@ class CaptionGenerator(object):
 
         The default caption ordering is
         ['npeople', 'character', 'copyright', 'image_type',
-         'artist', 'rating', 'tags'].
+         'artist', 'rating', 'crop_info', tags'].
 
         Args:
             character_sep (str):
@@ -87,6 +90,8 @@ class CaptionGenerator(object):
                 Probability of using artist information.
             use_rating_prob (float):
                 Probability of using rating information.
+            use_crop_info_prob (float):
+                Probability of using crop information.
             use_tags_prob (float):
                 Probability of using tags information.
         """
@@ -108,6 +113,7 @@ class CaptionGenerator(object):
             "image_type",
             "artist",
             "rating",
+            "crop_info",
             "tags",
         ]
         caption_ordering = caption_ordering or default_ordering
@@ -126,6 +132,7 @@ class CaptionGenerator(object):
         self.use_type_prob = use_image_type_prob
         self.use_artist_prob = use_artist_prob
         self.use_rating_prob = use_rating_prob
+        self.use_crop_prob = use_crop_info_prob
         self.use_tags_prob = use_tags_prob
 
     def caption_add_content(
@@ -223,6 +230,11 @@ class CaptionGenerator(object):
         else:
             return None
 
+    def to_text_crop(self, to_add):
+        if isinstance(to_add, dict) and "type" in to_add:
+            return to_add["type"] + " cropped"
+        return "cropped"
+
     def to_text_tags(self, to_add):
         # Case of {tag: score}
         if isinstance(to_add, dict):
@@ -249,6 +261,7 @@ class CaptionGenerator(object):
             "type": self.to_text_type,
             "artist": self.to_text_artist,
             "rating": self.to_text_rating,
+            "crop": self.to_text_crop,
             "tags": self.to_text_tags,
         }
 

@@ -187,7 +187,7 @@ class DuplicateRemover(object):
             for _, images in tqdm(dataloader):
                 images = images.to(self.device)
                 features = self.model(images)
-                embeddings.append(features.cpu().numpy())
+                embeddings.append(features.cpu().float().numpy())
 
         return np.vstack(embeddings)
 

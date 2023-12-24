@@ -181,9 +181,7 @@ def tag_and_caption_from_directory(
     dir: str,
     tagging_manager: TaggingManager,
     caption_generator: CaptionGenerator,
-    load_aux: List[str],
     save_aux: List[str],
-    overwrite_path: bool,
     logger: Optional[logging.Logger] = None,
 ):
     """
@@ -202,19 +200,15 @@ def tag_and_caption_from_directory(
             The tagging manager for managing tag operations.
         caption_generator (CaptionGenerator):
             The caption generator for generating captions.
-        load_aux (list):
-            List of auxiliary attributes to load.
         save_aux (list):
             List of auxiliary attributes to save.
-        overwrite_path (bool):
-            Whether to overwrite path in metadata or not.
         logger (Logger):
             Logger for logging. Defaults to None, which uses the default logger.
     """
     if logger is None:
         logger = logging.getLogger()
 
-    source = LocalSource(dir, load_aux=load_aux, overwrite_path=overwrite_path)
+    source = LocalSource(dir)
     source = source.attach(
         tagging_manager.get_tagging_action(),
         # Maybe it makes more sense to deal with process_from_original_tags here
