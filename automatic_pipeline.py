@@ -452,7 +452,7 @@ async def tag_and_caption(
             )
         )
         # Do not use character tag processor for computing core tags
-        # in mode "character" as this causes classifcation into different types
+        # in mode "character" as this causes classification into different types
         if args.prune_mode == "character":
             char_tag_proc = None
         await loop.run_in_executor(

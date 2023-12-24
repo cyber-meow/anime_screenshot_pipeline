@@ -7,7 +7,7 @@ Once we go through the pipeline, the dataset is hierarchically organized in `/pa
 
 With `multiply.txt` in each folder, the above structure is directly compatible with [EveryDream2](https://github.com/victorchall/EveryDream2trainer). 
 
-## Training with kohya trainer
+## Training with Kohya Trainer
 
 For [kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts) you need to perform one more step with `flatten_folder.py`
 

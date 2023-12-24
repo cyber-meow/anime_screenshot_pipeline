@@ -359,9 +359,9 @@ def parse_arguments():
         help=(
             "Whether we try to attribute label when multiple candidates are available "
             "when performing classification with metadata character information. "
-            "This typically coressponds to the case where we have one character that "
+            "This typically corresponds to the case where we have one character that "
             "always appear with another specific character, or to some specific form "
-            "of a character that is recognized as character tag in Danbooru."
+            "of a character that is recognized as a character tag in Danbooru."
         ),
     )
     parser.add_argument(
@@ -548,6 +548,17 @@ def parse_arguments():
             "Default is 'character_core'."
         ),
     )
+    parser.add_argument(
+        "--drop_difficulty",
+        type=int,
+        default=2,
+        help=(
+            "The difficulty level up to which tags should be dropped. Tags with "
+            "difficulty less than this value will be added to the drop lists. "
+            "0: nothing is dropped; 1: human-related tag; 2: furry, demon, mecha, etc."
+            "Defaults to 2."
+        ),
+    )
 
     # Specific arguments for core tag processing
     parser.add_argument(
@@ -571,20 +582,9 @@ def parse_arguments():
         help="Use existing core tag json instead of recomputing them.",
     )
     parser.add_argument(
-        "--drop_difficulty",
-        type=int,
-        default=2,
-        help=(
-            "The difficulty level up to which tags should be dropped. Tags with "
-            "difficulty less than this value will be added to the drop lists. "
-            "0: nothing is dropped; 1: human-related tag; 2: furry, demon, mecha, etc."
-            "Defaults to 2."
-        ),
-    )
-    parser.add_argument(
         "--drop_all_core",
         action="store_true",
-        help=("Whether to drop all core tags or not. Overwrites --drop_difficulty."),
+        help="Whether to drop all core tags or not. Overrides --drop_difficulty.",
     )
     parser.add_argument(
         "--emb_min_difficulty",
@@ -609,7 +609,7 @@ def parse_arguments():
         action="store_true",
         help=(
             "Whether to use all core tags for embedding initialization. "
-            "Overwrites --emb_min_difficulty and --emb_max_difficulty."
+            "Overrides --emb_min_difficulty and --emb_max_difficulty."
         ),
     )
     parser.add_argument(
@@ -763,7 +763,7 @@ def parse_arguments():
         type=int,
         default=10,
         help=(
-            "Put others instead of character name if number of images "
+            "Put 'character_others' instead of character name if number of images "
             "of the character combination is smaller then this number"
         ),
     )

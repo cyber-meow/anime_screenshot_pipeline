@@ -59,7 +59,7 @@ There are three ways that you can use the script.
 
 ## Pipeline Overview
 
-The script performs all the following automatically (note that the docs are not yet fully up to date).
+The script performs all the following automatically.
 
 - [Stage 0] [Anime and fanart downloading](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-0:-Anime-and-Fanart-Downloading)
 - [Stage 1] [Frame extraction and similar image removal](https://github.com/cyber-meow/anime_screenshot_pipeline/wiki/Stage-1:-Frame-Extraction-and-Similar-Image-Removal)
@@ -101,6 +101,7 @@ The script performs all the following automatically (note that the docs are not 
 
 ### Main
 
+- Update documentation [2023.12.24]
 - Fully automatic with only need for specifying anime name [2023.12.02]
 - Multi-anime support [2023.12.01]
 - Fanart support [2023.12.01]
@@ -120,11 +121,6 @@ The script performs all the following automatically (note that the docs are not 
 ## TODO / Potential improvements
 
 Contributions are welcome
-
-### Main
-
-- [ ] Update documentation
-
 
 ### Secondary
 
