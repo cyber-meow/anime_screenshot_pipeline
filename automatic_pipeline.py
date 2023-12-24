@@ -528,8 +528,8 @@ def common_preprocess(args, logger):
             args.src_dir,
             args.load_grabber_ext,
             args.load_aux,
-            character_mapping,
             args.overwrite_path,
+            character_mapping,
             logger=logger,
         )
 

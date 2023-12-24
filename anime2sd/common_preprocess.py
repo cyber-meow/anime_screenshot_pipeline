@@ -71,8 +71,8 @@ def load_metadata_from_aux(
     src_dir: str,
     load_grabber_ext: Optional[str],
     load_aux: List[str],
-    character_mapping: Optional[Dict[str, str]],
     overwrite_path: bool,
+    character_mapping: Optional[Dict[str, str]],
     logger: Optional[logging.Logger] = None,
 ) -> None:
     """
@@ -88,10 +88,10 @@ def load_metadata_from_aux(
             The extension of the grabber information files to be loaded.
         load_aux (List[str]):
             A list of auxiliary data attributes to be loaded.
-        character_mapping (Optional[Dict[str, str]]):
-            A mapping from old character names to new character names.
         overwrite_path (bool):
             Flag to indicate if the path in the metadata should be overwritten.
+        character_mapping (Optional[Dict[str, str]]):
+            A mapping from old character names to new character names.
         logger (Logger): Logger to use for logging.
     """
     if logger is None:

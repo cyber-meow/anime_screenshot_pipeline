@@ -61,6 +61,19 @@ Of course, it is important to tell the script what to download.
 
 :bulb: For `booru` pipeline, you can provide only `character_info_file` with neither `anime_name` nor `anime_name_booru` to download for the characters.
 
+### Download images using [imgbrd-grabber](https://github.com/Bionus/imgbrd-grabber)
+
+Alternatively, you can download images using [imgbrd-grabber](https://github.com/Bionus/imgbrd-grabber) before further processing. In this case, you should also save separate log files with a certain suffix, say `.info`, and with text file content of the following format.
+```
+character: %character:spaces,separator=^, %
+copyright: %copyright:spaces,separator=^, %
+artist: %artist:spaces,separator=^, %
+general: %general:spaces,separator=^, %
+rating: %rating%
+score: %score%
+```
+Then, by setting `--load_grabber_ext .info` these fields would also get imported in metadata.
+
 
 ## Other Important Arguments
 
