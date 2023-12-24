@@ -19,6 +19,11 @@ pipeline_type = "booru"
 # Image type that we are dealing with, used for folder name and might appear in caption as well. Default to --pipeline_type.
 image_type = "booru"
 
+# Metadata Loading and Saving
+[metadata_handling]
+# Extension of the grabber information files to load. Attributes from this file would overwrite those loaded from --load_aux.
+load_grabber_ext = ".tags"
+
 # Configuration for downloading images from Danbooru
 [booru_download]
 # The anime name used for downloading images from Danbooru

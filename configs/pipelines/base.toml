@@ -25,6 +25,18 @@ overwrite_path = false
 # Pipeline type that is used to construct dataset
 remove_intermediate = false
 
+# Metadata Loading and Saving
+[metadata_handling]
+# Extension of the grabber information files to load. Attributes from this file would overwrite those loaded from --load_aux.
+# load_grabber_ext = ".tags"
+load_grabber_ext = {}
+# List of auxiliary attributes to load
+# load_aux = ["processed_tags", "characters"] 
+load_aux = []
+# List of auxiliary attributes to save
+# save_aux = ["processed_tags", "characters"]
+save_aux = []
+
 # Duplicate Detection Configuration
 [duplicate_detection]
 # Do not remove similar images
@@ -88,15 +100,6 @@ max_size = 768
 image_save_ext = ".webp"
 # Filter repeated images again here
 filter_again = true
-
-# Metadata Loading and Saving for Tagging and Captioning
-[metadata_handling]
-# List of auxiliary attributes to load
-# load_aux = ["processed_tags", "characters"] 
-load_aux = []
-# List of auxiliary attributes to save
-# save_aux = ["processed_tags", "characters"]
-save_aux = []
 
 # Tagging Configuration
 [tagging]

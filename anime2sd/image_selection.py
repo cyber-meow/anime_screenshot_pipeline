@@ -180,7 +180,6 @@ def save_characters_to_meta_single(
     character: Character,
     encountered_paths: Dict[str, bool],
     character_names: Set[str],
-    overwrite_path: bool = False,
     overwrite_uncropped: bool = True,
     remove_unclassified: bool = False,
 ):
@@ -197,8 +196,6 @@ def save_characters_to_meta_single(
             update their metadata.
         character_names (set):
             Set of character names obtained from the classified directory.
-        overwrite_path (bool, optional):
-            Whether to overwrite the path in metadata. Defaults to False.
         overwrite_uncropped (bool, optional):
             Whether to overwrite the character metadata of original images or not.
         remove_unclassified (bool, optional):
@@ -220,9 +217,7 @@ def save_characters_to_meta_single(
 
         img_path = os.path.join(folder_path, img_file)
         meta_file_path, _ = get_corr_meta_names(img_path)
-        meta_data = get_or_generate_metadata(
-            img_path, warn=True, overwrite_path=overwrite_path
-        )
+        meta_data = get_or_generate_metadata(img_path, warn=True)
 
         # Update the characters field
         if character_string.lower().startswith("noise"):
@@ -255,7 +250,6 @@ def save_characters_to_meta_single(
 def save_characters_to_meta(
     classified_dir: str,
     raw_dir: str,
-    overwrite_path: bool = False,
     overwrite_uncropped: bool = True,
     remove_unclassified: bool = False,
     logger: Optional[logging.Logger] = None,
@@ -272,8 +266,6 @@ def save_characters_to_meta(
             Directory containing classified character folders.
         raw_dir (str):
             Directory containing raw images.
-        overwrite_path (bool, optional):
-            Whether to overwrite the path in metadata. Defaults to False.
         overwrite_uncropped (bool, optional):
             Whether to overwrite the character metadata for uncropped/original images.
             Defaults to True.
@@ -334,7 +326,6 @@ def save_characters_to_meta(
             character,
             encountered_paths,
             character_names,
-            overwrite_path=overwrite_path,
             overwrite_uncropped=overwrite_uncropped,
             remove_unclassified=remove_unclassified,
         )
@@ -468,7 +459,6 @@ def resize_character_images(
     image_type: str,
     n_nocharacter_frames: int,
     to_resize: bool = True,
-    overwrite_path: bool = False,
     logger: Optional[logging.Logger] = None,
 ) -> None:
     """
@@ -490,9 +480,6 @@ def resize_character_images(
             The number of frames without characters to save.
         to_resize (bool, optional):
             Flag to determine if resizing is required. Defaults to True.
-        overwrite_path (bool, optional):
-            Flag to determine if existing paths should be overwritten.
-            Defaults to False.
         logger (logging.Logger, optional):
             A logger to use for logging. Defaults to None, in which case
             the default logger will be used.
@@ -519,15 +506,11 @@ def resize_character_images(
             if img_path in processed_img_paths:
                 continue
             processed_img_paths.add(img_path)
-            meta_data = get_or_generate_metadata(
-                img_path, warn=warn, overwrite_path=overwrite_path
-            )
+            meta_data = get_or_generate_metadata(img_path, warn=warn)
             if "characters" in meta_data and meta_data["characters"]:
                 original_path = meta_data["path"]
                 if os.path.basename(src_dir) != "raw" and original_path != img_path:
-                    orig_meta_data = get_or_generate_metadata(
-                        original_path, warn=False, overwrite_path=overwrite_path
-                    )
+                    orig_meta_data = get_or_generate_metadata(original_path, warn=False)
                     cropped_size = meta_data["image_size"]
                     cropped_area = cropped_size[0] * cropped_size[1]
                     orig_size = orig_meta_data["image_size"]
@@ -584,7 +567,6 @@ def select_dataset_images_from_directory(
     full_dir: str,
     dst_dir: str,
     pipeline_type: str,
-    overwrite_path: bool,
     # For saving character to metadata
     character_overwrite_uncropped: bool,
     # For saving embedding initialization information
@@ -625,7 +607,6 @@ def select_dataset_images_from_directory(
         overwrite_emb_init_info (bool): Flag to overwrite embedding initialization info.
         use_3stage_crop (bool): Flag to use three-stage cropping.
         detect_level (str): Detection level for cropping.
-        overwrite_path (bool): Flag to overwrite existing paths in metadata.
         no_cropped_in_dataset (bool): Flag to exclude cropped images in dataset.
         no_original_in_dataset (bool): Flag to exclude original images in dataset.
         max_size (int): Maximum size for image resizing.
@@ -648,7 +629,6 @@ def select_dataset_images_from_directory(
     character_embeddings = save_characters_to_meta(
         classified_dir,
         full_dir,
-        overwrite_path=overwrite_path,
         overwrite_uncropped=overwrite_uncropped,
         remove_unclassified=character_remove_unclassified,
         logger=logger,
@@ -700,7 +680,6 @@ def select_dataset_images_from_directory(
         image_type=image_type,
         n_nocharacter_frames=n_reg,
         to_resize=to_resize,
-        overwrite_path=overwrite_path,
         logger=logger,
     )
     remove_empty_folders(dst_dir)

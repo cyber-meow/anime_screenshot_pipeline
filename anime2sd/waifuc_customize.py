@@ -11,6 +11,8 @@ from waifuc.model import ImageItem
 from waifuc.source import WebDataSource, DanbooruSource
 from imgutils.detect import detect_faces, detect_heads
 
+from anime2sd.basics import parse_grabber_info
+
 
 class WebDataSourceWithLimit(WebDataSource):
     """
@@ -187,13 +189,15 @@ class LocalSource(BaseDataSource):
         directory: str,
         recursive: bool = True,
         overwrite_path: bool = False,
-        load_aux: Optional[list] = None,
+        load_aux: Optional[List[str]] = None,
+        load_grabber_ext: Optional[str] = None,
         progress_bar: bool = True,
     ):
         self.directory = directory
         self.recursive = recursive
         self.overwrite_path = overwrite_path
         self.load_aux = load_aux or []
+        self.load_grabber_ext = load_grabber_ext
         self.progress_bar = progress_bar
         self.total_images = self._count_total_images() if progress_bar else None
 
@@ -249,6 +253,13 @@ class LocalSource(BaseDataSource):
                             if item != "":
                                 items.append(item)
                         meta[attribute] = items
+
+            if self.load_grabber_ext:
+                grabber_file_path = file + self.load_grabber_ext
+                if os.path.exists(grabber_file_path):
+                    with open(grabber_file_path, "r", encoding="utf-8") as f:
+                        grabber_info = f.readlines()
+                    meta.update(parse_grabber_info(grabber_info))
 
             yield ImageItem(origin_item.image, meta)
 

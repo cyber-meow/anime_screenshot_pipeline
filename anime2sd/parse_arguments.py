@@ -112,6 +112,35 @@ def parse_arguments():
         ),
     )
 
+    # Loading and saving of metadata using auxiliary files
+    parser.add_argument(
+        "--load_grabber_ext",
+        type=str,
+        default=None,
+        help=(
+            "Extension of the grabber information files to load. "
+            "Attributes from this file would overwrite those loaded from --load_aux."
+        ),
+    )
+    parser.add_argument(
+        "--load_aux",
+        type=str,
+        nargs="*",
+        # default=['processed_tags', 'characters'],
+        help="List of auxiliary attributes to load"
+        # "Default is processed_tags and characters. "
+        "E.g., --load_aux attr1 attr2 attr3",
+    )
+    parser.add_argument(
+        "--save_aux",
+        type=str,
+        nargs="*",
+        # default=['processed_tags', 'characters'],
+        help="List of auxiliary attributes to save; only used at stage 0 and 5"
+        # "Default is processed_tags and characters. "
+        "E.g., --save_aux attr1 attr2 attr3",
+    )
+
     # Arguments for downloading animes from nyaa.si
     parser.add_argument(
         "--anime_name",
@@ -449,26 +478,6 @@ def parse_arguments():
     )
     parser.add_argument(
         "--filter_again", action="store_true", help="Filter repeated images again here"
-    )
-
-    # Loading and saving of metadata for tagging and captioning stage
-    parser.add_argument(
-        "--load_aux",
-        type=str,
-        nargs="*",
-        # default=['processed_tags', 'characters'],
-        help="List of auxiliary attributes to load. "
-        # "Default is processed_tags and characters. "
-        "E.g., --load_aux attr1 attr2 attr3",
-    )
-    parser.add_argument(
-        "--save_aux",
-        type=str,
-        nargs="*",
-        # default=['processed_tags', 'characters'],
-        help="List of auxiliary attributes to save. "
-        # "Default is processed_tags and characters. "
-        "E.g., --save_aux attr1 attr2 attr3",
     )
 
     # Arguments for tagging

@@ -2,17 +2,12 @@ import os
 import re
 import csv
 import json
-import shutil
-import logging
 import random
 import string
 
-from tqdm import tqdm
 from PIL import Image
-from typing import List, Optional
+from typing import List
 from pathlib import Path
-
-from anime2sd.waifuc_customize import LocalSource, SaveExporter
 
 
 def parse_anime_info(filename: str) -> tuple:
@@ -43,6 +38,46 @@ def parse_anime_info(filename: str) -> tuple:
         return anime_name, episode_num
 
     return filename, None
+
+
+def to_list(line):
+    items = [item.strip() for item in line.split(",")]
+    items = [item for item in items if item not in ["", "unknown", "anonymous"]]
+    return items
+
+
+def parse_grabber_info(grabber_info: List[str]) -> dict:
+    """
+    Parses grabber information that follows the following format:
+
+    character: %character:spaces,separator=^, %
+    copyright: %copyright:spaces,separator=^, %
+    artist: %artist:spaces,separator=^, %
+    general: %general:spaces,separator=^, %
+    rating: %rating%
+    score: %score%
+
+    Args:
+        grabber_info (List[str]): The grabber information to be parsed.
+
+    Returns:
+        dict: A dictionary containing the parsed grabber information.
+    """
+    basic_info = {}
+    for line in grabber_info:
+        if line.startswith("character: "):
+            basic_info["characters"] = to_list(line.lstrip("character:"))
+        elif line.startswith("copyright: "):
+            basic_info["copyright"] = to_list(line.lstrip("copyright:"))
+        elif line.startswith("artist: "):
+            basic_info["artist"] = to_list(line.lstrip("artist:"))
+        elif line.startswith("general: "):
+            basic_info["tags"] = to_list(line.lstrip("general:"))
+        elif line.startswith("rating: "):
+            basic_info["rating"] = line.lstrip("rating:").strip()
+        elif line.startswith("score: "):
+            basic_info["score"] = line.lstrip("score:").strip()
+    return basic_info
 
 
 def random_string(length=6):
@@ -285,94 +320,3 @@ def get_related_paths(img_path):
         related_path = f"{base_filename}{ext}"
         res.append(related_path)
     return res
-
-
-def construct_file_list(src_dir: str):
-    """
-    Construct a list of all files in the directory and checks for duplicates.
-
-    Args:
-        src_dir (str): The directory to search.
-    Reurns:
-        A list of all file paths in the directory.
-    """
-    all_files = {}
-    for root, _, filenames in os.walk(src_dir):
-        for filename in filenames:
-            path = os.path.join(root, filename)
-            if filename in all_files and filename != "multiply.txt":
-                raise ValueError(f"Duplicate filename found: {filename}")
-            all_files[filename] = path
-    return all_files
-
-
-def rearrange_related_files(src_dir: str, logger: Optional[logging.Logger] = None):
-    """
-    Rearrange related files in some directory.
-
-    Args:
-        src_dir (src): The directory containing images and other files to rearrange.
-        logger (Logger): A logger to use for logging.
-    """
-    if logger is None:
-        logger = logging.getLogger()
-    all_files = construct_file_list(src_dir)
-    image_files = get_images_recursively(src_dir)
-
-    logger.info("Arranging related files ...")
-    for img_path in tqdm(image_files, desc="Rearranging related files"):
-        related_paths = get_related_paths(img_path)
-        for related_path in related_paths:
-            # If the related file does not exist in the expected location
-            if not os.path.exists(related_path):
-                # Search for the file in the all_files dictionary
-                found_path = all_files.get(os.path.basename(related_path))
-                if found_path is None:
-                    if related_path.endswith("json"):
-                        logger.warning(f"No related file found for {related_path}")
-                        meta_data = get_default_metadata(img_path)
-                        with open(related_path, "w") as f:
-                            json.dump(meta_data, f)
-                else:
-                    # Move the found file to the expected location
-                    shutil.move(found_path, related_path)
-                    logger.info(
-                        f"Moved related file from {found_path} " f"to {related_path}"
-                    )
-
-
-def load_metadata_from_aux(
-    src_dir: str,
-    load_aux: List[str],
-    save_aux: List[str],
-    overwrite_path: bool,
-    logger: Optional[logging.Logger] = None,
-) -> None:
-    """
-    Load metadata from auxiliary data and export it with potential modifications.
-
-    This function loads metadata from a source directory, potentially modifies it,
-    and then saves it back to the same directory.
-    It utilizes auxiliary data specified in 'load_aux' and 'save_aux' lists.
-
-    Args:
-        src_dir (str): The source directory from which to load the metadata.
-        load_aux (List[str]): A list of auxiliary data attributes to be loaded.
-        save_aux (List[str]): A list of auxiliary data attributes to be saved.
-        overwrite_path (bool):
-            Flag to indicate if the path in the metadata should be overwritten.
-        logger (Logger): Logger to use for logging.
-    """
-    if logger is None:
-        logger = logging.getLogger()
-    logger.info("Load metadata from auxiliary data ...")
-    source = LocalSource(src_dir, load_aux=load_aux, overwrite_path=overwrite_path)
-    source.export(
-        SaveExporter(
-            src_dir,
-            no_meta=False,
-            save_caption=True,
-            save_aux=save_aux,
-            in_place=True,
-        )
-    )
