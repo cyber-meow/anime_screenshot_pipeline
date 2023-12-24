@@ -65,18 +65,16 @@ def parse_grabber_info(grabber_info: List[str]) -> dict:
     """
     basic_info = {}
     for line in grabber_info:
+        for field in ["characters", "copyright", "artist", "tags"]:
+            if line.startswith(f"{field}: "):
+                basic_info[field] = to_list(line.lstrip(f"{field}:"))
+        for field in ["rating", "score", "fav_count"]:
+            if line.startswith(f"{field}: "):
+                basic_info[field] = line.lstrip(f"{field}:").strip()
         if line.startswith("character: "):
             basic_info["characters"] = to_list(line.lstrip("character:"))
-        elif line.startswith("copyright: "):
-            basic_info["copyright"] = to_list(line.lstrip("copyright:"))
-        elif line.startswith("artist: "):
-            basic_info["artist"] = to_list(line.lstrip("artist:"))
-        elif line.startswith("general: "):
+        if line.startswith("general: "):
             basic_info["tags"] = to_list(line.lstrip("general:"))
-        elif line.startswith("rating: "):
-            basic_info["rating"] = line.lstrip("rating:").strip()
-        elif line.startswith("score: "):
-            basic_info["score"] = line.lstrip("score:").strip()
     return basic_info
 
 
