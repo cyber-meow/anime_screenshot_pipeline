@@ -110,6 +110,7 @@ The script performs all the following automatically.
 
 ### Secondary
 
+- Load metadata from text file saved by imgbrd-grabber [2023.12.25]
 - Keep tokens separator support for Kohya trainer, possibility to add dropped character tags to the end [2023.12.02]
 - Ref directory hierarchy and Character class to account for different appearances of the same character [2023.11.28]
 - Embedding initialization with hard tags [2023.11.11]
