@@ -42,16 +42,16 @@ plugin_unet:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
-plugin_TE:
-  diag_oft:
-    _target_: lycoris.hcp.DiagOFTBlock.wrap_model
-    _partial_: True
-    rescaled: True
-    lr: 5e-7
-    dim: 32
-    layers:
-      - 're:.*self_attn$'
-      - 're:.*mlp$'
+plugin_TE: null
+  # diag_oft:
+  #   _target_: lycoris.hcp.DiagOFTBlock.wrap_model
+  #   _partial_: True
+  #   rescaled: True
+  #   lr: 5e-7
+  #   dim: 32
+  #   layers:
+  #     - 're:.*self_attn$'
+  #     - 're:.*mlp$'
 
 tokenizer_pt:
   emb_dir: '${emb_dir}'
