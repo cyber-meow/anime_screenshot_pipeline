@@ -18,7 +18,7 @@ The script `automatic_pipeline.py` allows you to construct a text-to-image train
 python automatic_pipeline.py \
     --anime name_of_my_favorite_anime \
     --base_config_file configs/pipelines/base.toml \
-    --config_file configs/pipelines/screenshot.toml configs/pipelines/booru.toml [...]
+    --config_file configs/pipelines/screenshots.toml configs/pipelines/booru.toml [...]
 ```
 
 Providing multiple [configuration files](configs/pipelines) allow for parallel processing of fanarts and animes (and even for parallel processing of multiple animes). You can either create your own configuration files or overwrite existing values by command line arguments.
