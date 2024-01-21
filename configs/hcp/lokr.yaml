@@ -43,17 +43,17 @@ plugin_unet:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
-plugin_TE:
-  lokr:
-    _target_: lycoris.hcp.LokrBlock.wrap_model
-    _partial_: True
-    lr: 2e-5
-    dim: 10000
-    alpha: 0
-    factor: 8
-    layers:
-      - 're:.*self_attn$'
-      - 're:.*mlp$'
+plugin_TE: null
+  # lokr:
+  #   _target_: lycoris.hcp.LokrBlock.wrap_model
+  #   _partial_: True
+  #   lr: 2e-5
+  #   dim: 10000
+  #   alpha: 0
+  #   factor: 8
+  #   layers:
+  #     - 're:.*self_attn$'
+  #     - 're:.*mlp$'
 
 tokenizer_pt:
   emb_dir: '${emb_dir}'

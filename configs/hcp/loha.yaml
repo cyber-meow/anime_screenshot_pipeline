@@ -42,16 +42,16 @@ plugin_unet:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
-plugin_TE:
-  loha:
-    _target_: lycoris.hcp.LohaBlock.wrap_model
-    _partial_: True
-    lr: 6e-5
-    dim: 4
-    alpha: 1
-    layers:
-      - 're:.*self_attn$'
-      - 're:.*mlp$'
+plugin_TE: null
+  # loha:
+  #   _target_: lycoris.hcp.LohaBlock.wrap_model
+  #   _partial_: True
+  #   lr: 6e-5
+  #   dim: 4
+  #   alpha: 1
+  #   layers:
+  #     - 're:.*self_attn$'
+  #     - 're:.*mlp$'
 
 tokenizer_pt:
   emb_dir: '${emb_dir}'

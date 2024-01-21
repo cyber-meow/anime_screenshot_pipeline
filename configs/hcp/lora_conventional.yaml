@@ -39,13 +39,13 @@ lora_unet:
       - 're:.*\.attn.?$'
       - 're:.*\.ff$'
 
-lora_text_encoder:
-  - lr: 6e-5
-    rank: 8
-    alpha: 4
-    layers:
-      - 're:.*self_attn$'
-      - 're:.*mlp$'
+lora_text_encoder: null
+  # - lr: 6e-5
+  #   rank: 8
+  #   alpha: 4
+  #   layers:
+  #     - 're:.*self_attn$'
+  #     - 're:.*mlp$'
 
 tokenizer_pt:
   emb_dir: '${emb_dir}'
