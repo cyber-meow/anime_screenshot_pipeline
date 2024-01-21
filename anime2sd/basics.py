@@ -41,8 +41,10 @@ def parse_anime_info(filename: str) -> tuple:
 
 
 def to_list(line):
-    items = [item.strip() for item in line.split(",")]
-    items = [item for item in items if item not in ["", "unknown", "anonymous"]]
+    items = line.split(",")
+    items = [item for item in items if item.strip() not in ["", "unknown", "anonymous"]]
+    # add underscore to match the original format
+    items = ["_".join(item.split()) for item in items]
     return items
 
 
