@@ -16,7 +16,7 @@ The script `automatic_pipeline.py` allows you to construct a text-to-image train
 
 ```bash
 python automatic_pipeline.py \
-    --anime name_of_my_favorite_anime \
+    --anime_name name_of_my_favorite_anime \
     --base_config_file configs/pipelines/base.toml \
     --config_file configs/pipelines/screenshots.toml configs/pipelines/booru.toml [...]
 ```
