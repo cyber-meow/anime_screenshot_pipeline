@@ -150,9 +150,9 @@ def download_images(
     if limit_per_character is not None and limit_per_character <= 0:
         limit_per_character = None
 
+    character_n_images = {}
     if tags:
         logger.info(f"Downloading images for {', '.join(tags)} to {output_dir} ...")
-        character_n_images = {}
         # This updates the character_n_images dictionary in place
         source = DanbooruSourceWithLimit(
             tags,
